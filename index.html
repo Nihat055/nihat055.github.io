@@ -8,7 +8,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Qaib">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#2b5f9e">
+<meta name="theme-color" content="#2347e0">
 <meta name="color-scheme" content="light dark">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
@@ -647,6 +647,103 @@ table.t td.stripe{border-left-width:3px}
   .dlg{border-radius:14px}
   .dlg-t{border-radius:13px 13px 0 0}
 }
+
+/* ======================================================================
+   DAHA QABARIQ GÖRÜNÜŞ — başlıq sətri aksent rəngini daşıyır
+   ====================================================================== */
+:root{
+  --ground:#e3e9f3;
+  --panel-2:#eef3fb;
+  --panel-3:#dde6f3;
+  --ink:#0d1320;
+  --line:#d4dceb;
+  --line-2:#b4c2d8;
+  --accent:#2347e0;
+  --sel:#e2e9ff;
+  --ok:#09713f;
+  --warn:#9c5200;
+  --crit:#bb1239;
+  --titlebar-bg:var(--accent);
+  --titlebar-ink:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#05080d;
+    --panel:#111924;
+    --panel-2:#17202d;
+    --panel-3:#1f2b3b;
+    --accent:#7e9dff;
+    --sel:#16213a;
+    --ok:#3ddc9a;
+    --warn:#f5b84f;
+    --crit:#ff7f95;
+    --titlebar-bg:var(--panel);
+    --titlebar-ink:var(--ink);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#05080d;
+  --panel:#111924;
+  --panel-2:#17202d;
+  --panel-3:#1f2b3b;
+  --accent:#7e9dff;
+  --sel:#16213a;
+  --ok:#3ddc9a;
+  --warn:#f5b84f;
+  --crit:#ff7f95;
+  --titlebar-bg:var(--panel);
+  --titlebar-ink:var(--ink);
+}
+
+/* ---- başlıq sətri ---- */
+.titlebar{
+  background:var(--titlebar-bg); color:var(--titlebar-ink);
+  border-bottom:0; box-shadow:0 2px 10px -4px rgba(10,20,60,.45);
+}
+.titlebar .appname{color:currentColor}
+.titlebar .docname{color:color-mix(in srgb, currentColor 72%, transparent)}
+.titlebar .vdiv{background:color-mix(in srgb, currentColor 32%, transparent)}
+.titlebar .mark i{background:currentColor}
+.titlebar .mark i:nth-child(3){background:#ffc96b}
+.titlebar .led{color:color-mix(in srgb, currentColor 78%, transparent)}
+.titlebar .sel{
+  background:color-mix(in srgb, currentColor 14%, transparent);
+  border-color:color-mix(in srgb, currentColor 30%, transparent);
+  color:currentColor;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 12px) 51%, calc(100% - 8px) 51%;
+  background-size:4px 4px, 4px 4px; background-repeat:no-repeat;
+}
+.titlebar .sel option{color:var(--ink); background:var(--panel)}
+.titlebar .btn{
+  background:color-mix(in srgb, currentColor 13%, transparent);
+  border-color:color-mix(in srgb, currentColor 30%, transparent);
+  color:currentColor;
+}
+.titlebar .btn:hover{background:color-mix(in srgb, currentColor 24%, transparent); color:currentColor}
+.titlebar .btn.primary{background:currentColor; border-color:currentColor; color:var(--titlebar-bg)}
+.titlebar .btn.primary:hover{filter:brightness(1); opacity:.92; color:var(--titlebar-bg)}
+.titlebar .btn[disabled]{opacity:.5}
+/* tünd rejimdə başlıq panel rəngindədir — alt xətt lazımdır */
+:root[data-theme="dark"] .titlebar{border-bottom:1px solid var(--line-2)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .titlebar{border-bottom:1px solid var(--line-2)}
+}
+
+/* ---- açılış ekranı başlıqla uyğun ---- */
+.splash{background:var(--titlebar-bg)}
+.splash-mark i{background:var(--titlebar-ink)}
+.splash-mark i:nth-child(3){background:#ffc96b}
+.splash-name{color:color-mix(in srgb, var(--titlebar-ink) 76%, transparent)}
+
+/* ---- daha canlı detallar ---- */
+.ph{background:color-mix(in srgb, var(--accent) 6%, var(--panel-2))}
+.navitem[aria-current="true"]{background:var(--sel); color:var(--accent)}
+.tag{background:color-mix(in srgb, currentColor 16%, transparent)}
+.kpi > div:first-child b{color:var(--accent)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 </style>
 
 <div class="win">
@@ -686,7 +783,7 @@ table.t td.stripe{border-left-width:3px}
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-0332";
+var APP_BUILD = "20261004-0339";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -715,7 +812,7 @@ var ICON_HREF = "icon-180.png";
   add("meta", { name: "mobile-web-app-capable", content: "yes" });
   add("meta", { name: "apple-mobile-web-app-title", content: "Qaib" });
   add("meta", { name: "apple-mobile-web-app-status-bar-style", content: "default" });
-  add("meta", { name: "theme-color", content: "#2b5f9e" });
+  add("meta", { name: "theme-color", content: "#2347e0" });
   add("link", { rel: "apple-touch-icon", href: ICON_HREF });
   add("link", { rel: "icon", href: ICON_HREF });
   if (location.protocol.indexOf("http") === 0) add("link", { rel: "manifest", href: "manifest.json" });
@@ -1077,6 +1174,7 @@ function migrate(raw) {
     (raw.profile && typeof raw.profile === "object") ? raw.profile : {}
   );
 
+  if (out.theme !== "light" && out.theme !== "dark") out.theme = "auto";
   if (!out.guard || typeof out.guard !== "object" || typeof out.guard.hash !== "string" || !out.guard.hash) {
     delete out.guard;
   }
@@ -1089,6 +1187,14 @@ function migrate(raw) {
   if (!out.semesters[out.active]) out.active = Object.keys(out.semesters)[0];
   out.version = 2;
   return out;
+}
+
+/* ---- Görünüş: sistem / işıqlı / tünd ---- */
+function applyTheme() {
+  const t = (state && state.theme) || "auto";
+  const root = document.documentElement;
+  if (t === "light" || t === "dark") root.setAttribute("data-theme", t);
+  else root.removeAttribute("data-theme");
 }
 
 /* ---- Yenilik yoxlaması ----
@@ -1793,7 +1899,10 @@ function viewProfil() {
                 hər dərsdən <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> xəbərdarlıq.
                 Faylı bir dəfə təqvimə əlavə edirsən — sonra bildirişləri telefonun özü göndərir,
                 tətbiq qapalı olsa da, internet olmasa da.</p>
-              <button class="btn" type="button" data-ics="1">Təqvim faylı yarat</button>
+              <div class="row">
+                <button class="btn" type="button" data-ics="1">Təqvim faylı yarat</button>
+                <button class="btn" type="button" data-testics="1">Sınaq bildirişi</button>
+              </div>
             </div>
           </section>
 
@@ -1805,6 +1914,19 @@ function viewProfil() {
                 <button class="btn" type="button" data-export="1">Məlumatı çıxar</button>
                 <button class="btn" type="button" data-import="1">Məlumatı yüklə</button>
               </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Görünüş</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">İşıqlı və tünd görünüş arasında seç.
+                <b>Sistem</b> seçilsə, telefonun/kompüterin öz rejiminə uyğunlaşır.</p>
+              <span class="seg">
+                <button type="button" data-theme="auto" aria-pressed="${(state.theme || "auto") === "auto"}">Sistem</button>
+                <button type="button" data-theme="light" aria-pressed="${state.theme === "light"}">İşıqlı</button>
+                <button type="button" data-theme="dark" aria-pressed="${state.theme === "dark"}">Tünd</button>
+              </span>
             </div>
           </section>
 
@@ -2016,6 +2138,7 @@ function render() {
     // sinfi geri götür ki, sonrakı kiçik yeniləmələrdə (qaib +/-) sətirlər sönüb-yanmasın
     enterTimer = setTimeout(() => host.classList.remove("enter"), 450);
   }
+  applyTheme();
   buildNav();
   paintStatus();
   paintSaveBar();
@@ -2089,7 +2212,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -2331,6 +2454,26 @@ document.addEventListener("click", (e) => {
       }, "Yüklə");
   }
 
+  /* ---- görünüş ---- */
+  if (t.dataset.theme) {
+    const th = t.dataset.theme;
+    return mutate((s) => { s.theme = th; });
+  }
+
+  /* ---- sınaq bildirişi ---- */
+  if (t.dataset.testics) {
+    const start = new Date(Date.now() + 3 * 60000);
+    const saat = String(start.getHours()).padStart(2, "0") + ":" + String(start.getMinutes()).padStart(2, "0");
+    return openDialog("Sınaq bildirişi", saat + "-də başlayır",
+      `<p class="dlg-msg">Təqvimə <b>3 dəqiqə sonra</b> başlayan bir sınaq hadisəsi əlavə edir.
+         Xəbərdarlıq başlamazdan <b>1 dəqiqə əvvəl</b> gəlir — yəni təxminən <b>2 dəqiqəyə</b>
+         telefonun bildiriş göstərəcək. Dərs bildirişləri də tam olaraq bu cür gəlir.</p>
+       <p class="dlg-msg" style="margin-top:11px">Faylı endir → üstünə toxun → <b>Təqvimə əlavə et</b>.
+         Sonra proqramdan çıx və gözlə.</p>`,
+      () => { saveFile("qaib-sinaq.ics", testIcs(), "text/calendar;charset=utf-8"); },
+      "Faylı endir");
+  }
+
   /* ---- versiya ---- */
   if (t.dataset.update) { applyUpdate(); return; }
   if (t.dataset.checkupd) {
@@ -2540,6 +2683,29 @@ function buildIcs(weeks, minutesBefore) {
 
   L.push("END:VCALENDAR");
   return { text: L.join("\r\n") + "\r\n", lessons, exams, skipped };
+}
+
+/* Sınaq hadisəsi: 3 dəqiqə sonra başlayır, 1 dəqiqə əvvəl xəbərdarlıq */
+function testIcs() {
+  const start = new Date(Date.now() + 3 * 60000);
+  const end = new Date(start.getTime() + 10 * 60000);
+  const L = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
+    "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Qaib Jurnalı",
+    "BEGIN:VEVENT",
+    "UID:qaib-sinaq-" + Date.now() + "@qaib",
+    "DTSTAMP:" + icsStamp(new Date()) + "Z",
+    "DTSTART:" + icsStamp(start),
+    "DTEND:" + icsStamp(end),
+    "SUMMARY:Qaib Jurnalı — sınaq bildirişi",
+    "LOCATION:sınaq",
+    "DESCRIPTION:Dərs bildirişlərinin necə gəldiyini yoxlamaq üçün yaradılıb. Silə bilərsən.",
+    "BEGIN:VALARM", "TRIGGER:-PT1M", "ACTION:DISPLAY",
+    "DESCRIPTION:Sınaq bildirişi — 1 dəqiqədən sonra başlayır",
+    "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR",
+  ];
+  return L.join(ICS_EOL) + ICS_EOL;
 }
 
 async function saveFile(name, text, mime) {
