@@ -1,7 +1,8 @@
 <!doctype html>
-<html lang="az">
+<html lang="az" translate="no">
 <head>
 <meta charset="utf-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -450,6 +451,61 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
   .semrow input{ padding:7px 1px }
   .ta{ font-size:13px }        /* JSON mətni: yaxınlaşma yalnız fokusda olur, burada lazım deyil */
 }
+
+/* ====================  açılış ekranı  ==================== */
+.splash{
+  position:fixed; inset:0; z-index:200; display:flex;
+  flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  background:var(--ground);
+  transition:opacity .3s ease, visibility .3s;
+}
+.splash.gone{opacity:0; visibility:hidden; pointer-events:none}
+.splash-mark{display:flex; gap:5px; align-items:flex-end; height:52px}
+.splash-mark i{
+  display:block; width:9px; border-radius:2px; background:var(--accent);
+  transform-origin:bottom; animation:qj-rise .5s cubic-bezier(.22,.9,.3,1) both;
+}
+.splash-mark i:nth-child(1){height:24px; animation-delay:.00s}
+.splash-mark i:nth-child(2){height:38px; animation-delay:.06s}
+.splash-mark i:nth-child(3){height:52px; background:var(--warn); animation-delay:.12s}
+.splash-mark i:nth-child(4){height:31px; animation-delay:.18s}
+.splash-name{
+  font-size:14px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); animation:qj-fade .45s .2s ease both;
+}
+@keyframes qj-rise{from{transform:scaleY(.05); opacity:0} to{transform:scaleY(1); opacity:1}}
+
+/* ====================  hərəkət  ==================== */
+@keyframes qj-fade{from{opacity:0} to{opacity:1}}
+@keyframes qj-fade-up{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
+@keyframes qj-dlg-in{from{opacity:0; transform:translateY(16px) scale(.985)} to{opacity:1; transform:none}}
+
+/* bölmə dəyişəndə məzmun pillə-pillə görünür (hər toxunuşda yox) */
+main.enter > *{animation:qj-fade-up .24s cubic-bezier(.22,.61,.36,1) both}
+main.enter > *:nth-child(2){animation-delay:.05s}
+main.enter > *:nth-child(3){animation-delay:.1s}
+main.enter > *:nth-child(4){animation-delay:.14s}
+
+.modal::before{animation:qj-fade .18s ease both}
+.dlg{animation:qj-dlg-in .22s cubic-bezier(.22,.61,.36,1) both}
+
+.btn, .navitem, .seg button, .spin button, .addbtn, .linkbtn,
+.ls, .cell, .sel, .find, .fld input, .fld select, .semrow input{
+  transition:background-color .14s ease, border-color .14s ease,
+             color .14s ease, box-shadow .14s ease, transform .1s ease;
+}
+table.t tbody tr{transition:background-color .13s ease}
+.btn:active, .spin button:active, .addbtn:active, .seg button:active{transform:scale(.97)}
+.ls:active, .cell:active{transform:scale(.995)}
+.bar i{transition:background-color .2s ease}
+.kpi b{transition:color .18s ease}
+.led::before{transition:background-color .25s ease}
+.tabbar .navitem[aria-current="true"]{transition:box-shadow .18s ease}
+
+@media (prefers-reduced-motion: reduce){
+  .splash{transition:none}
+  main.enter > *{animation:none}
+}
 </style>
 
 <div class="win">
@@ -482,6 +538,11 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <div class="modal" id="modal" hidden></div>
 
+<div class="splash" id="splash" aria-hidden="true">
+  <span class="splash-mark"><i></i><i></i><i></i><i></i></span>
+  <span class="splash-name">Qaib Jurnalı</span>
+</div>
+
 <script>
 "use strict";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
@@ -501,6 +562,9 @@ var ICON_HREF = "icon-180.png";
     for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
     head.appendChild(el);
   };
+  document.documentElement.lang = "az";
+  document.documentElement.setAttribute("translate", "no");
+  add("meta", { name: "google", content: "notranslate" });
   add("meta", { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" });
   /* iOS-da iki barmaq jesti ilə yaxınlaşdırmanı bağla */
   ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
@@ -1095,6 +1159,8 @@ const VIEWS = [
 ];
 
 let current = "overview";
+let lastView = null;          // animasiya yalnız bölmə dəyişəndə işləsin
+let enterTimer = null;
 let findQuery = "";
 let selected = 0;
 let viewWeek = null;              // Cədvəldə baxılan həftə (null = bu həftə)
@@ -1739,8 +1805,19 @@ function render() {
     : null;
 
   const out = (RENDERERS[current] || viewOverview)();
+  const viewChanged = lastView !== current;
+  lastView = current;
   document.getElementById("toolbar").innerHTML = out.toolbar;
-  document.getElementById("view").innerHTML = out.body;
+  const host = document.getElementById("view");
+  host.innerHTML = out.body;
+  if (viewChanged) {
+    host.classList.remove("enter");
+    void host.offsetWidth;          // animasiyanı yenidən başlat
+    host.classList.add("enter");
+    clearTimeout(enterTimer);
+    // sinfi geri götür ki, sonrakı kiçik yeniləmələrdə (qaib +/-) sətirlər sönüb-yanmasın
+    enterTimer = setTimeout(() => host.classList.remove("enter"), 450);
+  }
   buildNav();
   paintStatus();
   paintSaveBar();
@@ -2283,6 +2360,18 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
 }
+
+/* açılış ekranı — məzmun hazır olan kimi yumşaq itir */
+(function () {
+  const sp = document.getElementById("splash");
+  if (!sp) return;
+  const bitir = () => {
+    sp.classList.add("gone");
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 400);
+  };
+  const az = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(bitir, az ? 0 : 620);
+})();
 </script>
 
 </body>
