@@ -1,0 +1,1648 @@
+<!doctype html>
+<html lang="az">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Qaib">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#2b5f9e">
+<meta name="color-scheme" content="light dark">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Qaib Jurnalı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+</head>
+<body>
+<style>
+:root{
+  --ground:#eef1f4;
+  --panel:#ffffff;
+  --panel-2:#f3f5f8;
+  --panel-3:#e9edf1;
+  --ink:#1a1f26;
+  --ink-2:#33404d;
+  --muted:#59656f;
+  --line:#dfe4e9;
+  --line-2:#c8d0d8;
+  --accent:#2b5f9e;
+  --accent-ink:#ffffff;
+  --sel:#e5eef8;
+  --ok:#17663c;
+  --warn:#845300;
+  --crit:#9c1d16;
+  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0c1014;
+    --panel:#141a21;
+    --panel-2:#1a212a;
+    --panel-3:#212a34;
+    --ink:#e2e8ee;
+    --ink-2:#b4c0cc;
+    --muted:#96a2ae;
+    --line:#222b35;
+    --line-2:#303b46;
+    --accent:#6fa8dc;
+    --accent-ink:#0c1014;
+    --sel:#1a2634;
+    --ok:#4fbf84;
+    --warn:#d79a3c;
+    --crit:#ec6b61;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0c1014;
+  --panel:#141a21;
+  --panel-2:#1a212a;
+  --panel-3:#212a34;
+  --ink:#e2e8ee;
+  --ink-2:#b4c0cc;
+  --muted:#96a2ae;
+  --line:#222b35;
+  --line-2:#303b46;
+  --accent:#6fa8dc;
+  --accent-ink:#0c1014;
+  --sel:#1a2634;
+  --ok:#4fbf84;
+  --warn:#d79a3c;
+  --crit:#ec6b61;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-ui); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+
+/* ====================  pəncərə  ==================== */
+.win{height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden}
+.mid{flex:1; min-height:0; display:flex; min-width:0; overflow:hidden}
+.content{flex:1; min-width:0; min-height:0; display:flex; flex-direction:column}
+
+.titlebar{
+  position:relative; z-index:30; min-height:42px; flex:none; flex-wrap:wrap;
+  display:flex; align-items:center; gap:9px; padding:0 10px;
+  background:var(--panel); border-bottom:1px solid var(--line-2);
+}
+.mark{display:flex; gap:1.5px; align-items:flex-end; height:13px; flex:none}
+.mark i{display:block; width:3px; background:var(--accent)}
+.mark i:nth-child(1){height:6px}
+.mark i:nth-child(2){height:10px}
+.mark i:nth-child(3){height:13px; background:var(--warn)}
+.mark i:nth-child(4){height:8px}
+.appname{font-size:13.5px; font-weight:600; letter-spacing:-.005em; white-space:nowrap}
+.vdiv{width:1px; height:15px; background:var(--line-2); flex:none}
+.docname{
+  font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; min-width:0;
+}
+.tb-right{margin-left:auto; display:flex; align-items:center; gap:9px; flex:none}
+
+.sel{
+  appearance:none; background:var(--panel-2); border:1px solid var(--line-2);
+  border-radius:4px; padding:5px 22px 5px 9px; font-size:12.5px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 12px) 51%, calc(100% - 8px) 51%;
+  background-size:4px 4px, 4px 4px; background-repeat:no-repeat;
+  max-width:46vw; text-overflow:ellipsis;
+}
+.led{display:flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); white-space:nowrap}
+.led::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--muted); flex:none}
+.led[data-s="ok"]::before{background:var(--ok)}
+.led[data-s="local"]::before{background:var(--warn)}
+.led[data-s="busy"]::before{background:var(--accent)}
+
+/* ====================  yan panel / tablar  ==================== */
+.sidebar{display:none}
+.navitem{
+  display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+  background:none; border:0; border-radius:4px; padding:6px 9px; cursor:pointer;
+  color:var(--ink-2); font-size:13.5px;
+}
+.navitem:hover{background:var(--panel-2)}
+.navitem[aria-current="true"]{background:var(--sel); color:var(--accent); font-weight:600}
+.navitem svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.navitem .cnt{margin-left:auto; font-family:var(--f-mono); font-size:11px; color:var(--muted)}
+.navitem[aria-current="true"] .cnt{color:var(--accent)}
+.navgroup{
+  font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted);
+  padding:13px 9px 5px; font-weight:600;
+}
+
+.bottom{flex:none; z-index:30; background:var(--panel); border-top:1px solid var(--line-2)}
+.tabbar{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); padding-bottom:env(safe-area-inset-bottom)}
+.tabbar .navitem{
+  flex-direction:column; gap:3px; border-radius:0; padding:6px 1px 7px;
+  font-size:11px; color:var(--muted); align-items:center; white-space:nowrap;
+}
+.tabbar .navitem[aria-current="true"]{background:none; box-shadow:inset 0 2px 0 var(--accent)}
+.tabbar .navitem svg{width:18px;height:18px}
+.tabbar .navitem .cnt{display:none}
+.tabbar .navitem > span{min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis}
+
+/* ====================  alət sətri  ==================== */
+.toolbar{
+  flex:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:9px 16px; background:var(--panel-2); border-bottom:1px solid var(--line);
+  min-height:44px;
+}
+.vtitle{font-size:13.5px; font-weight:600; letter-spacing:-.005em; margin-right:4px}
+.vhint{font-size:12.5px; color:var(--muted); line-height:1.4}
+.tb-sp{margin-left:auto}
+
+.btn{
+  background:var(--panel); border:1px solid var(--line-2); border-radius:4px;
+  padding:5px 12px; font-size:13px; cursor:pointer; white-space:nowrap;
+}
+.btn[disabled]{opacity:.45; cursor:default}
+.btn[disabled]:hover{border-color:var(--line-2); color:inherit}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1); color:var(--accent-ink)}
+.btn.danger:hover{border-color:var(--crit); color:var(--crit)}
+.seg{display:inline-flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden}
+.seg button{background:var(--panel); border:0; border-right:1px solid var(--line-2); padding:5px 12px; font-size:13px; color:var(--muted); cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--sel); color:var(--accent); font-weight:600}
+.find{
+  background:var(--panel); border:1px solid var(--line-2); border-radius:4px;
+  padding:5px 10px; font-size:13px; width:min(280px,52vw);
+}
+.find:focus{border-color:var(--accent); outline:none}
+
+/* ====================  məzmun  ==================== */
+main{
+  flex:1; min-width:0; min-height:0; padding:14px 14px 18px;
+  overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:5px; overflow:hidden}
+main > * + *{margin-top:14px}
+.two > * + *{margin-top:14px}
+.two > div > .panel + .panel{margin-top:14px}
+.ph{
+  display:flex; align-items:center; gap:8px; padding:7px 11px;
+  background:var(--panel-2); border-bottom:1px solid var(--line);
+  font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+}
+.ph .ph-r{margin-left:auto; font-weight:400; text-transform:none; letter-spacing:0; font-size:12px}
+.pb{padding:11px}
+
+/* KPI zolağı — hairline bölünmüş, kart yox */
+.kpi{display:flex; flex-wrap:wrap}
+.kpi > div{
+  flex:1 1 90px; padding:9px 11px 10px; border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.kpi > div:last-child{border-right:0}
+.kpi b{display:block; font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:20px; font-weight:500; letter-spacing:-.02em; line-height:1.15}
+.kpi span{display:block; font-size:11.5px; color:var(--muted); margin-top:2px}
+.kpi b.c-ok{color:var(--ok)} .kpi b.c-warn{color:var(--warn)} .kpi b.c-crit{color:var(--crit)}
+
+/* ====================  cədvəllər  ==================== */
+.tw{overflow-x:auto}
+table.t{width:100%; border-collapse:collapse; font-size:13.5px}
+table.t th{
+  text-align:left; padding:7px 10px; font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+  background:var(--panel-2); border-bottom:1px solid var(--line-2); white-space:nowrap;
+}
+table.t td{padding:0 10px; height:39px; border-bottom:1px solid var(--line); vertical-align:middle}
+table.t tbody tr:last-child td{border-bottom:0}
+table.t tbody tr:hover{background:var(--panel-2)}
+table.t tbody tr[aria-selected="true"]{background:var(--sel)}
+table.t .r{text-align:right; font-family:var(--f-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+table.t .c{text-align:center}
+table.t .nm{font-weight:500; min-width:160px}
+table.t .nm small{display:block; font-weight:400; font-size:12px; color:var(--muted); margin-top:-2px}
+table.t .ix{width:32px; color:var(--muted); font-family:var(--f-mono); font-size:12px; text-align:right}
+table.t tr.clk{cursor:pointer}
+table.t td.stripe{border-left:2px solid transparent; padding-left:8px}
+table.t tr.lv-warn td.stripe{border-left-color:var(--warn)}
+table.t tr.lv-crit td.stripe{border-left-color:var(--crit)}
+.code{font-family:var(--f-mono); font-size:12px; color:var(--muted); white-space:nowrap}
+
+/* vəziyyət nişanı — doldurulmuş "pill" yox, çərçivəli etiket */
+.tag{
+  display:inline-block; font-family:var(--f-mono); font-size:10.5px; font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase; padding:2px 6px; border-radius:3px;
+  border:1px solid currentColor; white-space:nowrap;
+}
+.tag.ok{color:var(--ok)} .tag.warn{color:var(--warn)} .tag.crit{color:var(--crit)}
+.tag.neu{color:var(--muted)} .tag.acc{color:var(--accent)}
+
+/* sətir içi nazik qaib zolağı */
+.bar{display:flex; gap:1px; height:7px; min-width:68px; align-items:stretch}
+.bar i{flex:1 0 2px; background:var(--line-2); border-radius:1px}
+.bar i.on{background:var(--accent)}
+.bar.lv-warn i.on{background:var(--warn)}
+.bar.lv-crit i.on{background:var(--crit)}
+.bar i.gap{margin-right:3px}
+
+/* ədəd artırıcı — real proqramlardakı spinner */
+.spin{display:inline-flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden; background:var(--panel)}
+.spin button{
+  width:24px; height:24px; border:0; background:none; cursor:pointer;
+  font-family:var(--f-mono); font-size:13px; color:var(--ink-2); padding:0;
+}
+.spin button:hover{background:var(--sel); color:var(--accent)}
+.spin button:first-child{border-right:1px solid var(--line)}
+.spin button:last-child{border-left:1px solid var(--line)}
+.spin .v{
+  min-width:30px; text-align:center; font-family:var(--f-mono); font-variant-numeric:tabular-nums;
+  font-size:12.5px; display:grid; place-items:center; background:var(--panel-2);
+}
+
+/* ====================  dərs cədvəli: gün sütunları  ==================== */
+.board{display:grid; gap:11px; grid-template-columns:1fr; padding:12px}
+.col{border:1px solid var(--line); border-radius:5px; overflow:hidden; display:flex; flex-direction:column}
+.col-h{
+  display:flex; align-items:center; gap:7px; padding:7px 10px;
+  background:var(--panel-2); border-bottom:1px solid var(--line);
+  font-size:12.5px; font-weight:600;
+}
+.col-h.today{color:var(--accent)}
+.col-h .n{margin-left:auto; font-family:var(--f-mono); font-size:11.5px; color:var(--muted); font-weight:400}
+.col-b{display:flex; flex-direction:column; gap:1px; background:var(--line); flex:1}
+.ls{
+  display:block; width:100%; text-align:left; background:var(--panel); border:0;
+  border-left:2px solid transparent; padding:9px 10px; cursor:pointer; color:inherit;
+}
+.ls:hover{background:var(--sel)}
+.ls .tm{
+  display:block; font-family:var(--f-mono); font-size:12px; font-weight:500;
+  color:var(--accent); letter-spacing:-.01em;
+}
+.ls b{display:block; font-size:13px; font-weight:500; margin-top:3px; line-height:1.35}
+.ls .mt{display:block; font-family:var(--f-mono); font-size:11px; color:var(--muted); margin-top:4px}
+.ls.lv-warn{border-left-color:var(--warn)}
+.ls.lv-crit{border-left-color:var(--crit)}
+.col-empty{padding:16px 10px; background:var(--panel); color:var(--muted); font-size:12.5px; text-align:center}
+.col-f{padding:7px; background:var(--panel); border-top:1px solid var(--line)}
+.addbtn{
+  width:100%; border:1px dashed var(--line-2); background:none; border-radius:4px;
+  padding:7px; font-size:12.5px; color:var(--muted); cursor:pointer;
+}
+.addbtn:hover{border-color:var(--accent); color:var(--accent); border-style:solid}
+
+/* ====================  sahələr  ==================== */
+.form{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:9px}
+.fld label{display:block; font-size:11px; letter-spacing:.02em; color:var(--muted); margin-bottom:4px}
+.fld input, .fld select, .semrow input{
+  width:100%; background:var(--panel); color:var(--ink);
+  border:1px solid var(--line-2); border-radius:4px;
+  padding:6px 9px; font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:13.5px;
+}
+.fld.txt input{font-family:var(--f-ui)}
+.fld input:focus, .fld select:focus, .semrow input:focus{border-color:var(--accent); outline:none}
+.semrow input::placeholder{color:var(--muted); opacity:1}
+.semrow{display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px}
+.semrow input{text-align:center; padding:7px 2px; font-size:14px; font-weight:500}
+@media (max-width:560px){ .semrow{grid-template-columns:repeat(4,minmax(0,1fr))} }
+
+dl.kv{margin:0}
+dl.kv > div{display:flex; justify-content:space-between; gap:14px; padding:7px 11px; border-bottom:1px solid var(--line); align-items:baseline}
+dl.kv > div:last-child{border-bottom:0}
+dl.kv dt{font-size:12.5px; color:var(--muted); flex:none}
+dl.kv dd{margin:0; font-size:13.5px; text-align:right; word-break:break-word}
+dl.kv dd button{background:none; border:0; padding:0; font:inherit; color:var(--ink); cursor:pointer; text-align:right; border-bottom:1px dashed var(--line-2)}
+dl.kv dd button:hover{color:var(--accent); border-bottom-color:var(--accent)}
+
+.flabel{font-size:11.5px; color:var(--muted); margin:0 0 8px}
+ol.steps{margin:0; padding:12px 14px 14px 34px; display:flex; flex-direction:column; gap:8px}
+ol.steps li{font-size:13px; line-height:1.55}
+ol.steps li::marker{color:var(--accent); font-family:var(--f-mono); font-size:12px}
+.flag{color:var(--warn); font-weight:500}
+.dlg-f .del{margin-right:auto}
+.hintbox{font-size:12.5px; line-height:1.6; color:var(--muted); padding:9px 11px; border-top:1px solid var(--line); background:var(--panel-2)}
+.blank{padding:24px 12px; text-align:center; color:var(--muted); font-size:13px}
+
+/* ====================  status sətri  ==================== */
+.statusbar{
+  display:flex; align-items:center; gap:10px; min-height:26px; padding:3px 11px;
+  background:var(--panel-2); border-top:1px solid var(--line);
+  font-family:var(--f-mono); font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden;
+}
+.statusbar .sb-r{margin-left:auto; display:flex; gap:10px; align-items:center; min-width:0; overflow:hidden}
+.statusbar s{text-decoration:none; opacity:.4}
+.sb-keys{display:none}
+
+/* ====================  dialoq  ==================== */
+.modal{position:fixed; inset:0; z-index:60; display:grid; align-items:end; justify-items:stretch}
+.modal[hidden]{display:none}
+.modal::before{content:""; position:absolute; inset:0; background:rgba(8,12,18,.45)}
+.dlg{
+  position:relative; background:var(--panel); border:1px solid var(--line-2);
+  border-radius:8px 8px 0 0; max-height:88vh; display:flex; flex-direction:column;
+}
+.dlg-t{
+  display:flex; align-items:center; gap:8px; padding:9px 12px; flex:none;
+  background:var(--panel-2); border-bottom:1px solid var(--line); border-radius:7px 7px 0 0;
+}
+.dlg-t strong{font-size:13.5px; font-weight:600}
+.dlg-t em{font-style:normal; font-size:11.5px; color:var(--muted); margin-left:auto; font-family:var(--f-mono)}
+.dlg-b{padding:13px 12px; overflow:auto}
+.dlg-f{
+  display:flex; justify-content:flex-end; gap:7px; padding:10px 12px; flex:none;
+  border-top:1px solid var(--line); background:var(--panel-2);
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
+}
+.dlg-msg{font-size:13px; color:var(--ink-2); margin:0; line-height:1.6}
+
+/* ====================  geniş ekran  ==================== */
+@media (min-width:920px){
+  .sidebar{
+    display:block; width:206px; flex:none; background:var(--panel);
+    border-right:1px solid var(--line); padding:6px 7px 14px;
+    overflow-y:auto; overscroll-behavior:contain;
+  }
+  .tabbar{display:none}
+  .bottom{border-top:1px solid var(--line-2)}
+  main{padding:16px 18px 24px}
+  .sb-keys{display:inline}
+  .docname{font-size:12px}
+  .modal{place-items:center}
+  .dlg{width:min(520px,92vw); border-radius:8px}
+  .dlg-t{border-radius:7px 7px 0 0}
+  .dlg-f{padding-bottom:10px}
+  .board{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
+  .two > * + *{margin-top:0}
+}
+@media (max-width:759px){
+  .hide-sm{display:none}
+  .vdiv, .docname{display:none}
+  .titlebar{gap:7px; padding:0 9px}
+  .led{font-size:0; gap:0}
+  .led::before{width:8px; height:8px}
+  .board{padding:10px}
+}
+</style>
+
+<div class="win">
+  <header class="titlebar">
+    <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="appname">Qaib Jurnalı</span>
+    <span class="vdiv" aria-hidden="true"></span>
+    <span class="docname" id="docname"></span>
+    <span class="tb-right">
+      <button class="btn" id="btnDiscard" type="button" data-discard="1" hidden>Geri qaytar</button>
+      <button class="btn primary" id="btnSave" type="button" data-save="1" disabled>Saxlanıldı</button>
+      <select class="sel" id="semPick" aria-label="Semestr"></select>
+      <span class="led" id="sync" data-s="busy">Yüklənir</span>
+    </span>
+  </header>
+
+  <div class="mid">
+    <nav class="sidebar" id="sidebar" aria-label="Bölmələr"></nav>
+    <div class="content">
+      <div class="toolbar" id="toolbar"></div>
+      <main id="view" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <footer class="statusbar" id="statusbar"></footer>
+    <nav class="tabbar" id="tabbar" aria-label="Bölmələr"></nav>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden></div>
+
+<script>
+"use strict";
+var ICON_HREF = "icon-180.png";
+
+/* ============================================================
+   0. iPhone / Windows — proqram kimi açılma üçün meta
+   ============================================================ */
+(function () {
+  const head = document.head;
+  const add = (tag, attrs) => {
+    const sel = tag + Object.entries(attrs)
+      .filter(([k]) => k === "name" || k === "rel")
+      .map(([k, v]) => `[${k}="${v}"]`).join("");
+    if (head.querySelector(sel)) return;
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    head.appendChild(el);
+  };
+  add("meta", { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" });
+  add("meta", { name: "apple-mobile-web-app-capable", content: "yes" });
+  add("meta", { name: "mobile-web-app-capable", content: "yes" });
+  add("meta", { name: "apple-mobile-web-app-title", content: "Qaib" });
+  add("meta", { name: "apple-mobile-web-app-status-bar-style", content: "default" });
+  add("meta", { name: "theme-color", content: "#2b5f9e" });
+  add("link", { rel: "apple-touch-icon", href: ICON_HREF });
+  add("link", { rel: "icon", href: ICON_HREF });
+  if (location.protocol.indexOf("http") === 0) add("link", { rel: "manifest", href: "manifest.json" });
+})();
+
+/* ============================================================
+   1. Fənn kataloqu  (Excel: "Data" vərəqi)
+   ============================================================ */
+const HOUR_RATE = 2200 / 60;              // Excel: (2200/60)
+const QAIB_BY_CREDIT = { 3: 3, 4: 9, 5: 12, 6: 15 };  // Excel: "Qaib sayı" sütunu
+
+const CATALOG = [
+  ["End942", "Xarici dildə işgüzar və akademik kommunikasiya 2", 5, "İsgəndərova Nərgiz"],
+  ["Azd019", "Azərbaycan dilində işgüzar və akademik kommunikasiya", 4, "Talıbova Sevinc"],
+  ["Tur650", "Turizm coğrafiyası", 5, "İsmayılova Lalə"],
+  ["Mal452", "Marketinqin əsasları", 5, "Bayramova İlfanə"],
+  ["Riy180", "Biznes riyaziyyatı", 6, "Fətəliyeva Aynurə"],
+  ["Mik300", "Mikroiqtisadiyyat", 5, "Aslanova İlhamə"],
+  ["End942", "Xarici dildə işgüzar və akademik kommunikasiya 1", 5, ""],
+  ["End943", "Xarici dildə işgüzar və akademik kommunikasiya 3", 5, "Rzazadə Nigar"],
+  ["Bid014", "Biznes statistikası", 5, "Dünyamalıyeva Vəfa Rəşid"],
+  ["Mak260", "Makroiqtisadiyyat", 5, "Aslanova İlhamə Eybulla"],
+  ["Tur220", "Turizmdə nəqliyyat", 5, "Abbasova Könül Akif"],
+  ["Tur450", "Turizmdə vasitəçilər", 4, "Tağısoy Xədicə Elşən"],
+  ["Tur200", "Turizmdə marketinq və marketinq araşdırmaları", 6, "Atakişiyeva Nərgiz Nəriman"],
+  ["Tur590", "Turizm hüququ", 5, ""],
+  ["Eko390", "İnsan resurslarının idarə edilməsi", 4, ""],
+  ["Muh320", "Mühasibat uçotu", 5, ""],
+  ["Tur600", "Qonaqpərvərlik sahəsinin idarə edilməsi", 5, ""],
+  ["Tur111", "Azərbaycanın turizm ehtiyatları", 5, ""],
+  ["Com160", "İnformasiya texnologiyaları (ixtisas üzrə)", 3, ""],
+  ["Met250", "Multikulturalizmə giriş", 3, ""],
+  ["Tur610", "İdarəetmə uçotu və korporativ qərarların verilməsi", 5, ""],
+  ["Tur155", "Turizm məhsulunun hazırlanması", 5, ""],
+  ["Tur630", "Destinasiyaların idarə edilməsi", 4, ""],
+  ["Tur620", "Dayanıqlı turizm", 4, ""],
+  ["Tur190", "Bronlaşdırma sistemləri", 4, ""],
+  ["Met700", "Kəmiyyət əsaslı tədqiqat metodları", 4, ""],
+  ["Tur145", "Turizmdə bədən dilinin tətbiqi", 4, ""],
+  ["Tur165", "Turist davranışı və psixologiyası", 5, ""],
+  ["Tur125", "Turizm siyasəti və planlaşdırılması", 5, ""],
+  ["Met710", "Keyfiyyət əsaslı tədqiqat metodları", 5, ""],
+  ["Tur135", "Turizm iqtisadiyyatı", 5, ""],
+  ["Tur175", "Sağlamlıq turizmi", 5, ""],
+  ["Men032", "Otel menecmenti", 5, ""],
+  ["Tur185", "Azərbaycanın turizm marşrutları", 5, ""],
+  ["Tur195", "Tarixi və mədəni turizm", 5, ""],
+  ["Tur210", "Ekoloji turizm", 5, ""],
+  ["Tur215", "Biznes və konqres turizmi", 5, ""],
+  ["Tur151", "Ekskursiya işinin təşkili", 5, ""],
+  ["Tur340", "Aqroturizm", 5, ""],
+  ["Tec061", "Təcrübə 1 (tədris)", 6, ""],
+  ["Tec062", "Təcrübə 2 (tədris)", 6, ""],
+  ["Tec063", "Təcrübə 3 (istehsalat)", 9, ""],
+  ["Yda060", "Yekun Attestasiyalar", 9, ""],
+  ["Tar140", "Azərbaycan tarixi", 5, ""],
+  ["End941", "Xarici dildə işgüzar və akademik kommunikasiya 1", 5, ""],
+  ["Tur640", "Turizmə giriş", 5, ""],
+  ["Eko472", "Menecmentin əsasları", 5, ""],
+  ["Met330", "Sosial tədqiqata giriş", 4, "Yusifli Xəlil Toğrul"],
+  ["Mmt045", "Mülki müdafiə və ilkin tibbi yardım", 6, ""],
+].map(([code, name, credits, teacher]) => ({ code, name, credits, teacher }));
+
+const BY_NAME = new Map();
+for (const c of CATALOG) if (!BY_NAME.has(c.name)) BY_NAME.set(c.name, c);
+
+const cat = (name) => BY_NAME.get(name) || { code: "—", name, credits: null, teacher: "" };
+const qaibLimit = (credits) => (credits != null && QAIB_BY_CREDIT[credits] != null ? QAIB_BY_CREDIT[credits] : null);
+
+/* ============================================================
+   2. Excel-dən götürülmüş başlanğıc vəziyyət
+   ============================================================ */
+const DAYS = [
+  ["mon", "Bazar ertəsi", "B.e"],
+  ["tue", "Çərşənbə axşamı", "Ç.a"],
+  ["wed", "Çərşənbə", "Çər"],
+  ["thu", "Cümə axşamı", "C.a"],
+  ["fri", "Cümə", "Cümə"],
+];
+const SEM_SLOTS = 8;                       // Excel: V..AC "Seminar grade"
+
+/* Dərs cədvəli: hər gündə sərbəst sayda dərs olur və hər dərsin öz saatı var
+   (alt qrup dərsləri qalanlardan fərqli saata düşə bilir). */
+const emptyWeek = () => Object.fromEntries(DAYS.map(([k]) => [k, []]));
+const lesson = (time, subject, room, teacher) => ({ time, subject, room, teacher });
+
+const T1 = "09:00 – 10:20", T2 = "10:30 – 11:50", T3 = "12:00 – 13:20", T4 = "13:50 – 15:10";
+
+function ustWeek() {
+  return {
+    mon: [
+      lesson(T1, "Makroiqtisadiyyat", "424S", "Aslanova İlhamə Eybulla"),
+      lesson(T2, "Turizmdə vasitəçilər", "422S", "Tağısoy Xədicə Elşən"),
+    ],
+    tue: [
+      lesson(T1, "Turizmdə vasitəçilər", "202M", "Tağısoy Xədicə Elşən"),
+      lesson(T2, "Turizmdə nəqliyyat", "203M", "Abbasova Könül Akif"),
+      lesson(T3, "Turizmdə marketinq və marketinq araşdırmaları", "430M", "Atakişiyeva Nərgiz Nəriman"),
+    ],
+    wed: [
+      lesson(T1, "Sosial tədqiqata giriş", "421M", "Yusifli Xəlil Toğrul"),
+      lesson(T2, "Turizmdə marketinq və marketinq araşdırmaları", "509S", "Atakişiyeva Nərgiz Nəriman"),
+      lesson(T3, "Xarici dildə işgüzar və akademik kommunikasiya 3", "420P", "Rzazadə Nigar"),
+    ],
+    thu: [
+      lesson(T1, "Sosial tədqiqata giriş", "515S", "Yusifli Xəlil Toğrul"),
+      lesson(T2, "Biznes statistikası", "102M", "Dünyamalıyeva Vəfa Rəşid"),
+      lesson(T3, "Makroiqtisadiyyat", "102M", "Aslanova İlhamə Eybulla"),
+      lesson(T4, "Turizmdə marketinq və marketinq araşdırmaları", "430M", "Atakişiyeva Nərgiz Nəriman"),
+    ],
+    fri: [
+      lesson(T1, "Xarici dildə işgüzar və akademik kommunikasiya 3", "510P", "Rzazadə Nigar"),
+      lesson(T2, "Biznes statistikası", "407S", "Qasımov Cəsarət"),
+      lesson(T3, "Turizmdə nəqliyyat", "410S", "Nərimanbəyli Vüqar İlqar"),
+    ],
+  };
+}
+
+/** row: absent = işlənmiş qaib saatı (Excel F), q = imtahan balı (Excel Q) */
+const row = (name, absent, o = {}) => ({
+  name,
+  absent: absent || 0,
+  examRoom: o.examRoom || "",
+  examDate: o.examDate || "",
+  q: o.q ?? null,
+  s: o.s ?? null,
+  t: o.t ?? null,
+  u: o.u ?? null,
+  sem: Object.assign(Array.from({ length: SEM_SLOTS }, () => null), o.sem || []),
+  ad: o.ad ?? null,
+});
+
+/* Semestrlərin fənn siyahısı və profil sahələrinin adları — şəxsi məlumat deyil. */
+const COURSES = {
+  "Kurs 1 • Semestr 2": [
+    "Xarici dildə işgüzar və akademik kommunikasiya 2",
+    "Azərbaycan dilində işgüzar və akademik kommunikasiya",
+    "Marketinqin əsasları",
+    "Biznes riyaziyyatı",
+    "Turizm coğrafiyası",
+    "Mikroiqtisadiyyat",
+  ],
+  "Kurs 2 • Semestr 1": [
+    "Xarici dildə işgüzar və akademik kommunikasiya 3",
+    "Biznes statistikası",
+    "Makroiqtisadiyyat",
+    "Turizmdə nəqliyyat",
+    "Turizmdə vasitəçilər",
+    "Turizmdə marketinq və marketinq araşdırmaları",
+    "Sosial tədqiqata giriş",
+  ],
+};
+
+const PROFILE_FIELDS = [
+  "Ad, Soyad, Ata adı", "Tələbə kodu", "Qrup kodu", "Fakültə", "İxtisas",
+  "Digital.edu login", "Digital.edu kod", "Teams login",
+  "Universitet telefonu", "Universitet e-poçtu", "Ünvan", "Sayt",
+];
+
+const PERSONAL = null;   // acig hostda sexsi melumat saxlanilmir
+
+const BASELINE = {
+  version: 2,
+  active: "Kurs 2 • Semestr 1",
+  // Həftə növbəsi: bu bazar ertəsindən başlayan həftə "ust" sayılır,
+  // sonrakı həftələr avtomatik olaraq bir-birini növbələyir.
+  weekAnchor: { monday: "2026-09-28", type: "ust" },
+  semesters: Object.fromEntries(Object.keys(COURSES).map((key) => [key, {
+    courses: COURSES[key].map((name, i) => {
+      const p = (typeof PERSONAL !== "undefined" && PERSONAL && PERSONAL.rows[key] && PERSONAL.rows[key][i]) || {};
+      return row(name, p.absent, p);
+    }),
+  }])),
+  schedules: {
+    "Kurs 1 • Semestr 2": { alt: emptyWeek(), ust: emptyWeek() },
+    "Kurs 2 • Semestr 1": { alt: emptyWeek(), ust: ustWeek() },
+  },
+  profile: Object.assign(
+    Object.fromEntries(PROFILE_FIELDS.map((k) => [k, ""])),
+    (typeof PERSONAL !== "undefined" && PERSONAL && PERSONAL.profile) || {}
+  ),
+};
+
+/* ============================================================
+   3. Excel formullarının eyni qarşılığı
+   ============================================================ */
+const roundHalfUp = (x) => (x < 0 ? -Math.round(-x) : Math.round(x));
+const numOr = (v, d = 0) => (v == null || v === "" || Number.isNaN(Number(v)) ? d : Number(v));
+
+/** Bir fənn sətrinin bütün hesablanan sütunları. */
+function compute(r) {
+  const c = cat(r.name);
+  const credits = c.credits;                         // Excel D: VLOOKUP(Data!C)
+  const G = qaibLimit(credits);                      // Excel G: VLOOKUP(Data!H)
+  const F = numOr(r.absent);                         // Excel F
+  const H = G == null ? null : G - F;                // Excel H: G-F
+  const I = H == null ? null : H / 2;                // Excel I: H/2
+  const atLimit = G != null && F >= G;               // Excel J: "LIMIT"
+  const failedByAbsence = G != null && F > G;        // Excel K: "Fail"
+
+  const semVals = r.sem.filter((v) => v != null && v !== "").map(Number);
+  // Excel AE: IFERROR(ROUND(AVERAGE(V:AC)*2+SUM(S:U),0),0)+AD
+  const AE = (semVals.length
+    ? roundHalfUp((semVals.reduce((a, b) => a + b, 0) / semVals.length) * 2 + numOr(r.s) + numOr(r.t) + numOr(r.u))
+    : 0) + numOr(r.ad);
+
+  const O = AE;                                      // Excel O: =AE
+  const P = 51 - O === 51 ? null : 51 - O;           // Excel P
+  const Q = numOr(r.q);                              // Excel Q
+  const R = Q + O === 0 ? null : Q + O;              // Excel R
+
+  // Excel AF
+  let result;
+  if (failedByAbsence) result = "Fail";
+  else if (Q === 0 || R == null || R === 0) result = "No Result";
+  else if (Q < 17) result = "Fail";
+  else result = R >= 51 ? "Pass" : "Fail";
+
+  let level = "ok";
+  if (failedByAbsence) level = "crit";
+  else if (atLimit) level = "crit";
+  else if (G != null && G > 0 && F / G >= 0.75) level = "warn";
+
+  return {
+    code: c.code, credits, teacher: c.teacher, G, F, H, I,
+    atLimit, failedByAbsence, AE, O, P, Q, R, result, level,
+    pay25: credits == null ? null : HOUR_RATE * credits * 0.25,
+    paySub: credits == null ? null : HOUR_RATE * credits,
+  };
+}
+
+/** Excel AI6: SUMPRODUCT(G*1,R)/SUMPRODUCT(G*1) */
+function semesterGpa(courses) {
+  let top = 0, bot = 0;
+  for (const r of courses) {
+    const m = compute(r);
+    if (m.G == null) continue;
+    top += m.G * (m.R == null ? 0 : m.R);
+    bot += m.G;
+  }
+  return bot === 0 ? null : top / bot;
+}
+
+/** Excel N: Days remaining */
+function examCountdown(iso) {
+  if (!iso) return { label: "Təyin olunmayıb", tone: "neutral" };
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { label: "Təyin olunmayıb", tone: "neutral" };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.floor((d - today) / 86400000);
+  if (diff < 0) return { label: "Keçib", tone: "neutral" };
+  if (diff === 0) return { label: "Bu gün", tone: "crit" };
+  if (diff === 1) return { label: "Sabah", tone: "crit" };
+  return { label: diff + " gün qalıb", tone: diff <= 7 ? "warn" : "acc" };
+}
+
+const fmtDate = (iso) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} · ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+const money = (n) => (n == null ? "—" : n.toLocaleString("az-AZ", { maximumFractionDigits: 2 }) + " ₼");
+const dash = (v) => (v == null || v === "" ? "—" : v);
+const esc = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+
+/* ============================================================
+   4. Vəziyyət, saxlama və sinxron
+   Auto-save YOXDUR: dəyişikliklər yalnız "Saxla" düyməsi ilə yazılır.
+   ============================================================ */
+const LS_KEY = "qaib-jurnali-v2";
+const LS_OLD = "qaib-jurnali-v1";
+
+let state = structuredClone(BASELINE);
+let savedJson = JSON.stringify(state);   // ən son saxlanılmış nüsxə
+let dirty = false;                        // saxlanılmamış dəyişiklik var?
+let docRef = null;
+let remotePending = null;                 // başqa cihazdan gələn, hələ qəbul olunmamış nüsxə
+
+const SYNC = { s: "busy", t: "Yüklənir", at: null };
+function setSync(s, text) {
+  SYNC.s = s; SYNC.t = text;
+  if (s === "ok") SYNC.at = new Date();
+  const el = document.getElementById("sync");
+  if (el) { el.dataset.s = s; el.textContent = text; }
+  if (typeof paintStatus === "function") paintStatus();
+}
+
+/* Həftə növbəsi — bazar ertəsi dəyişir */
+function mondayOf(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+function currentWeekType() {
+  const a = state.weekAnchor || BASELINE.weekAnchor;
+  const base = mondayOf(new Date(a.monday + "T00:00:00"));
+  const now = mondayOf(new Date());
+  const weeks = Math.round((now - base) / 604800000);
+  const same = ((weeks % 2) + 2) % 2 === 0;
+  const other = a.type === "ust" ? "alt" : "ust";
+  return same ? a.type : other;
+}
+const weekName = (t) => (t === "ust" ? "Üst həftə" : "Alt həftə");
+
+function migrate(raw) {
+  const out = structuredClone(BASELINE);
+  if (!raw || typeof raw !== "object") return out;
+  Object.assign(out, raw);
+
+  // köhnə (v1) formatda saatlar ümumi sütunda idi
+  const oldTimes = Array.isArray(raw.times) ? raw.times : null;
+
+  for (const key of Object.keys(out.semesters || {})) {
+    const sem = out.semesters[key] || {};
+    sem.courses = (sem.courses || []).map((r) => {
+      const merged = Object.assign(row(r.name, r.absent), r);
+      merged.sem = Object.assign(Array.from({ length: SEM_SLOTS }, () => null), (r.sem || []).slice(0, SEM_SLOTS));
+      return merged;
+    });
+    out.semesters[key] = sem;
+  }
+
+  out.schedules = out.schedules || {};
+  for (const key of Object.keys(out.semesters)) {
+    const sch = out.schedules[key] || {};
+    for (const wk of ["alt", "ust"]) {
+      const src = sch[wk] || {};
+      const fixed = {};
+      for (const [dk] of DAYS) {
+        const arr = Array.isArray(src[dk]) ? src[dk] : [];
+        fixed[dk] = arr.map((e, i) => {
+          if (!e || typeof e !== "object") return null;
+          const subject = String(e.subject || "").trim();
+          if (!subject) return null;
+          const t = e.time != null && String(e.time) !== ""
+            ? String(e.time)
+            : (oldTimes && oldTimes[i] ? String(oldTimes[i]).replace("\n", " – ") : "");
+          return { time: t, subject, room: String(e.room || ""), teacher: String(e.teacher || "") };
+        }).filter(Boolean);
+      }
+      sch[wk] = fixed;
+    }
+    out.schedules[key] = sch;
+  }
+
+  delete out.times;
+  delete out.week;
+  const a = out.weekAnchor;
+  if (!a || typeof a !== "object" || !a.monday) out.weekAnchor = structuredClone(BASELINE.weekAnchor);
+  else if (a.type !== "alt" && a.type !== "ust") a.type = "ust";
+  if (!out.semesters[out.active]) out.active = Object.keys(out.semesters)[0];
+  out.version = 2;
+  return out;
+}
+
+/* dəyişiklik — yalnız yaddaşda, diskə yazılmır */
+function mutate(fn) {
+  fn(state);
+  dirty = true;
+  render();
+}
+
+async function commit() {
+  savedJson = JSON.stringify(state);
+  dirty = false;
+  remotePending = null;
+  try { localStorage.setItem(LS_KEY, savedJson); } catch (e) { /* kvota */ }
+  render();
+  if (!docRef) { setSync("local", "Yalnız bu cihazda"); return; }
+  setSync("busy", "Saxlanılır");
+  try {
+    await docRef.set({ state: JSON.parse(savedJson) });
+    setSync("ok", "Saxlanıldı");
+  } catch (err) {
+    setSync("local", err && err.code === "invalid_argument" ? "Yazmaq olmur" : "Şəbəkə yoxdur");
+  }
+}
+
+/* dəyişiklikləri ləğv et — başqa cihazdan nüsxə gəlmişsə onu götürür */
+function discard() {
+  const src = remotePending || JSON.parse(savedJson);
+  remotePending = null;
+  state = migrate(src);
+  savedJson = JSON.stringify(state);
+  dirty = false;
+  if (typeof resetSelection === "function") resetSelection();
+  render();
+}
+
+async function initStore() {
+  try {
+    const cached = localStorage.getItem(LS_KEY) || localStorage.getItem(LS_OLD);
+    if (cached) {
+      state = migrate(JSON.parse(cached));
+      savedJson = JSON.stringify(state);
+      render();
+    }
+  } catch (e) { /* korlanmış keş */ }
+
+  let db = null, uid = null;
+  try { db = await (window.claude && window.claude.use ? window.claude.use("db") : null); } catch (e) { db = null; }
+  try {
+    const user = await (window.claude && window.claude.use ? window.claude.use("user") : null);
+    if (user) uid = await user.id();
+  } catch (e) { uid = null; }
+
+  if (!db) { setSync("local", "Yalnız bu cihazda"); return; }
+  docRef = uid ? db.collection("data/users/" + uid).doc("state") : db.doc("shared/state");
+
+  docRef.onSnapshot(
+    (snap) => {
+      if (!snap.exists) { setSync("ok", "Hazırdır"); return; }
+      if (snap.metadata.hasPendingWrites) return;
+      const d = snap.data();
+      if (!d || !d.state) return;
+      const incoming = migrate(d.state);
+      const incomingJson = JSON.stringify(incoming);
+      if (incomingJson === savedJson) { setSync("ok", "Sinxron"); return; }
+      if (dirty) {
+        remotePending = d.state;
+        setSync("busy", "Başqa cihazda dəyişiklik var");
+        return;
+      }
+      state = incoming;
+      savedJson = incomingJson;
+      try { localStorage.setItem(LS_KEY, savedJson); } catch (e) {}
+      setSync("ok", "Sinxron");
+      render();
+    },
+    () => setSync("local", "Yalnız bu cihazda")
+  );
+}
+
+window.addEventListener("beforeunload", (e) => {
+  if (!dirty) return;
+  e.preventDefault();
+  e.returnValue = "";
+});
+
+/* ============================================================
+   5. Naviqasiya
+   ============================================================ */
+const ICONS = {
+  overview: '<svg viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>',
+  qaib: '<svg viewBox="0 0 20 20"><path d="M3 16.5V9M7.7 16.5V4M12.3 16.5v-5M17 16.5V8"/><path d="M2 18h16"/></svg>',
+  cedvel: '<svg viewBox="0 0 20 20"><rect x="2.5" y="3.5" width="15" height="14" rx="1"/><path d="M2.5 7.5h15M7.5 7.5v10M12.5 7.5v10"/></svg>',
+  qiymet: '<svg viewBox="0 0 20 20"><path d="M3 17V3h11l3 3v11z"/><path d="M6 8h8M6 11.5h8M6 15h5"/></svg>',
+  fenn: '<svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="M17 17l-3.9-3.9"/></svg>',
+  profil: '<svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2"/><path d="M3.8 17c1.2-3 3.5-4.5 6.2-4.5S15 14 16.2 17"/></svg>',
+};
+const VIEWS = [
+  ["overview", "İcmal"],
+  ["qaib", "Qaib"],
+  ["cedvel", "Cədvəl"],
+  ["qiymet", "Qiymət"],
+  ["fenn", "Fənn"],
+  ["profil", "Profil"],
+];
+
+let current = "overview";
+let findQuery = "";
+let selected = 0;
+let viewWeek = null;              // Cədvəldə baxılan həftə (null = bu həftə)
+
+function resetSelection() { selected = 0; viewWeek = null; }
+
+const activeSem = () => state.semesters[state.active] || { courses: [] };
+const shownWeek = () => viewWeek || currentWeekType();
+function weekBlock(wk) {
+  if (!state.schedules[state.active]) state.schedules[state.active] = { alt: emptyWeek(), ust: emptyWeek() };
+  const sch = state.schedules[state.active];
+  if (!sch[wk]) sch[wk] = emptyWeek();
+  return sch[wk];
+}
+const todayKey = () => (DAYS[new Date().getDay() - 1] || [])[0] || null;
+const TONE = { neutral: "neu", crit: "crit", warn: "warn", acc: "acc" };
+
+/* "09:00 – 10:20" → 540, sıralama üçün */
+function timeKey(s) {
+  const m = String(s || "").match(/(\d{1,2})[:.](\d{2})/);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : 9999;
+}
+/* günün dərsləri saat sırası ilə; ilkin indeks saxlanılır */
+function dayLessons(wk, dk) {
+  return weekBlock(wk)[dk]
+    .map((e, i) => ({ e, i }))
+    .sort((a, b) => timeKey(a.e.time) - timeKey(b.e.time) || a.i - b.i);
+}
+
+function navCount(k) {
+  const sem = activeSem();
+  if (k === "qaib" || k === "qiymet") return sem.courses.length;
+  if (k === "fenn") return CATALOG.length;
+  if (k === "cedvel") return DAYS.reduce((a, [dk]) => a + weekBlock(shownWeek())[dk].length, 0);
+  return "";
+}
+
+function buildNav() {
+  const items = VIEWS.map(([k, label]) => {
+    const c = navCount(k);
+    return `<button class="navitem" type="button" data-go="${k}" aria-current="${k === current}">`
+      + ICONS[k] + `<span>${label}</span>` + (c === "" ? "" : `<span class="cnt">${c}</span>`) + `</button>`;
+  });
+  document.getElementById("sidebar").innerHTML =
+    `<p class="navgroup">Semestr</p>` + items.slice(0, 4).join("")
+    + `<p class="navgroup">Arayış</p>` + items.slice(4).join("");
+  document.getElementById("tabbar").innerHTML = items.join("");
+}
+
+function go(k) {
+  if (current === k) return;
+  current = k;
+  render();
+  window.scrollTo({ top: 0 });
+}
+
+/* ============================================================
+   6. Ortaq parçalar
+   ============================================================ */
+function barHtml(m) {
+  if (m.G == null) return `<span class="code">—</span>`;
+  let s = "";
+  for (let i = 0; i < m.G; i++) {
+    s += `<i class="${i < m.F ? "on" : ""}${i % 2 === 1 && i !== m.G - 1 ? " gap" : ""}"></i>`;
+  }
+  return `<span class="bar lv-${m.level}" role="img" aria-label="${m.F} / ${m.G} saat">${s}</span>`;
+}
+
+function statusTag(m) {
+  if (m.failedByAbsence) return `<span class="tag crit">Limit aşılıb</span>`;
+  if (m.atLimit) return `<span class="tag crit">Limitdə</span>`;
+  if (m.level === "warn") return `<span class="tag warn">Diqqət</span>`;
+  return `<span class="tag ok">Normal</span>`;
+}
+
+function spinHtml(i, v) {
+  return `<span class="spin">`
+    + `<button type="button" data-absent="${i}" data-delta="-1" aria-label="Bir saat azalt">−</button>`
+    + `<span class="v">${v}</span>`
+    + `<button type="button" data-absent="${i}" data-delta="1" aria-label="Bir saat artır">+</button>`
+    + `</span>`;
+}
+
+/* ============================================================
+   7. İcmal
+   ============================================================ */
+function viewOverview() {
+  const sem = activeSem();
+  const ms = sem.courses.map(compute);
+  const usedH = ms.reduce((a, m) => a + m.F, 0);
+  const leftL = ms.reduce((a, m) => a + (m.I > 0 ? m.I : 0), 0);
+  const risk = ms.filter((m) => m.level !== "ok").length;
+
+  const cw = currentWeekType();
+  const tk = todayKey();
+  const shownDay = tk || "mon";
+  const rows = dayLessons(cw, shownDay);
+  const dayName = DAYS.find(([k]) => k === shownDay)[1];
+
+  const lessons = rows.length === 0
+    ? `<p class="blank">Bu gün üçün cədvəldə dərs yoxdur.</p>`
+    : `<div class="tw"><table class="t"><thead><tr>
+         <th>Saat</th><th>Fənn</th><th class="hide-sm">Otaq</th><th class="r">Qaib</th><th></th>
+       </tr></thead><tbody>${rows.map(({ e }) => {
+          const ci = sem.courses.findIndex((c) => c.name === e.subject);
+          const m = ci >= 0 ? compute(sem.courses[ci]) : null;
+          return `<tr class="${m ? "lv-" + m.level : ""}">
+            <td class="stripe r" style="white-space:nowrap">${esc(e.time) || "—"}</td>
+            <td class="nm">${esc(e.subject)}${e.teacher ? `<small>${esc(e.teacher)}</small>` : ""}</td>
+            <td class="hide-sm code">${esc(e.room) || "—"}</td>
+            <td class="r">${m && m.G != null ? m.F + " / " + m.G : "—"}</td>
+            <td class="r" style="width:96px">${ci >= 0
+              ? `<button class="btn" type="button" data-absent="${ci}" data-delta="2">+ 1 dərs</button>`
+              : `<span class="code">—</span>`}</td>
+          </tr>`;
+        }).join("")}</tbody></table></div>`;
+
+  const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+  const exams = sem.courses
+    .map((r) => ({ r, cd: examCountdown(r.examDate) }))
+    .filter((x) => x.r.examDate && new Date(x.r.examDate) >= today0)
+    .sort((a, b) => new Date(a.r.examDate) - new Date(b.r.examDate));
+
+  return {
+    toolbar: `<span class="vtitle">İcmal</span>`
+      + `<span class="vhint">${esc(dayName)}${tk ? "" : " · növbəti dərs günü"} · ${esc(weekName(cw))}</span>`,
+    body: `
+      <section class="panel">
+        <div class="ph">Semestr göstəriciləri<span class="ph-r">${esc(state.active)}</span></div>
+        <div class="kpi">
+          <div><b>${sem.courses.length}</b><span>fənn</span></div>
+          <div><b>${usedH}</b><span>işlənmiş qaib, saat</span></div>
+          <div><b>${leftL % 1 ? leftL.toFixed(1) : leftL}</b><span>qalan dərs</span></div>
+          <div><b class="${risk ? "c-warn" : "c-ok"}">${risk}</b><span>diqqət tələb edir</span></div>
+        </div>
+      </section>
+
+      <div class="two">
+        <section class="panel">
+          <div class="ph">${esc(dayName)} — dərslər<span class="ph-r">${rows.length} dərs</span></div>
+          ${lessons}
+        </section>
+
+        <section class="panel">
+          <div class="ph">İmtahan cədvəli<span class="ph-r">${exams.length} planlaşdırılıb</span></div>
+          ${exams.length === 0
+            ? `<p class="blank">İmtahan tarixi yazılmayıb. <b>Qiymət</b> bölməsindən əlavə et.</p>`
+            : `<div class="tw"><table class="t"><thead><tr>
+                 <th>Fənn</th><th>Tarix</th><th class="hide-sm">Otaq</th><th class="r">Qalıb</th>
+               </tr></thead><tbody>${exams.map(({ r, cd }) => `<tr>
+                 <td class="nm">${esc(r.name)}</td>
+                 <td class="r">${fmtDate(r.examDate)}</td>
+                 <td class="hide-sm code">${esc(r.examRoom) || "—"}</td>
+                 <td class="r"><span class="tag ${TONE[cd.tone]}">${cd.label}</span></td>
+               </tr>`).join("")}</tbody></table></div>`}
+        </section>
+      </div>`,
+  };
+}
+
+/* ============================================================
+   8. Qaib  —  sıra Excel-dəki kimi sabitdir, qaib dəyişəndə tərpənmir
+   ============================================================ */
+function viewQaib() {
+  const sem = activeSem();
+  return {
+    toolbar: `<span class="vtitle">Qaib hesabatı</span>`
+      + `<span class="vhint">Limit kredit sayına görə: 3→3, 4→9, 5→12, 6→15 saat</span>`,
+    body: sem.courses.length === 0
+      ? `<section class="panel"><p class="blank">Bu semestrdə fənn yoxdur.</p></section>`
+      : `<section class="panel">
+          <div class="ph">Fənnlər<span class="ph-r">${sem.courses.length} sətir</span></div>
+          <div class="tw"><table class="t">
+            <thead><tr>
+              <th class="ix">№</th><th>Fənn</th>
+              <th class="hide-sm">Kod</th><th class="hide-sm r">Kr</th>
+              <th class="hide-sm r">Qaib</th><th class="hide-sm r">Limit</th>
+              <th class="only-sm r">Qaib / limit</th>
+              <th class="hide-sm r">Qalan</th><th class="r">Dərs</th>
+              <th class="hide-sm">Yüklənmə</th><th>Vəziyyət</th><th class="c">Düzəliş</th>
+            </tr></thead>
+            <tbody>${sem.courses.map((r, i) => {
+              const m = compute(r);
+              return `<tr class="lv-${m.level}">
+                <td class="ix stripe">${i + 1}</td>
+                <td class="nm">${esc(r.name)}${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
+                <td class="hide-sm code">${esc(m.code)}</td>
+                <td class="hide-sm r">${dash(m.credits)}</td>
+                <td class="hide-sm r">${m.F}</td>
+                <td class="hide-sm r">${dash(m.G)}</td>
+                <td class="only-sm r">${m.F} <span class="code">/ ${dash(m.G)}</span></td>
+                <td class="hide-sm r">${m.H == null ? "—" : m.H}</td>
+                <td class="r">${m.I == null ? "—" : m.I % 1 ? m.I.toFixed(1) : m.I}</td>
+                <td class="hide-sm">${barHtml(m)}</td>
+                <td>${statusTag(m)}</td>
+                <td class="c">${spinHtml(i, m.F)}</td>
+              </tr>`;
+            }).join("")}</tbody>
+          </table></div>
+          <p class="hintbox">Sıra Excel faylındakı kimidir və qaib dəyişəndə yerini dəyişmir. Qalan dərs = qalan saat ÷ 2; zolaqda hər cüt blok bir dərsdir.</p>
+        </section>`,
+  };
+}
+
+/* ============================================================
+   9. Dərs cədvəli  —  hər dərsin öz saatı, həftə avtomatik növbələnir
+   ============================================================ */
+function viewCedvel() {
+  const cw = currentWeekType();
+  const wk = shownWeek();
+  const tk = todayKey();
+  const nextMon = weekName(cw === "ust" ? "alt" : "ust");
+  const total = DAYS.reduce((a, [dk]) => a + weekBlock(wk)[dk].length, 0);
+  const sem = activeSem();
+
+  const columns = DAYS.map(([dk, label]) => {
+    const list = dayLessons(wk, dk);
+    const isToday = dk === tk && wk === cw;
+    return `<section class="col">
+      <div class="col-h ${isToday ? "today" : ""}">
+        <span>${esc(label)}</span>${isToday ? `<span class="tag acc">bugün</span>` : ""}
+        <span class="n">${list.length}</span>
+      </div>
+      <div class="col-b">
+        ${list.length === 0 ? `<p class="col-empty">dərs yoxdur</p>` : list.map(({ e, i }) => {
+          const ci = sem.courses.findIndex((c) => c.name === e.subject);
+          const lv = ci >= 0 ? compute(sem.courses[ci]).level : "ok";
+          return `<button class="ls lv-${lv}" type="button" data-edit="${wk}:${dk}:${i}">
+            <span class="tm">${esc(e.time) || "saat yazılmayıb"}</span>
+            <b>${esc(e.subject)}</b>
+            ${e.room || e.teacher ? `<span class="mt">${esc(e.room)}${e.room && e.teacher ? " · " : ""}${esc(e.teacher)}</span>` : ""}
+          </button>`;
+        }).join("")}
+      </div>
+      <div class="col-f">
+        <button class="addbtn" type="button" data-add="${wk}:${dk}">+ Dərs əlavə et</button>
+      </div>
+    </section>`;
+  }).join("");
+
+  return {
+    toolbar: `<span class="vtitle">Dərs cədvəli</span>`
+      + `<span class="seg">
+           <button type="button" data-vweek="alt" aria-pressed="${wk === "alt"}">Alt həftə${cw === "alt" ? " ·" : ""}</button>
+           <button type="button" data-vweek="ust" aria-pressed="${wk === "ust"}">Üst həftə${cw === "ust" ? " ·" : ""}</button>
+         </span>`
+      + `<button class="btn" type="button" data-copyweek="1">${wk === "alt" ? "Üst həftədən köçür" : "Alt həftədən köçür"}</button>`
+      + `<button class="btn" type="button" data-flipweek="1" title="Universitetdə bu həftə digəri olmalıdırsa, növbəni bir həftə çevirir">Növbəni çevir</button>`
+      + `<span class="vhint tb-sp">${total} dərs</span>`,
+    body: `<section class="panel">
+      <div class="ph">${esc(weekName(wk))}${wk === cw ? " — bu həftə" : " — baxış"}
+        <span class="ph-r">bazar ertəsindən: ${esc(nextMon)}</span>
+      </div>
+      <div class="board">${columns}</div>
+      <p class="hintbox">Həftə hər bazar ertəsi avtomatik dəyişir, əl ilə seçmək lazım deyil — nöqtə (·) işarəsi bu həftəni göstərir. Yuxarıdaki düymələr yalnız hansı həftəyə baxdığını dəyişir. Saatı hər dərs üçün özün yazırsan, ona görə alt qrup dərsləri də düzgün yerə düşür.</p>
+    </section>`,
+  };
+}
+
+/* ============================================================
+   10. Qiymətlər
+   ============================================================ */
+function viewQiymet() {
+  const sem = activeSem();
+  const ms = sem.courses.map(compute);
+  const gpa = semesterGpa(sem.courses);
+  const pass = ms.filter((m) => m.result === "Pass").length;
+  const fail = ms.filter((m) => m.result === "Fail").length;
+  const none = ms.filter((m) => m.result === "No Result").length;
+  const resTag = (res) => res === "Pass" ? `<span class="tag ok">Keçdi</span>`
+    : res === "Fail" ? `<span class="tag crit">Kəsildi</span>` : `<span class="tag neu">Nəticə yox</span>`;
+
+  if (sem.courses.length === 0) {
+    return { toolbar: `<span class="vtitle">Qiymətlər</span>`, body: `<section class="panel"><p class="blank">Bu semestrdə fənn yoxdur.</p></section>` };
+  }
+  const si = Math.min(selected, sem.courses.length - 1);
+  const r = sem.courses[si];
+  const m = ms[si];
+  const cd = examCountdown(r.examDate);
+
+  return {
+    toolbar: `<span class="vtitle">Qiymətlər</span>`
+      + `<span class="vhint">Giriş balı = orta(seminar) × 2 + müstəqil iş + kollokvium + qaib balı, üstəgəl səhv balı</span>`
+      + `<span class="tb-sp"><span class="tag acc">ÜOMG ${gpa == null ? "—" : gpa.toFixed(2)}</span></span>`,
+    body: `
+      <section class="panel">
+        <div class="ph">Semestr yekunu</div>
+        <div class="kpi">
+          <div><b class="c-ok">${pass}</b><span>keçdi</span></div>
+          <div><b class="c-crit">${fail}</b><span>kəsildi</span></div>
+          <div><b>${none}</b><span>nəticə yox</span></div>
+          <div><b>${gpa == null ? "—" : gpa.toFixed(2)}</b><span>ÜOMG</span></div>
+        </div>
+        <div class="tw"><table class="t">
+          <thead><tr>
+            <th class="ix">№</th><th>Fənn</th>
+            <th class="r">Giriş</th><th class="hide-sm r">Min. imtahan</th>
+            <th class="r">İmtahan</th><th class="r">Ümumi</th><th>Nəticə</th>
+          </tr></thead>
+          <tbody>${sem.courses.map((c, i) => {
+            const mm = ms[i];
+            return `<tr class="clk" data-pick="${i}" aria-selected="${i === si}">
+              <td class="ix">${i + 1}</td>
+              <td class="nm">${esc(c.name)}</td>
+              <td class="r">${mm.O}</td>
+              <td class="hide-sm r">${dash(mm.P)}</td>
+              <td class="r">${c.q == null ? "—" : c.q}</td>
+              <td class="r">${dash(mm.R)}</td>
+              <td>${resTag(mm.result)}</td>
+            </tr>`;
+          }).join("")}</tbody>
+        </table></div>
+      </section>
+
+      <section class="panel">
+        <div class="ph">Seçilmiş fənn<span class="ph-r">${esc(r.name)}</span></div>
+        <div class="pb">
+          <p class="flabel">Seminar qiymətləri — Excel-dəki V–AC sütunları</p>
+          <div class="semrow">
+            ${r.sem.map((v, k) => `<input class="mono" inputmode="numeric" placeholder="—" value="${v == null ? "" : v}" data-g="${si}" data-field="sem" data-k="${k}" aria-label="Seminar ${k + 1}">`).join("")}
+          </div>
+          <p class="flabel" style="margin-top:18px">Bal komponentləri</p>
+          <div class="form">
+            <div class="fld"><label>Müstəqil iş</label><input inputmode="numeric" value="${r.s ?? ""}" data-g="${si}" data-field="s"></div>
+            <div class="fld"><label>Kollokvium</label><input inputmode="numeric" value="${r.t ?? ""}" data-g="${si}" data-field="t"></div>
+            <div class="fld"><label>Qaib balı</label><input inputmode="numeric" value="${r.u ?? ""}" data-g="${si}" data-field="u"></div>
+            <div class="fld"><label>Səhv balı</label><input inputmode="numeric" value="${r.ad ?? ""}" data-g="${si}" data-field="ad"></div>
+          </div>
+
+          <p class="flabel" style="margin-top:18px">İmtahan — bal, otaq və tarix</p>
+          <div class="form">
+            <div class="fld"><label>İmtahan balı</label><input inputmode="numeric" value="${r.q ?? ""}" data-g="${si}" data-field="q"></div>
+            <div class="fld txt"><label>İmtahan otağı</label><input value="${esc(r.examRoom)}" placeholder="məs. 426" data-g="${si}" data-field="examRoom"></div>
+            <div class="fld txt" style="grid-column:1/-1"><label>İmtahan tarixi və saatı — ${cd.label}</label><input type="datetime-local" value="${esc(r.examDate)}" data-g="${si}" data-field="examDate"></div>
+          </div>
+        </div>
+        <div class="kpi" style="border-top:1px solid var(--line)">
+          <div><b>${m.O}</b><span>giriş balı</span></div>
+          <div><b>${dash(m.P)}</b><span>lazım olan min. imtahan</span></div>
+          <div><b>${dash(m.R)}</b><span>ümumi bal</span></div>
+          <div><b class="${m.failedByAbsence ? "c-crit" : "c-ok"}" style="font-size:14px">${m.failedByAbsence ? "Qaib limiti aşılıb" : "İmtahana buraxılır"}</b><span>buraxılış</span></div>
+        </div>
+      </section>`,
+  };
+}
+
+/* ============================================================
+   11. Fənn kataloqu
+   ============================================================ */
+function viewFenn() {
+  const q = findQuery.trim().toLowerCase();
+  const hits = CATALOG.filter((c) => !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
+  return {
+    toolbar: `<span class="vtitle">Fənn kataloqu</span>`
+      + `<input class="find" id="find" type="search" placeholder="Fənn adı və ya kodu…" value="${esc(findQuery)}" aria-label="Fənn axtar">`
+      + `<span class="vhint tb-sp">${hits.length} / ${CATALOG.length}</span>`,
+    body: `<section class="panel">
+      <div class="ph">Nəticələr<span class="ph-r">saat dəyəri 2200 ÷ 60</span></div>
+      ${hits.length === 0 ? `<p class="blank">Uyğun fənn tapılmadı.</p>` : `<div class="tw"><table class="t">
+        <thead><tr>
+          <th>Kod</th><th>Fənn</th><th class="r">Kr</th>
+          <th class="r">Qaib limiti</th><th class="hide-sm r">Dərs</th>
+          <th class="r">25% ödəniş</th><th class="hide-sm r">Alt qrup</th>
+        </tr></thead>
+        <tbody>${hits.map((c) => {
+          const G = qaibLimit(c.credits);
+          return `<tr>
+            <td class="code">${esc(c.code)}</td>
+            <td class="nm">${esc(c.name)}${c.teacher ? `<small>${esc(c.teacher)}</small>` : ""}</td>
+            <td class="r">${c.credits}</td>
+            <td class="r">${G == null ? "—" : G + " saat"}</td>
+            <td class="hide-sm r">${G == null ? "—" : G / 2}</td>
+            <td class="r">${money(HOUR_RATE * c.credits * 0.25)}</td>
+            <td class="hide-sm r">${money(HOUR_RATE * c.credits)}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table></div>`}
+    </section>`,
+  };
+}
+
+/* ============================================================
+   12. Profil
+   ============================================================ */
+function viewProfil() {
+  const p = state.profile;
+  return {
+    toolbar: `<span class="vtitle">Profil və parametrlər</span>`,
+    body: `
+      <div class="two">
+        <section class="panel">
+          <div class="ph">Tələbə məlumatları</div>
+          <dl class="kv">${Object.entries(p).map(([k, v]) =>
+            `<div><dt>${esc(k)}</dt><dd><button type="button" data-prof="${esc(k)}">${esc(v) || "—"}</button></dd></div>`).join("")}
+          </dl>
+          <p class="hintbox">Teams şifrəsi və Telegram açarı bu proqrama köçürülməyib — şifrəni veb səhifədə saxlamaq təhlükəlidir.</p>
+        </section>
+
+        <div>
+          <section class="panel">
+            <div class="ph">Semestrlər</div>
+            <div class="tw"><table class="t">
+              <thead><tr><th>Semestr</th><th class="r">Fənn</th><th class="r">ÜOMG</th><th></th></tr></thead>
+              <tbody>${Object.keys(state.semesters).map((k) => {
+                const g = semesterGpa(state.semesters[k].courses);
+                return `<tr><td class="nm">${esc(k)}</td>
+                  <td class="r">${state.semesters[k].courses.length}</td>
+                  <td class="r">${g == null ? "—" : g.toFixed(2)}</td>
+                  <td class="r">${k === state.active ? `<span class="tag acc">Aktiv</span>` : `<button class="btn" type="button" data-setsem="${esc(k)}">Keç</button>`}</td></tr>`;
+              }).join("")}</tbody>
+            </table></div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">iPhone-a əlavə etmək</div>
+            <ol class="steps">
+              <li>Bu səhifəni <b>Safari</b>-də aç — Chrome-da bu addım yoxdur.</li>
+              <li>Ekranın aşağısındaki <b>Paylaş</b> işarəsinə bas (yuxarı oxlu kvadrat).</li>
+              <li>Siyahını yuxarı dart və <b>“Ana ekrana əlavə et”</b> / <b>Add to Home Screen</b> seç.</li>
+              <li>Sağ yuxarıdaki <b>Əlavə et</b> düyməsini bas.</li>
+            </ol>
+            <p class="hintbox">Bundan sonra ikon ana ekranda qalır, brauzer sətri olmadan tam ekranda açılır.</p>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Məlumat köçürmə</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Kompüterdəki pəncərə ilə telefondaki nüsxə ayrı məlumat saxlayır. Bu iki düymə ilə məlumatı birindən digərinə köçür.</p>
+              <div class="row">
+                <button class="btn" type="button" data-export="1">Məlumatı çıxar</button>
+                <button class="btn" type="button" data-import="1">Məlumatı yüklə</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Bərpa</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Bütün qaib, qiymət və cədvəl dəyişikliklərini silib Excel faylındakı ilk vəziyyətə qaytarır.</p>
+              <button class="btn danger" type="button" data-reset="1">Excel vəziyyətinə qaytar</button>
+            </div>
+          </section>
+        </div>
+      </div>`,
+  };
+}
+
+const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, qiymet: viewQiymet, fenn: viewFenn, profil: viewProfil };
+
+/* ============================================================
+   13. Çəkiliş
+   ============================================================ */
+function paintStatus() {
+  const el = document.getElementById("statusbar");
+  if (!el) return;
+  const sem = activeSem();
+  const ms = sem.courses.map(compute);
+  const usedH = ms.reduce((a, m) => a + m.F, 0);
+  const risk = ms.filter((m) => m.level !== "ok").length;
+  const at = SYNC.at ? SYNC.at.toTimeString().slice(0, 5) : null;
+  el.innerHTML = `<span>${esc(state.active)}</span><s>|</s>`
+    + `<span>${sem.courses.length} fənn</span><s>|</s>`
+    + `<span>${usedH} saat qaib</span><s>|</s>`
+    + `<span>${risk} risk</span>`
+    + `<span class="sb-r">`
+    + (dirty ? `<span class="flag">saxlanılmamış dəyişiklik</span>` : "")
+    + (remotePending ? `<span class="flag">başqa cihazda yenilik var</span>` : "")
+    + `<span class="sb-keys">1–6 bölmə · / axtarış · Ctrl+S saxla</span>`
+    + `<span>${esc(SYNC.t)}${at ? " " + at : ""}</span></span>`;
+}
+
+function paintSaveBar() {
+  const bs = document.getElementById("btnSave");
+  const bd = document.getElementById("btnDiscard");
+  if (!bs || !bd) return;
+  bs.disabled = !dirty;
+  bs.textContent = dirty ? "Saxla" : "Saxlanıldı";
+  bd.hidden = !dirty;
+  bd.textContent = remotePending ? "Digərini götür" : "Geri qaytar";
+}
+
+function render() {
+  const sel = document.getElementById("semPick");
+  const keys = Object.keys(state.semesters);
+  sel.innerHTML = keys.map((k) => `<option value="${esc(k)}" ${k === state.active ? "selected" : ""}>${esc(k)}</option>`).join("");
+  document.getElementById("docname").textContent = state.active;
+
+  const active = document.activeElement;
+  const keep = active && (active.id === "find" || (active.dataset && active.dataset.g != null))
+    ? { g: active.dataset ? active.dataset.g : null, field: active.dataset ? active.dataset.field : null, k: active.dataset ? active.dataset.k : null, id: active.id, pos: active.selectionStart }
+    : null;
+
+  const out = (RENDERERS[current] || viewOverview)();
+  document.getElementById("toolbar").innerHTML = out.toolbar;
+  document.getElementById("view").innerHTML = out.body;
+  buildNav();
+  paintStatus();
+  paintSaveBar();
+
+  if (keep) {
+    const q = keep.id === "find" ? "#find"
+      : `[data-g="${keep.g}"][data-field="${keep.field}"]${keep.k != null ? `[data-k="${keep.k}"]` : ""}`;
+    const el = document.querySelector(q);
+    if (el) { el.focus(); try { el.setSelectionRange(keep.pos, keep.pos); } catch (e) {} }
+  }
+}
+
+/* ============================================================
+   14. Dialoq
+   ============================================================ */
+function openDialog(title, meta, bodyHtml, onSave, saveLabel, onDelete) {
+  const host = document.getElementById("modal");
+  host.hidden = false;
+  host.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="dlg-t"><strong>${esc(title)}</strong>${meta ? `<em>${esc(meta)}</em>` : ""}</div>
+    <div class="dlg-b">${bodyHtml}</div>
+    <div class="dlg-f">
+      ${onDelete ? `<button class="btn danger del" type="button" data-dlg="delete">Sil</button>` : ""}
+      <button class="btn" type="button" data-dlg="cancel">Ləğv et</button>
+      <button class="btn primary" type="button" data-dlg="save">${esc(saveLabel || "Yadda saxla")}</button>
+    </div>
+  </div>`;
+  host._onSave = onSave;
+  host._onDelete = onDelete;
+  const first = host.querySelector("input,select,textarea");
+  if (first) { first.focus(); try { first.select(); } catch (e) {} }
+}
+function closeDialog() {
+  const host = document.getElementById("modal");
+  host.hidden = true;
+  host.innerHTML = "";
+  host._onSave = null;
+  host._onDelete = null;
+}
+
+/* bir dərs xanasının sahələri */
+function lessonFields(e) {
+  const names = activeSem().courses.map((c) => c.name);
+  const extra = e.subject && names.indexOf(e.subject) < 0;
+  return `<div class="fld txt"><label>Saat — necə istəyirsən elə yaz</label>
+      <input data-fld="time" value="${esc(e.time)}" placeholder="09:00 – 10:20"></div>
+    <div class="fld" style="margin-top:10px"><label>Fənn</label><select data-fld="subject">
+      <option value="">— seç —</option>
+      ${names.map((n) => `<option value="${esc(n)}" ${n === e.subject ? "selected" : ""}>${esc(n)}</option>`).join("")}
+      ${extra ? `<option value="${esc(e.subject)}" selected>${esc(e.subject)}</option>` : ""}
+    </select></div>
+    <div class="form" style="margin-top:10px">
+      <div class="fld txt"><label>Otaq</label><input data-fld="room" value="${esc(e.room)}"></div>
+      <div class="fld txt"><label>Müəllim</label><input data-fld="teacher" value="${esc(e.teacher)}"></div>
+    </div>`;
+}
+
+/* ============================================================
+   15. Hadisələr
+   ============================================================ */
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard]");
+  if (!t) return;
+  const host = document.getElementById("modal");
+
+  if (t.dataset.dlg) {
+    if (t.dataset.dlg === "delete" && host._onDelete) host._onDelete();
+    else if (t.dataset.dlg === "save" && host._onSave) {
+      const vals = {};
+      host.querySelectorAll("[data-fld]").forEach((el) => { vals[el.dataset.fld] = el.value; });
+      host._onSave(vals);
+    }
+    return closeDialog();
+  }
+
+  if (t.dataset.save != null) return commit();
+  if (t.dataset.discard != null) return discard();
+  if (t.dataset.go) return go(t.dataset.go);
+
+  if (t.dataset.absent != null) {
+    const i = +t.dataset.absent, d = +t.dataset.delta;
+    return mutate((s) => {
+      const r = s.semesters[s.active].courses[i];
+      r.absent = Math.max(0, numOr(r.absent) + d);
+    });
+  }
+
+  if (t.dataset.vweek) { viewWeek = t.dataset.vweek; return render(); }
+
+  if (t.dataset.flipweek) {
+    viewWeek = null;
+    return mutate((s) => { s.weekAnchor.type = s.weekAnchor.type === "ust" ? "alt" : "ust"; });
+  }
+
+  if (t.dataset.copyweek) {
+    const to = shownWeek();
+    const from = to === "alt" ? "ust" : "alt";
+    return mutate((s) => { s.schedules[s.active][to] = structuredClone(s.schedules[s.active][from]); });
+  }
+
+  if (t.dataset.add) {
+    const parts = t.dataset.add.split(":");
+    const wk = parts[0], dk = parts[1];
+    const label = DAYS.find(([k]) => k === dk)[1];
+    return openDialog(`${label} — yeni dərs`, weekName(wk),
+      lessonFields({ time: "", subject: "", room: "", teacher: "" }),
+      (v) => {
+        if (!String(v.subject || "").trim()) return;
+        mutate((s) => {
+          s.schedules[s.active][wk][dk].push({
+            time: String(v.time || "").trim(),
+            subject: v.subject,
+            room: String(v.room || "").trim(),
+            teacher: String(v.teacher || "").trim() || cat(v.subject).teacher || "",
+          });
+        });
+      }, "Əlavə et");
+  }
+
+  if (t.dataset.edit) {
+    const parts = t.dataset.edit.split(":");
+    const wk = parts[0], dk = parts[1], i = +parts[2];
+    const e0 = weekBlock(wk)[dk][i];
+    const label = DAYS.find(([k]) => k === dk)[1];
+    return openDialog(`${label} — dərsi dəyiş`, weekName(wk), lessonFields(e0),
+      (v) => mutate((s) => {
+        const cell = s.schedules[s.active][wk][dk][i];
+        cell.time = String(v.time || "").trim();
+        cell.subject = v.subject || "";
+        cell.room = String(v.room || "").trim();
+        cell.teacher = String(v.teacher || "").trim() || (v.subject ? cat(v.subject).teacher : "") || "";
+      }),
+      "Yadda saxla",
+      () => mutate((s) => { s.schedules[s.active][wk][dk].splice(i, 1); }));
+  }
+
+  if (t.dataset.pick != null) { selected = +t.dataset.pick; return render(); }
+
+  if (t.dataset.setsem) {
+    const k = t.dataset.setsem;
+    resetSelection();
+    return mutate((s) => { s.active = k; });
+  }
+
+  if (t.dataset.prof) {
+    const key = t.dataset.prof;
+    return openDialog(key, "Profil",
+      `<div class="fld txt"><label>${esc(key)}</label><input data-fld="v" value="${esc(state.profile[key] || "")}"></div>`,
+      (v) => mutate((s) => { s.profile[key] = v.v; }));
+  }
+
+  if (t.dataset.export) {
+    return openDialog("Məlumatın çıxarışı", "JSON",
+      `<p class="dlg-msg" style="margin-bottom:10px">Hamısını seç və kopyala, sonra digər cihazda <b>Məlumatı yüklə</b> ilə yerləşdir.</p>
+       <textarea class="ta" id="expta" readonly>${esc(JSON.stringify(state))}</textarea>`,
+      () => {
+        const ta = document.getElementById("expta");
+        if (ta) { ta.select(); try { document.execCommand("copy"); } catch (err) {} }
+      }, "Kopyala");
+  }
+
+  if (t.dataset.import) {
+    return openDialog("Məlumatı yüklə", "JSON",
+      `<p class="dlg-msg" style="margin-bottom:10px">Digər cihazdan kopyaladığın mətni bura yerləşdir. Hazırkı məlumat üzərinə yazılacaq — sonra <b>Saxla</b> düyməsini bas.</p>
+       <textarea class="ta" data-fld="json" placeholder="{ ... }"></textarea>`,
+      (v) => {
+        let parsed = null;
+        try { parsed = JSON.parse(v.json); } catch (err) { parsed = null; }
+        if (!parsed || !parsed.semesters) {
+          setTimeout(() => openDialog("Mətn oxunmadı", "",
+            `<p class="dlg-msg">Yerləşdirilən mətn tam JSON deyil. Çıxarışı əvvəldən sonadək, heç nə kəsmədən kopyala.</p>`,
+            null, "Oldu"), 0);
+          return;
+        }
+        resetSelection();
+        mutate((s) => { Object.assign(s, migrate(parsed)); });
+      }, "Yüklə");
+  }
+
+  if (t.dataset.reset) {
+    return openDialog("Excel vəziyyətinə qaytarılsın?", "sonra Saxla lazımdır",
+      `<p class="dlg-msg">Bütün qaib, qiymət və cədvəl dəyişiklikləri silinəcək və fayl ilk oxunduğu vəziyyətə qayıdacaq.</p>`,
+      () => { resetSelection(); mutate((s) => { Object.assign(s, structuredClone(BASELINE)); }); },
+      "Bəli, qaytar");
+  }
+});
+
+document.getElementById("modal").addEventListener("click", (e) => {
+  if (e.target.id === "modal") closeDialog();
+});
+
+document.getElementById("semPick").addEventListener("change", (e) => {
+  resetSelection();
+  mutate((s) => { s.active = e.target.value; });
+});
+
+document.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el.id === "find") { findQuery = el.value; return render(); }
+  if (!el.dataset || el.dataset.g == null) return;
+  const i = +el.dataset.g, field = el.dataset.field;
+  const raw = el.value.trim();
+  const asNum = raw === "" ? null : Number(raw.replace(",", "."));
+  mutate((s) => {
+    const r = s.semesters[s.active].courses[i];
+    if (field === "sem") r.sem[+el.dataset.k] = Number.isNaN(asNum) ? null : asNum;
+    else if (field === "examRoom" || field === "examDate") r[field] = raw;
+    else r[field] = Number.isNaN(asNum) ? null : asNum;
+  });
+});
+
+document.addEventListener("keydown", (e) => {
+  const modal = document.getElementById("modal");
+  if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+    e.preventDefault();
+    if (dirty) commit();
+    return;
+  }
+  if (e.key === "Escape" && !modal.hidden) return closeDialog();
+  if (!modal.hidden) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "select" || tag === "textarea") return;
+  if (e.key === "/") { e.preventDefault(); go("fenn"); const f = document.getElementById("find"); if (f) f.focus(); return; }
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= VIEWS.length) { e.preventDefault(); go(VIEWS[n - 1][0]); }
+});
+
+/* ============================================================
+   16. Başlat
+   ============================================================ */
+render();
+initStore();
+
+/* Oflayn is ucun: sened sorgulari sebekadan, ikonlar kesden */
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
