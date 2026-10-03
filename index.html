@@ -801,6 +801,12 @@ function migrate(raw) {
     out.schedules[key] = sch;
   }
 
+  // profil sahələri həmişə tam olsun — gələn nüsxə natamam olsa da
+  out.profile = Object.assign(
+    Object.fromEntries(PROFILE_FIELDS.map((k) => [k, ""])),
+    (raw.profile && typeof raw.profile === "object") ? raw.profile : {}
+  );
+
   delete out.times;
   delete out.week;
   const a = out.weekAnchor;
@@ -827,7 +833,7 @@ async function commit() {
   if (!backend) { setSync("local", CLOUD_MODE ? "Sinxron qurulmayıb" : "Yalnız bu cihazda"); return; }
   setSync("busy", "Saxlanılır");
   try {
-    await backend.push({ updatedAt: Date.now(), state: JSON.parse(savedJson) });
+    await backend.push({ updatedAt: Date.now(), stateJson: savedJson });
     setSync("ok", "Saxlanıldı");
   } catch (err) {
     setSync("local", "Saxlanmadı — " + ((err && err.message) || "xəta"));
@@ -846,13 +852,22 @@ function discard() {
 }
 
 /* ---- uzaqdan gələn nüsxə ---- */
+function payloadState(payload) {
+  if (!payload) return null;
+  if (typeof payload.stateJson === "string") {
+    try { return JSON.parse(payload.stateJson); } catch (e) { return null; }
+  }
+  return payload.state || null;    // köhnə format
+}
+
 function onRemote(payload) {
-  if (!payload || !payload.state) { setSync("ok", "Hazırdır"); return; }
-  const incoming = migrate(payload.state);
+  const raw = payloadState(payload);
+  if (!raw) { setSync("ok", "Hazırdır"); return; }
+  const incoming = migrate(raw);
   const incomingJson = JSON.stringify(incoming);
   if (incomingJson === savedJson) { setSync("ok", "Sinxron"); return; }
   if (dirty) {
-    remotePending = payload.state;
+    remotePending = raw;
     setSync("busy", "Başqa cihazda dəyişiklik var");
     return;
   }
@@ -899,9 +914,15 @@ function cloudEndpoint(cfg) {
   return base + "/vaults/" + encodeURIComponent(String(cfg.key || "").trim()) + ".json";
 }
 function cloudError(status) {
+  if (status === 400) return "baza məlumatı qəbul etmədi";
   if (status === 401 || status === 403) return "açar qəbul olunmadı, qaydaları yoxla";
   if (status === 404) return "baza ünvanı tapılmadı";
   return "HTTP " + status;
+}
+async function cloudThrow(r) {
+  let detail = "";
+  try { const j = await r.json(); if (j && j.error) detail = " (" + String(j.error).slice(0, 80) + ")"; } catch (e) {}
+  throw new Error(cloudError(r.status) + detail);
 }
 function makeCloudBackend(cfg) {
   return {
@@ -911,11 +932,11 @@ function makeCloudBackend(cfg) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      if (!r.ok) throw new Error(cloudError(r.status));
+      if (!r.ok) await cloudThrow(r);
     },
     pull: async () => {
       const r = await fetch(cloudEndpoint(cfg) + "?t=" + Date.now(), { cache: "no-store" });
-      if (!r.ok) throw new Error(cloudError(r.status));
+      if (!r.ok) await cloudThrow(r);
       return await r.json();
     },
   };
@@ -1678,7 +1699,7 @@ document.addEventListener("click", (e) => {
         setSync("busy", "Yoxlanılır");
         backend.pull()
           .then((payload) => {
-            if (!payload || !payload.state) {
+            if (!payloadState(payload)) {
               commit();          // bulud boşdur: bu cihazdaki məlumatı ilk nüsxə kimi göndər
             } else {
               onRemote(payload);
