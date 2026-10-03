@@ -722,9 +722,27 @@ table.t td.stripe{border-left-width:3px}
   color:currentColor;
 }
 .titlebar .btn:hover{background:color-mix(in srgb, currentColor 24%, transparent); color:currentColor}
-.titlebar .btn.primary{background:currentColor; border-color:currentColor; color:var(--titlebar-bg)}
-.titlebar .btn.primary:hover{filter:brightness(1); opacity:.92; color:var(--titlebar-bg)}
-.titlebar .btn[disabled]{opacity:.5}
+/* SƏHV İDİ: background:currentColor + color eyni qaydada → fon və yazı eyni rəng olurdu.
+   İndi hər ikisi açıq şəkildə öz nişanəsindən gəlir. */
+.titlebar .btn.primary{
+  background:var(--titlebar-ink);
+  border-color:var(--titlebar-ink);
+  color:var(--titlebar-bg);
+  font-weight:600;
+}
+.titlebar .btn.primary:hover{
+  background:var(--titlebar-ink); border-color:var(--titlebar-ink);
+  color:var(--titlebar-bg); filter:none; opacity:.9;
+}
+/* saxlanmış vəziyyətdə sönük olsun, amma həmişə oxunsun —
+   color-mix yox, sadə opacity: hər brauzerdə eyni nəticə verir */
+.titlebar .btn.primary[disabled]{
+  background:var(--titlebar-ink);
+  border-color:var(--titlebar-ink);
+  color:var(--titlebar-bg);
+  opacity:.58;
+}
+.titlebar .btn[disabled]{opacity:.62}
 /* tünd rejimdə başlıq panel rəngindədir — alt xətt lazımdır */
 :root[data-theme="dark"] .titlebar{border-bottom:1px solid var(--line-2)}
 @media (prefers-color-scheme: dark){
@@ -783,7 +801,7 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-0339";
+var APP_BUILD = "20261004-0349";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
