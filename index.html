@@ -423,6 +423,7 @@ ol.steps li::marker{color:var(--accent); font-family:var(--f-mono); font-size:12
 
 <script>
 "use strict";
+var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
 /* ============================================================
@@ -715,15 +716,21 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&
 /* ============================================================
    4. Vəziyyət, saxlama və sinxron
    Auto-save YOXDUR: dəyişikliklər yalnız "Saxla" düyməsi ilə yazılır.
+   Sinxron arxa ucu mühitə görə seçilir:
+     · Claude qabığında  → Claude-un öz bazası (canlı izləmə)
+     · GitHub Pages-də   → Firebase Realtime Database (REST, SDK-sız)
    ============================================================ */
 const LS_KEY = "qaib-jurnali-v2";
 const LS_OLD = "qaib-jurnali-v1";
+const CFG_KEY = "qaib-sinxron-cfg";
 
 let state = structuredClone(BASELINE);
 let savedJson = JSON.stringify(state);   // ən son saxlanılmış nüsxə
 let dirty = false;                        // saxlanılmamış dəyişiklik var?
-let docRef = null;
-let remotePending = null;                 // başqa cihazdan gələn, hələ qəbul olunmamış nüsxə
+let backend = null;                       // { push, pull, watch? }
+let remotePending = null;                 // başqa cihazdan gələn, qəbul olunmamış nüsxə
+
+const CLOUD_MODE = typeof CLOUD_SYNC !== "undefined" && CLOUD_SYNC;
 
 const SYNC = { s: "busy", t: "Yüklənir", at: null };
 function setSync(s, text) {
@@ -732,9 +739,10 @@ function setSync(s, text) {
   const el = document.getElementById("sync");
   if (el) { el.dataset.s = s; el.textContent = text; }
   if (typeof paintStatus === "function") paintStatus();
+  if (typeof paintSaveBar === "function") paintSaveBar();
 }
 
-/* Həftə növbəsi — bazar ertəsi dəyişir */
+/* ---- Həftə növbəsi — bazar ertəsi dəyişir ---- */
 function mondayOf(d) {
   const x = new Date(d);
   x.setHours(0, 0, 0, 0);
@@ -752,12 +760,12 @@ function currentWeekType() {
 }
 const weekName = (t) => (t === "ust" ? "Üst həftə" : "Alt həftə");
 
+/* ---- Köhnə nüsxələri yeni formata gətir ---- */
 function migrate(raw) {
   const out = structuredClone(BASELINE);
   if (!raw || typeof raw !== "object") return out;
   Object.assign(out, raw);
 
-  // köhnə (v1) formatda saatlar ümumi sütunda idi
   const oldTimes = Array.isArray(raw.times) ? raw.times : null;
 
   for (const key of Object.keys(out.semesters || {})) {
@@ -803,7 +811,7 @@ function migrate(raw) {
   return out;
 }
 
-/* dəyişiklik — yalnız yaddaşda, diskə yazılmır */
+/* ---- dəyişiklik: yalnız yaddaşda, diskə yazılmır ---- */
 function mutate(fn) {
   fn(state);
   dirty = true;
@@ -816,17 +824,17 @@ async function commit() {
   remotePending = null;
   try { localStorage.setItem(LS_KEY, savedJson); } catch (e) { /* kvota */ }
   render();
-  if (!docRef) { setSync("local", "Yalnız bu cihazda"); return; }
+  if (!backend) { setSync("local", CLOUD_MODE ? "Sinxron qurulmayıb" : "Yalnız bu cihazda"); return; }
   setSync("busy", "Saxlanılır");
   try {
-    await docRef.set({ state: JSON.parse(savedJson) });
+    await backend.push({ updatedAt: Date.now(), state: JSON.parse(savedJson) });
     setSync("ok", "Saxlanıldı");
   } catch (err) {
-    setSync("local", err && err.code === "invalid_argument" ? "Yazmaq olmur" : "Şəbəkə yoxdur");
+    setSync("local", "Saxlanmadı — " + ((err && err.message) || "xəta"));
   }
 }
 
-/* dəyişiklikləri ləğv et — başqa cihazdan nüsxə gəlmişsə onu götürür */
+/* ---- dəyişiklikləri ləğv et; başqa cihazdan nüsxə varsa onu götürür ---- */
 function discard() {
   const src = remotePending || JSON.parse(savedJson);
   remotePending = null;
@@ -835,6 +843,94 @@ function discard() {
   dirty = false;
   if (typeof resetSelection === "function") resetSelection();
   render();
+}
+
+/* ---- uzaqdan gələn nüsxə ---- */
+function onRemote(payload) {
+  if (!payload || !payload.state) { setSync("ok", "Hazırdır"); return; }
+  const incoming = migrate(payload.state);
+  const incomingJson = JSON.stringify(incoming);
+  if (incomingJson === savedJson) { setSync("ok", "Sinxron"); return; }
+  if (dirty) {
+    remotePending = payload.state;
+    setSync("busy", "Başqa cihazda dəyişiklik var");
+    return;
+  }
+  state = incoming;
+  savedJson = incomingJson;
+  try { localStorage.setItem(LS_KEY, savedJson); } catch (e) {}
+  setSync("ok", "Sinxron");
+  render();
+}
+
+/* ---- arxa uc 1: Claude qabığının bazası ---- */
+async function initClaudeBackend() {
+  let db = null, uid = null;
+  try { db = await (window.claude && window.claude.use ? window.claude.use("db") : null); } catch (e) { db = null; }
+  try {
+    const user = await (window.claude && window.claude.use ? window.claude.use("user") : null);
+    if (user) uid = await user.id();
+  } catch (e) { uid = null; }
+  if (!db) return;
+  const ref = uid ? db.collection("data/users/" + uid).doc("state") : db.doc("shared/state");
+  backend = {
+    push: (payload) => ref.set(payload),
+    pull: async () => { const s = await ref.get(); return s.exists ? s.data() : null; },
+    watch: (cb) => ref.onSnapshot(
+      (snap) => {
+        if (!snap.exists) { cb(null); return; }
+        if (snap.metadata.hasPendingWrites) return;
+        cb(snap.data());
+      },
+      () => setSync("local", "Yalnız bu cihazda")
+    ),
+  };
+}
+
+/* ---- arxa uc 2: Firebase Realtime Database (REST) ---- */
+function cloudCfg() {
+  try { const r = localStorage.getItem(CFG_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; }
+}
+function cloudCfgSave(cfg) {
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+}
+function cloudEndpoint(cfg) {
+  const base = String(cfg.url || "").trim().replace(/\/+$/, "");
+  return base + "/vaults/" + encodeURIComponent(String(cfg.key || "").trim()) + ".json";
+}
+function cloudError(status) {
+  if (status === 401 || status === 403) return "açar qəbul olunmadı, qaydaları yoxla";
+  if (status === 404) return "baza ünvanı tapılmadı";
+  return "HTTP " + status;
+}
+function makeCloudBackend(cfg) {
+  return {
+    push: async (payload) => {
+      const r = await fetch(cloudEndpoint(cfg), {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) throw new Error(cloudError(r.status));
+    },
+    pull: async () => {
+      const r = await fetch(cloudEndpoint(cfg) + "?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) throw new Error(cloudError(r.status));
+      return await r.json();
+    },
+  };
+}
+async function initCloudBackend() {
+  const cfg = cloudCfg();
+  if (!cfg || !cfg.url || !cfg.key) { setSync("local", "Sinxron qurulmayıb"); return; }
+  backend = makeCloudBackend(cfg);
+}
+
+/* buluddan yenidən oxu — canlı izləmə olmayan rejimdə */
+function cloudRefresh() {
+  if (!backend || backend.watch || dirty) return;
+  setSync("busy", "Yoxlanılır");
+  backend.pull().then(onRemote).catch(() => setSync("local", "Şəbəkə yoxdur"));
 }
 
 async function initStore() {
@@ -847,39 +943,25 @@ async function initStore() {
     }
   } catch (e) { /* korlanmış keş */ }
 
-  let db = null, uid = null;
-  try { db = await (window.claude && window.claude.use ? window.claude.use("db") : null); } catch (e) { db = null; }
-  try {
-    const user = await (window.claude && window.claude.use ? window.claude.use("user") : null);
-    if (user) uid = await user.id();
-  } catch (e) { uid = null; }
+  if (CLOUD_MODE) await initCloudBackend();
+  else await initClaudeBackend();
 
-  if (!db) { setSync("local", "Yalnız bu cihazda"); return; }
-  docRef = uid ? db.collection("data/users/" + uid).doc("state") : db.doc("shared/state");
-
-  docRef.onSnapshot(
-    (snap) => {
-      if (!snap.exists) { setSync("ok", "Hazırdır"); return; }
-      if (snap.metadata.hasPendingWrites) return;
-      const d = snap.data();
-      if (!d || !d.state) return;
-      const incoming = migrate(d.state);
-      const incomingJson = JSON.stringify(incoming);
-      if (incomingJson === savedJson) { setSync("ok", "Sinxron"); return; }
-      if (dirty) {
-        remotePending = d.state;
-        setSync("busy", "Başqa cihazda dəyişiklik var");
-        return;
-      }
-      state = incoming;
-      savedJson = incomingJson;
-      try { localStorage.setItem(LS_KEY, savedJson); } catch (e) {}
-      setSync("ok", "Sinxron");
-      render();
-    },
-    () => setSync("local", "Yalnız bu cihazda")
-  );
+  if (!backend) {
+    if (!CLOUD_MODE) setSync("local", "Yalnız bu cihazda");
+    return;
+  }
+  if (backend.watch) {
+    backend.watch(onRemote);
+  } else {
+    try { onRemote(await backend.pull()); }
+    catch (e) { setSync("local", "Şəbəkə yoxdur"); }
+  }
 }
+
+/* tətbiq yenidən görünən kimi buluddan yoxla */
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden) cloudRefresh();
+});
 
 window.addEventListener("beforeunload", (e) => {
   if (!dirty) return;
@@ -1332,6 +1414,30 @@ function viewProfil() {
             <p class="hintbox">Bundan sonra ikon ana ekranda qalır, brauzer sətri olmadan tam ekranda açılır.</p>
           </section>
 
+          ${CLOUD_MODE ? `<section class="panel">
+            <div class="ph">Sinxron<span class="ph-r">${cloudCfg() ? "qurulub" : "qurulmayıb"}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${cloudCfg()
+                ? "Bu cihaz sinxron bazasına bağlıdır. <b>Saxla</b> basanda məlumat buluda yazılır, tətbiqi açanda oradan oxunur."
+                : "Hələ bağlanmayıb — məlumat yalnız bu cihazda qalır. Bağlamaq üçün baza ünvanı və açar lazımdır."}</p>
+              <div class="row">
+                <button class="btn" type="button" data-synccfg="1">${cloudCfg() ? "Ayarı dəyiş" : "Sinxronu qur"}</button>
+                ${cloudCfg() ? `<button class="btn" type="button" data-syncnow="1">İndi yenilə</button>` : ""}
+              </div>
+            </div>
+          </section>` : ""}
+
+          <section class="panel">
+            <div class="ph">Təqvim və bildirişlər</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Dərs cədvəlindən və imtahanlardan təqvim faylı yaradır:
+                hər dərsdən <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> xəbərdarlıq.
+                Faylı bir dəfə təqvimə əlavə edirsən — sonra bildirişləri telefonun özü göndərir,
+                tətbiq qapalı olsa da, internet olmasa da.</p>
+              <button class="btn" type="button" data-ics="1">Təqvim faylı yarat</button>
+            </div>
+          </section>
+
           <section class="panel">
             <div class="ph">Məlumat köçürmə</div>
             <div class="pb">
@@ -1464,7 +1570,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-ics]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -1554,6 +1660,41 @@ document.addEventListener("click", (e) => {
       (v) => mutate((s) => { s.profile[key] = v.v; }));
   }
 
+  if (t.dataset.synccfg) {
+    const c = cloudCfg() || { url: "", key: "" };
+    return openDialog("Sinxron ayarı", "Firebase Realtime Database",
+      `<div class="fld txt" style="margin-bottom:10px"><label>Baza ünvanı — Database URL</label>
+         <input data-fld="url" value="${esc(c.url)}" placeholder="https://qaib-xxxx-default-rtdb.firebaseio.com"></div>
+       <div class="fld txt"><label>Açar</label>
+         <input data-fld="key" value="${esc(c.key)}" placeholder="açarı yerləşdir"></div>
+       <p class="dlg-msg" style="margin-top:12px">Hər iki cihazda <b>eyni</b> ünvan və <b>eyni</b> açar yazılmalıdır.
+         Bu iki dəyər yalnız bu cihazda saxlanılır, açıq səhifədə görünmür.</p>`,
+      (val) => {
+        const cfg = { url: String(val.url || "").trim(), key: String(val.key || "").trim() };
+        if (!cfg.url || !cfg.key) return;
+        cloudCfgSave(cfg);
+        backend = makeCloudBackend(cfg);
+        setSync("busy", "Yoxlanılır");
+        backend.pull()
+          .then((payload) => { onRemote(payload); render(); })
+          .catch((err) => { setSync("local", "Alınmadı — " + ((err && err.message) || "xəta")); render(); });
+      }, "Yoxla və saxla");
+  }
+
+  if (t.dataset.syncnow) { cloudRefresh(); return; }
+
+  if (t.dataset.ics) {
+    const out = buildIcs(16, 5);
+    return openDialog("Təqvim faylı", out.lessons + " dərs · " + out.exams + " imtahan",
+      `<p class="dlg-msg">Fayl 16 həftəlik dərsləri (alt/üst həftə üçün 2 həftədən bir təkrar) və
+         yazılmış imtahanları əhatə edir.${out.skipped
+           ? ` <b>${out.skipped} dərsin saatı yazılmayıb</b> — onlar faylda yoxdur.` : ""}</p>
+       <p class="dlg-msg" style="margin-top:11px">Endirdikdən sonra fayla toxun → <b>Təqvimə əlavə et</b>.
+         Dərs cədvəlini dəyişəndə faylı yenidən yarat.</p>`,
+      () => { saveFile("qaib-cedvel.ics", out.text, "text/calendar;charset=utf-8"); },
+      "Faylı endir");
+  }
+
   if (t.dataset.export) {
     return openDialog("Məlumatın çıxarışı", "JSON",
       `<p class="dlg-msg" style="margin-bottom:10px">Hamısını seç və kopyala, sonra digər cihazda <b>Məlumatı yüklə</b> ilə yerləşdir.</p>
@@ -1631,7 +1772,137 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ============================================================
-   16. Başlat
+   17. Təqvim ixracı (.ics) — iPhone bildirişləri bunun üzərindən gəlir
+   ============================================================ */
+const ICS_EOL = String.fromCharCode(13, 10);   // CRLF
+const pad2 = (n) => String(n).padStart(2, "0");
+const icsStamp = (d) =>
+  d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) +
+  "T" + pad2(d.getHours()) + pad2(d.getMinutes()) + "00";
+
+/* "09:00 – 10:20" → {s:540, e:620};  tək saat yazılıbsa 80 dəqiqə sayılır */
+function parseRange(t) {
+  const m = String(t || "").match(/(\d{1,2})[:.](\d{2})(?:\s*[–\-—]\s*(\d{1,2})[:.](\d{2}))?/);
+  if (!m) return null;
+  const s = Number(m[1]) * 60 + Number(m[2]);
+  let e = m[3] != null ? Number(m[3]) * 60 + Number(m[4]) : s + 80;
+  if (e <= s) e = s + 80;
+  return { s, e };
+}
+const icsEsc = (s) => String(s)
+  .replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+/* RFC 5545 sətir qatlanması — bayt əsaslı, çoxbaytlı hərfi ortadan kəsmir */
+function icsFold(line) {
+  const enc = new TextEncoder();
+  if (enc.encode(line).length <= 73) return line;
+  const out = [];
+  let cur = "", bytes = 0;
+  for (const ch of line) {
+    const b = enc.encode(ch).length;
+    if (bytes + b > 73) { out.push(cur); cur = " "; bytes = 1; }
+    cur += ch;
+    bytes += b;
+  }
+  out.push(cur);
+  return out.join(ICS_EOL);
+}
+
+function buildIcs(weeks, minutesBefore) {
+  weeks = weeks || 16;
+  const mb = minutesBefore == null ? 5 : minutesBefore;
+  const L = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
+    "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "X-WR-CALNAME:Qaib Jurnalı", "X-WR-TIMEZONE:Asia/Baku",
+  ];
+  const now = new Date();
+  const stamp = icsStamp(now);
+  const monThis = mondayOf(now);
+  const cw = currentWeekType();
+  let lessons = 0, exams = 0, skipped = 0;
+
+  for (const wk of ["alt", "ust"]) {
+    const base = new Date(monThis);
+    if (wk !== cw) base.setDate(base.getDate() + 7);   // növbəti həftə o tipdədir
+    DAYS.forEach(([dk], di) => {
+      for (const e of weekBlock(wk)[dk]) {
+        if (!e.subject) continue;
+        const tr = parseRange(e.time);
+        if (!tr) { skipped++; continue; }
+        const start = new Date(base);
+        start.setDate(start.getDate() + di);
+        start.setHours(Math.floor(tr.s / 60), tr.s % 60, 0, 0);
+        const end = new Date(start);
+        end.setHours(Math.floor(tr.e / 60), tr.e % 60, 0, 0);
+        const until = new Date(start);
+        until.setDate(until.getDate() + weeks * 7);
+        lessons++;
+        L.push("BEGIN:VEVENT");
+        L.push("UID:qaib-" + wk + "-" + dk + "-" + lessons + "-" + start.getTime() + "@qaib");
+        L.push("DTSTAMP:" + stamp + "Z");
+        L.push("DTSTART:" + icsStamp(start));
+        L.push("DTEND:" + icsStamp(end));
+        L.push("RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + icsStamp(until));
+        L.push(icsFold("SUMMARY:" + icsEsc(e.subject)));
+        if (e.room) L.push(icsFold("LOCATION:" + icsEsc(e.room)));
+        const desc = [e.teacher, weekName(wk)].filter(Boolean).join(" · ");
+        if (desc) L.push(icsFold("DESCRIPTION:" + icsEsc(desc)));
+        L.push("BEGIN:VALARM", "TRIGGER:-PT" + mb + "M", "ACTION:DISPLAY",
+               icsFold("DESCRIPTION:" + icsEsc(e.subject + " — " + mb + " dəqiqə qaldı")), "END:VALARM");
+        L.push("END:VEVENT");
+      }
+    });
+  }
+
+  for (const key of Object.keys(state.semesters)) {
+    for (const r of state.semesters[key].courses) {
+      if (!r.examDate) continue;
+      const st = new Date(r.examDate);
+      if (Number.isNaN(st.getTime())) continue;
+      const en = new Date(st.getTime() + 2 * 3600000);
+      exams++;
+      L.push("BEGIN:VEVENT");
+      L.push("UID:qaib-imtahan-" + exams + "-" + st.getTime() + "@qaib");
+      L.push("DTSTAMP:" + stamp + "Z");
+      L.push("DTSTART:" + icsStamp(st));
+      L.push("DTEND:" + icsStamp(en));
+      L.push(icsFold("SUMMARY:İmtahan — " + icsEsc(r.name)));
+      if (r.examRoom) L.push(icsFold("LOCATION:" + icsEsc(r.examRoom)));
+      L.push(icsFold("DESCRIPTION:" + icsEsc(key)));
+      L.push("BEGIN:VALARM", "TRIGGER:-P2D", "ACTION:DISPLAY",
+             icsFold("DESCRIPTION:" + icsEsc(r.name + " imtahanına 2 gün qaldı")), "END:VALARM");
+      L.push("BEGIN:VALARM", "TRIGGER:-P1D", "ACTION:DISPLAY",
+             icsFold("DESCRIPTION:" + icsEsc(r.name + " imtahanına 1 gün qaldı")), "END:VALARM");
+      L.push("END:VEVENT");
+    }
+  }
+
+  L.push("END:VCALENDAR");
+  return { text: L.join("\r\n") + "\r\n", lessons, exams, skipped };
+}
+
+async function saveFile(name, text, mime) {
+  try {
+    const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
+    if (dl && dl.save) { await dl.save({ filename: name, data: text }); return true; }
+  } catch (e) { /* aşağıdaki yolu sına */ }
+  try {
+    const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    return true;
+  } catch (e) { return false; }
+}
+
+/* ============================================================
+   18. Başlat
    ============================================================ */
 render();
 initStore();
