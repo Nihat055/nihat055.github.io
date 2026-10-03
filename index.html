@@ -506,6 +506,147 @@ table.t tbody tr{transition:background-color .13s ease}
   .splash{transition:none}
   main.enter > *{animation:none}
 }
+
+.flagbtn{
+  background:none; border:0; padding:0 2px; cursor:pointer;
+  font-family:var(--f-mono); font-size:11px; color:var(--accent);
+  font-weight:600; text-decoration:underline; text-underline-offset:2px;
+}
+.flagbtn:hover{filter:brightness(1.2)}
+
+/* ======================================================================
+   MÜASİRLƏŞDİRMƏ — rənglər dərinləşdirildi, səthlər bir-birindən ayrıldı
+   (sonda gəldiyi üçün yuxarıdaki dəyərləri əvəz edir)
+   ====================================================================== */
+:root{
+  --ground:#e7ecf4;
+  --panel:#ffffff;
+  --panel-2:#f1f5fb;
+  --panel-3:#e3eaf4;
+  --ink:#111724;
+  --ink-2:#2e3a4e;
+  --muted:#596782;
+  --line:#dae1ed;
+  --line-2:#bfcadb;
+  --accent:#2f54eb;
+  --accent-ink:#ffffff;
+  --sel:#e6ecfe;
+  --ok:#0b7a4b;
+  --warn:#a65a00;
+  --crit:#c01a3d;
+  --shadow-1:0 1px 2px rgba(17,23,36,.05), 0 1px 3px rgba(17,23,36,.06);
+  --shadow-2:0 6px 18px -8px rgba(17,23,36,.22);
+  --shadow-3:0 18px 44px -16px rgba(17,23,36,.34);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#070a10;
+    --panel:#121a24;
+    --panel-2:#18212e;
+    --panel-3:#202b3a;
+    --ink:#e6ecf6;
+    --ink-2:#b7c5d7;
+    --muted:#8c9cb4;
+    --line:#1e2835;
+    --line-2:#2c3a4c;
+    --accent:#89a5ff;
+    --accent-ink:#080c14;
+    --sel:#17223a;
+    --ok:#34d399;
+    --warn:#f0b24a;
+    --crit:#fb7185;
+    --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+    --shadow-2:0 6px 18px -8px rgba(0,0,0,.7);
+    --shadow-3:0 18px 44px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#070a10;
+  --panel:#121a24;
+  --panel-2:#18212e;
+  --panel-3:#202b3a;
+  --ink:#e6ecf6;
+  --ink-2:#b7c5d7;
+  --muted:#8c9cb4;
+  --line:#1e2835;
+  --line-2:#2c3a4c;
+  --accent:#89a5ff;
+  --accent-ink:#080c14;
+  --sel:#17223a;
+  --ok:#34d399;
+  --warn:#f0b24a;
+  --crit:#fb7185;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+  --shadow-2:0 6px 18px -8px rgba(0,0,0,.7);
+  --shadow-3:0 18px 44px -16px rgba(0,0,0,.8);
+}
+
+/* ---- səthlər: düz deyil, bir-birindən ayrılmış ---- */
+.panel{border-radius:10px; box-shadow:var(--shadow-1); border-color:var(--line)}
+.titlebar{box-shadow:0 1px 0 var(--line-2), 0 6px 16px -14px rgba(0,0,0,.6)}
+.toolbar{background:var(--panel-2)}
+.ph{background:var(--panel-2); color:var(--ink-2); letter-spacing:.04em}
+.bottom{box-shadow:0 -6px 16px -14px rgba(0,0,0,.6)}
+
+/* ---- aksent: daha doymuş, lazım olan yerdə görünür ---- */
+.mark i{border-radius:1.5px}
+.navitem[aria-current="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
+.tabbar .navitem[aria-current="true"]{box-shadow:inset 0 2.5px 0 var(--accent)}
+.btn:hover{background:var(--sel); border-color:var(--accent); color:var(--accent)}
+.btn.primary{box-shadow:var(--shadow-1)}
+.btn.primary:hover{background:var(--accent); filter:brightness(1.12)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.spin{box-shadow:var(--shadow-1)}
+.spin .v{background:var(--panel-3)}
+.find:focus, .fld input:focus, .fld select:focus, .semrow input:focus, .ta:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* ---- nişanlar: boş çərçivə yox, rəngli dolğu ---- */
+.tag{
+  border-color:color-mix(in srgb, currentColor 32%, transparent);
+  background:color-mix(in srgb, currentColor 13%, transparent);
+  font-weight:600;
+}
+
+/* ---- rəqəmlər daha oxunaqlı ---- */
+.kpi b{font-size:22px; font-weight:500; color:var(--ink)}
+.kpi > div:first-child b{color:var(--accent)}
+.kpi b.c-ok{color:var(--ok)} .kpi b.c-warn{color:var(--warn)} .kpi b.c-crit{color:var(--crit)}
+.kpi > div{background:var(--panel)}
+
+/* ---- qaib zolağı: qalın, yumşaq, dolğun ---- */
+.bar{height:9px}
+.bar i{background:var(--panel-3); border-radius:2.5px}
+.bar i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff) 0%, var(--accent) 100%)}
+.bar.lv-warn i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--warn) 88%, #fff) 0%, var(--warn) 100%)}
+.bar.lv-crit i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--crit) 88%, #fff) 0%, var(--crit) 100%)}
+
+/* ---- cədvəl: başlıq daha aydın, sətirlər daha canlı ---- */
+table.t th{background:var(--panel-3); color:var(--ink-2); border-bottom-color:var(--line-2)}
+table.t tbody tr:hover{background:var(--panel-2)}
+table.t tbody tr[aria-selected="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
+table.t td.stripe{border-left-width:3px}
+
+/* ---- cədvəl sütunları və dialoq ---- */
+.col{border-radius:8px; box-shadow:var(--shadow-1)}
+.col-h{background:var(--panel-2)}
+.ls .tm{color:var(--accent); font-weight:600}
+.addbtn:hover{background:var(--sel)}
+.dlg{border-radius:14px; box-shadow:var(--shadow-3); border-color:var(--line-2)}
+.dlg-t{background:var(--panel-2); border-radius:13px 13px 0 0}
+.modal::before{background:rgba(6,10,18,.58); backdrop-filter:blur(2px)}
+
+/* ---- yan panel və status ---- */
+.sidebar{background:var(--panel)}
+.statusbar{background:var(--panel-2); color:var(--muted)}
+.splash-mark i{border-radius:3px}
+
+@media (min-width:920px){
+  .dlg{border-radius:14px}
+  .dlg-t{border-radius:13px 13px 0 0}
+}
 </style>
 
 <div class="win">
@@ -545,6 +686,7 @@ table.t tbody tr{transition:background-color .13s ease}
 
 <script>
 "use strict";
+var APP_BUILD = "20261004-0332";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -949,6 +1091,46 @@ function migrate(raw) {
   return out;
 }
 
+/* ---- Yenilik yoxlaması ----
+   Cihaz köhnə nüsxəni yaddaşda saxlaya bilir. Server tərəfdəki version.json
+   ilə müqayisə edib, fərq varsa istifadəçiyə bir toxunuşluq yeniləmə verir. */
+let updateReady = false;
+let lastUpdCheck = 0;
+
+async function checkUpdate(force) {
+  if (location.protocol.indexOf("http") !== 0) return false;
+  const now = Date.now();
+  if (!force && now - lastUpdCheck < 600000) return updateReady;   // 10 dəqiqədə bir
+  lastUpdCheck = now;
+  try {
+    const r = await fetch("version.json?t=" + now, { cache: "no-store" });
+    if (!r.ok) return false;
+    const j = await r.json();
+    if (j && j.build && String(j.build) !== String(APP_BUILD)) {
+      updateReady = true;
+      if (typeof paintStatus === "function") paintStatus();
+      return true;
+    }
+  } catch (e) { /* şəbəkə yoxdur */ }
+  return false;
+}
+
+async function applyUpdate() {
+  try {
+    if (window.caches) {
+      const ks = await caches.keys();
+      await Promise.all(ks.map((k) => caches.delete(k)));
+    }
+  } catch (e) { /* davam */ }
+  try {
+    if (navigator.serviceWorker) {
+      const rs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(rs.map((r) => r.unregister()));
+    }
+  } catch (e) { /* davam */ }
+  location.replace(location.pathname + "?v=" + Date.now());
+}
+
 /* ---- Qoruma kodu ----
    Kod açıq saxlanılmır: yalnız ondan alınan barmaq izi yadda qalır.
    Məqsəd güclü şifrələmə deyil, səhv toxunuşla məlumatı silməyin qarşısını almaqdır. */
@@ -1129,7 +1311,9 @@ async function initStore() {
 
 /* tətbiq yenidən görünən kimi buluddan yoxla */
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden) cloudRefresh();
+  if (document.hidden) return;
+  cloudRefresh();
+  checkUpdate(false);
 });
 
 window.addEventListener("beforeunload", (e) => {
@@ -1625,6 +1809,19 @@ function viewProfil() {
           </section>
 
           <section class="panel">
+            <div class="ph">Versiya<span class="ph-r">${esc(APP_BUILD)}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${updateReady
+                ? "<b>Yeni versiya hazırdır.</b> Yenilə düyməsi köhnə nüsxəni yaddaşdan silib ən sonuncunu yükləyir."
+                : "Proqram ən son versiyadadır. Yeni nüsxə çıxanda özü xəbər verəcək."}</p>
+              <div class="row">
+                <button class="btn" type="button" data-checkupd="1">Yenilikləri yoxla</button>
+                ${updateReady ? `<button class="btn primary" type="button" data-update="1">Yenilə</button>` : ""}
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
             <div class="ph">Qoruma kodu<span class="ph-r">${guardOn() ? "aktiv" : "yoxdur"}</span></div>
             <div class="pb">
               <p class="dlg-msg" style="margin-bottom:11px">${guardOn()
@@ -1772,6 +1969,7 @@ function paintStatus() {
     + `<span>${usedH} saat qaib</span><s>|</s>`
     + `<span>${risk} risk</span>`
     + `<span class="sb-r">`
+    + (updateReady ? `<button class="flagbtn" type="button" data-update="1">yeni versiya var — yenilə</button>` : "")
     + (dirty ? `<span class="flag">saxlanılmamış dəyişiklik</span>` : "")
     + (remotePending ? `<span class="flag">başqa cihazda yenilik var</span>` : "")
     + `<span class="sb-keys">1–6 bölmə · / axtarış · Ctrl+S saxla</span>`
@@ -1891,7 +2089,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -2133,6 +2331,22 @@ document.addEventListener("click", (e) => {
       }, "Yüklə");
   }
 
+  /* ---- versiya ---- */
+  if (t.dataset.update) { applyUpdate(); return; }
+  if (t.dataset.checkupd) {
+    checkUpdate(true).then((varmi) => {
+      render();
+      if (!varmi) {
+        openDialog("Ən son versiyadır", APP_BUILD,
+          `<p class="dlg-msg">Yeni nüsxə yoxdur. Buna baxmayaraq köhnə göründüyünü düşünürsənsə,
+             <b>Yenilə</b> ilə yaddaşı təmizləyə bilərsən.</p>
+           <div class="row" style="margin-top:12px"><button class="btn" type="button" data-update="1">Yaddaşı təmizlə və yenilə</button></div>`,
+          null, "Bağla");
+      }
+    });
+    return;
+  }
+
   /* ---- kodu təyin et / dəyiş ---- */
   if (t.dataset.setguard) {
     return openDialog(guardOn() ? "Kodu dəyiş" : "Kod təyin et", "rəqəm və ya mətn",
@@ -2372,6 +2586,9 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
   const az = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   setTimeout(bitir, az ? 0 : 620);
 })();
+
+/* açılışdan sonra arxa planda yenilik yoxla */
+setTimeout(() => checkUpdate(true), 1500);
 </script>
 
 </body>

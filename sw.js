@@ -1,7 +1,7 @@
 /* Qaib Jurnali - sade oflayn kes.
    Sened sorgulari sebekadan gelir (yenilikler derhal gorunsun),
    sebeka yoxdursa kesdeki nusxa verilir. */
-const CACHE = "qaib-v1";
+const CACHE = "qaib-20261004-0332";
 const SHELL = ["./", "./index.html", "./manifest.json",
                "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 
@@ -24,6 +24,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
+  if (req.url.indexOf("version.json") >= 0) return;   // hemise sebekeden
   const isDoc = req.mode === "navigate" || req.destination === "document";
   if (isDoc) {
     e.respondWith(
