@@ -1422,7 +1422,8 @@ function viewProfil() {
                 : "Hələ bağlanmayıb — məlumat yalnız bu cihazda qalır. Bağlamaq üçün baza ünvanı və açar lazımdır."}</p>
               <div class="row">
                 <button class="btn" type="button" data-synccfg="1">${cloudCfg() ? "Ayarı dəyiş" : "Sinxronu qur"}</button>
-                ${cloudCfg() ? `<button class="btn" type="button" data-syncnow="1">İndi yenilə</button>` : ""}
+                ${cloudCfg() ? `<button class="btn" type="button" data-syncnow="1">İndi yenilə</button>
+                 <button class="btn" type="button" data-syncpush="1">Buluda göndər</button>` : ""}
               </div>
             </div>
           </section>` : ""}
@@ -1570,7 +1571,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-ics]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -1676,12 +1677,22 @@ document.addEventListener("click", (e) => {
         backend = makeCloudBackend(cfg);
         setSync("busy", "Yoxlanılır");
         backend.pull()
-          .then((payload) => { onRemote(payload); render(); })
+          .then((payload) => {
+            if (!payload || !payload.state) {
+              commit();          // bulud boşdur: bu cihazdaki məlumatı ilk nüsxə kimi göndər
+            } else {
+              onRemote(payload);
+              render();
+            }
+          })
           .catch((err) => { setSync("local", "Alınmadı — " + ((err && err.message) || "xəta")); render(); });
       }, "Yoxla və saxla");
   }
 
   if (t.dataset.syncnow) { cloudRefresh(); return; }
+
+  /* buluda məcburi göndəriş — saxlanılmamış dəyişiklik olmasa da işləyir */
+  if (t.dataset.syncpush) { commit(); return; }
 
   if (t.dataset.ics) {
     const out = buildIcs(16, 5);
