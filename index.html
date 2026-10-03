@@ -2,7 +2,7 @@
 <html lang="az">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Qaib">
@@ -76,11 +76,17 @@
 }
 
 *{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
+html{
+  -webkit-text-size-adjust:100%;
+  touch-action:pan-x pan-y;      /* iki barmaqla yaxınlaşdırma və cüt toxunuş söndürülür */
+  overscroll-behavior:none;      /* kənarda rezin sıçrayış olmasın */
+}
 body{
   margin:0; background:var(--ground); color:var(--ink);
   font-family:var(--f-ui); font-size:14px; line-height:1.55;
   -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
 }
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent); outline-offset:1px}
@@ -424,6 +430,26 @@ dl.rep-id dd{margin:0; font-size:13px; font-weight:600}
   .tw{overflow:visible}
   tr{break-inside:avoid}
 }
+
+/* ====================  tətbiq hissi  ==================== */
+/* idarəetmə elementlərində mətn seçilməsin, uzun basanda menyu çıxmasın */
+.titlebar, .toolbar, .statusbar, .sidebar, .tabbar,
+.navitem, .btn, .seg button, .spin button, .addbtn, .linkbtn,
+.ph, .kpi, .tag, .col-h, .ls, .cell, table.t thead th{
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+}
+/* oxunan və yazılan yerlərdə seçmə qalır */
+input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
+  -webkit-user-select:text; user-select:text; -webkit-touch-callout:default;
+}
+
+@media (max-width:759px){
+  /* iOS 16px-dən kiçik xanaya toxunanda ekranı özbaşına yaxınlaşdırır — qarşısını alır */
+  .fld input, .fld select, .semrow input, .find, .ta, .sel,
+  input, select, textarea{ font-size:16px }
+  .semrow input{ padding:7px 1px }
+  .ta{ font-size:13px }        /* JSON mətni: yaxınlaşma yalnız fokusda olur, burada lazım deyil */
+}
 </style>
 
 <div class="win">
@@ -475,7 +501,10 @@ var ICON_HREF = "icon-180.png";
     for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
     head.appendChild(el);
   };
-  add("meta", { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" });
+  add("meta", { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" });
+  /* iOS-da iki barmaq jesti ilə yaxınlaşdırmanı bağla */
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
   add("meta", { name: "apple-mobile-web-app-capable", content: "yes" });
   add("meta", { name: "mobile-web-app-capable", content: "yes" });
   add("meta", { name: "apple-mobile-web-app-title", content: "Qaib" });
@@ -842,6 +871,10 @@ function migrate(raw) {
     (raw.profile && typeof raw.profile === "object") ? raw.profile : {}
   );
 
+  if (!out.guard || typeof out.guard !== "object" || typeof out.guard.hash !== "string" || !out.guard.hash) {
+    delete out.guard;
+  }
+
   delete out.times;
   delete out.week;
   const a = out.weekAnchor;
@@ -851,6 +884,22 @@ function migrate(raw) {
   out.version = 2;
   return out;
 }
+
+/* ---- Qoruma kodu ----
+   Kod açıq saxlanılmır: yalnız ondan alınan barmaq izi yadda qalır.
+   Məqsəd güclü şifrələmə deyil, səhv toxunuşla məlumatı silməyin qarşısını almaqdır. */
+function guardFingerprint(pin) {
+  const txt = "qaib\u00A7" + String(pin == null ? "" : pin);
+  let a = 0x811c9dc5, b = 0x01000193;
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt.charCodeAt(i);
+    a = Math.imul(a ^ ch, 16777619) >>> 0;
+    b = Math.imul(b + ch + i + 1, 2654435761) >>> 0;
+  }
+  return a.toString(16).padStart(8, "0") + b.toString(16).padStart(8, "0");
+}
+const guardOn = () => !!(state.guard && typeof state.guard.hash === "string" && state.guard.hash);
+const guardOk = (pin) => guardOn() && guardFingerprint(pin) === state.guard.hash;
 
 /* ---- dəyişiklik: yalnız yaddaşda, diskə yazılmır ---- */
 function mutate(fn) {
@@ -1510,6 +1559,19 @@ function viewProfil() {
           </section>
 
           <section class="panel">
+            <div class="ph">Qoruma kodu<span class="ph-r">${guardOn() ? "aktiv" : "yoxdur"}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${guardOn()
+                ? "Məlumatı silən və üzərinə yazan əməliyyatlar kod tələb edir: <b>Excel vəziyyətinə qaytar</b> və <b>Məlumatı yüklə</b>."
+                : "Kod təyin etsən, məlumatı silən əməliyyatlar (<b>Excel vəziyyətinə qaytar</b>, <b>Məlumatı yüklə</b>) kod soruşacaq. Səhvən toxunub hər şeyi itirməkdən qoruyur."}</p>
+              <div class="row">
+                <button class="btn" type="button" data-setguard="1">${guardOn() ? "Kodu dəyiş" : "Kod təyin et"}</button>
+                ${guardOn() ? `<button class="btn danger" type="button" data-delguard="1">Kodu sil</button>` : ""}
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
             <div class="ph">Bərpa</div>
             <div class="pb">
               <p class="dlg-msg" style="margin-bottom:11px">Bütün qaib, qiymət və cədvəl dəyişikliklərini silib Excel faylındakı ilk vəziyyətə qaytarır.</p>
@@ -1724,6 +1786,13 @@ function closeDialog() {
   host._onDelete = null;
 }
 
+/* səhv kod — dialoq bağlandıqdan sonra göstərilir, yoxsa dərhal itir */
+function badCode() {
+  setTimeout(() => openDialog("Kod səhvdir", "",
+    `<p class="dlg-msg">Daxil etdiyin kod uyğun gəlmir. Əməliyyat icra olunmadı.</p>`,
+    null, "Oldu"), 0);
+}
+
 /* bir dərs xanasının sahələri */
 function lessonFields(e) {
   const names = activeSem().courses.map((c) => c.name);
@@ -1745,7 +1814,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -1969,8 +2038,11 @@ document.addEventListener("click", (e) => {
   if (t.dataset.import) {
     return openDialog("Məlumatı yüklə", "JSON",
       `<p class="dlg-msg" style="margin-bottom:10px">Digər cihazdan kopyaladığın mətni bura yerləşdir. Hazırkı məlumat üzərinə yazılacaq — sonra <b>Saxla</b> düyməsini bas.</p>
-       <textarea class="ta" data-fld="json" placeholder="{ ... }"></textarea>`,
+       <textarea class="ta" data-fld="json" placeholder="{ ... }"></textarea>`
+       + (guardOn() ? `<div class="fld" style="margin-top:12px"><label>Qoruma kodu</label>
+            <input type="password" inputmode="numeric" data-fld="code" autocomplete="off"></div>` : ""),
       (v) => {
+        if (guardOn() && !guardOk(v.code)) { badCode(); return; }
         let parsed = null;
         try { parsed = JSON.parse(v.json); } catch (err) { parsed = null; }
         if (!parsed || !parsed.semesters) {
@@ -1984,10 +2056,47 @@ document.addEventListener("click", (e) => {
       }, "Yüklə");
   }
 
+  /* ---- kodu təyin et / dəyiş ---- */
+  if (t.dataset.setguard) {
+    return openDialog(guardOn() ? "Kodu dəyiş" : "Kod təyin et", "rəqəm və ya mətn",
+      (guardOn() ? `<div class="fld" style="margin-bottom:10px"><label>Hazırkı kod</label>
+           <input type="password" inputmode="numeric" data-fld="old" autocomplete="off"></div>` : "")
+      + `<div class="fld"><label>Yeni kod</label>
+           <input type="password" inputmode="numeric" data-fld="yeni" autocomplete="off"></div>
+         <p class="dlg-msg" style="margin-top:11px">Kod bütün cihazlarında eyni olacaq.
+           Unutsan, sıfırlamaq üçün mənə yaz.</p>`,
+      (val) => {
+        if (guardOn() && !guardOk(val.old)) { badCode(); return; }
+        const yeni = String(val.yeni || "").trim();
+        if (!yeni) return;
+        mutate((s) => { s.guard = { hash: guardFingerprint(yeni) }; });
+      }, "Təsdiqlə");
+  }
+
+  if (t.dataset.delguard) {
+    return openDialog("Kodu sil", "qoruma söndürüləcək",
+      `<div class="fld"><label>Hazırkı kod</label>
+         <input type="password" inputmode="numeric" data-fld="old" autocomplete="off"></div>`,
+      (val) => {
+        if (!guardOk(val.old)) { badCode(); return; }
+        mutate((s) => { delete s.guard; });
+      }, "Sil");
+  }
+
   if (t.dataset.reset) {
     return openDialog("Excel vəziyyətinə qaytarılsın?", "sonra Saxla lazımdır",
-      `<p class="dlg-msg">Bütün qaib, qiymət və cədvəl dəyişiklikləri silinəcək və fayl ilk oxunduğu vəziyyətə qayıdacaq.</p>`,
-      () => { resetSelection(); mutate((s) => { Object.assign(s, structuredClone(BASELINE)); }); },
+      `<p class="dlg-msg">Bütün qaib, qiymət və cədvəl dəyişiklikləri silinəcək və fayl ilk oxunduğu vəziyyətə qayıdacaq.</p>`
+      + (guardOn() ? `<div class="fld" style="margin-top:12px"><label>Qoruma kodu</label>
+           <input type="password" inputmode="numeric" data-fld="code" autocomplete="off"></div>` : ""),
+      (val) => {
+        if (guardOn() && !guardOk(val.code)) { badCode(); return; }
+        resetSelection();
+        mutate((s) => {
+          const guard = s.guard;
+          Object.assign(s, structuredClone(BASELINE));
+          if (guard) s.guard = guard;      // kod sıfırlamadan sonra da qalır
+        });
+      },
       "Bəli, qaytar");
   }
 });
