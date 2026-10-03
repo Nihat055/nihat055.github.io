@@ -389,6 +389,41 @@ ol.steps li::marker{color:var(--accent); font-family:var(--f-mono); font-size:12
   .led::before{width:8px; height:8px}
   .board{padding:10px}
 }
+
+/* ====================  hesabat  ==================== */
+.linkbtn{
+  background:none; border:0; padding:0; font:inherit; color:inherit; cursor:pointer;
+  text-align:left; border-bottom:1px dashed var(--line-2);
+}
+.linkbtn:hover{color:var(--accent); border-bottom-color:var(--accent)}
+.report .rep-head{padding:16px 16px 4px}
+.report h1{font-family:var(--f-ui); font-size:19px; font-weight:600; letter-spacing:-.01em; margin:0 0 3px}
+.report .rep-sub{color:var(--muted); font-size:12.5px; margin:0 0 14px}
+dl.rep-id{display:flex; flex-wrap:wrap; gap:6px 26px; margin:0 0 14px}
+dl.rep-id > div{display:flex; gap:8px; align-items:baseline}
+dl.rep-id dt{color:var(--muted); font-size:12px}
+dl.rep-id dd{margin:0; font-size:13px; font-weight:600}
+.report .rep-foot{
+  color:var(--muted); font-size:12px; line-height:1.65;
+  padding:12px 16px 16px; border-top:1px solid var(--line); margin:0;
+}
+
+/* ====================  çap  ==================== */
+@media print{
+  .titlebar, .sidebar, .bottom, .toolbar, .tabbar, .statusbar{display:none !important}
+  .win{height:auto; overflow:visible; display:block}
+  .mid, .content{display:block; overflow:visible}
+  main{overflow:visible; padding:0; display:block}
+  body{background:#fff; color:#000; font-size:11pt}
+  .panel{border:1px solid #bbb; border-radius:0; box-shadow:none}
+  .ph{background:#f2f2f2; color:#333}
+  .kpi > div{border-color:#ddd}
+  table.t th{background:#f2f2f2; color:#333}
+  table.t td{border-color:#eee}
+  .report .rep-head, .report .rep-foot{color:#000}
+  .tw{overflow:visible}
+  tr{break-inside:avoid}
+}
 </style>
 
 <div class="win">
@@ -1178,6 +1213,7 @@ function viewQaib() {
   const sem = activeSem();
   return {
     toolbar: `<span class="vtitle">Qaib hesabatı</span>`
+      + `<button class="btn" type="button" data-addcourse="1">Fənn əlavə et</button>`
       + `<span class="vhint">Limit kredit sayına görə: 3→3, 4→9, 5→12, 6→15 saat</span>`,
     body: sem.courses.length === 0
       ? `<section class="panel"><p class="blank">Bu semestrdə fənn yoxdur.</p></section>`
@@ -1196,7 +1232,7 @@ function viewQaib() {
               const m = compute(r);
               return `<tr class="lv-${m.level}">
                 <td class="ix stripe">${i + 1}</td>
-                <td class="nm">${esc(r.name)}${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
+                <td class="nm"><button class="linkbtn" type="button" data-course="${i}">${esc(r.name)}</button>${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
                 <td class="hide-sm code">${esc(m.code)}</td>
                 <td class="hide-sm r">${dash(m.credits)}</td>
                 <td class="hide-sm r">${m.F}</td>
@@ -1210,7 +1246,7 @@ function viewQaib() {
               </tr>`;
             }).join("")}</tbody>
           </table></div>
-          <p class="hintbox">Sıra Excel faylındakı kimidir və qaib dəyişəndə yerini dəyişmir. Qalan dərs = qalan saat ÷ 2; zolaqda hər cüt blok bir dərsdir.</p>
+          <p class="hintbox">Fənn adına toxunsan, dəqiq qaib saatını yaza və ya fənni silə bilərsən. Sıra Excel faylındakı kimidir və qaib dəyişəndə yerini dəyişmir. Qalan dərs = qalan saat ÷ 2; zolaqda hər cüt blok bir dərsdir.</p>
         </section>`,
   };
 }
@@ -1411,17 +1447,19 @@ function viewProfil() {
 
         <div>
           <section class="panel">
-            <div class="ph">Semestrlər</div>
+            <div class="ph">Semestrlər<span class="ph-r"><button class="btn" type="button" data-addsem="1">Semestr əlavə et</button></span></div>
             <div class="tw"><table class="t">
-              <thead><tr><th>Semestr</th><th class="r">Fənn</th><th class="r">ÜOMG</th><th></th></tr></thead>
+              <thead><tr><th>Semestr</th><th class="r">Fənn</th><th class="r">ÜOMG</th><th></th><th></th></tr></thead>
               <tbody>${Object.keys(state.semesters).map((k) => {
                 const g = semesterGpa(state.semesters[k].courses);
                 return `<tr><td class="nm">${esc(k)}</td>
                   <td class="r">${state.semesters[k].courses.length}</td>
                   <td class="r">${g == null ? "—" : g.toFixed(2)}</td>
-                  <td class="r">${k === state.active ? `<span class="tag acc">Aktiv</span>` : `<button class="btn" type="button" data-setsem="${esc(k)}">Keç</button>`}</td></tr>`;
+                  <td class="r">${k === state.active ? `<span class="tag acc">Aktiv</span>` : `<button class="btn" type="button" data-setsem="${esc(k)}">Keç</button>`}</td>
+                  <td class="r"><button class="btn" type="button" data-report="${esc(k)}">Hesabat</button></td></tr>`;
               }).join("")}</tbody>
             </table></div>
+            <p class="hintbox">Semestr bitəndə yenisini əlavə et və ona keç — köhnəsi siyahıda arxiv kimi qalır, qiymətləri və qaibləri heç yerə getmir.</p>
           </section>
 
           <section class="panel">
@@ -1483,7 +1521,112 @@ function viewProfil() {
   };
 }
 
-const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, qiymet: viewQiymet, fenn: viewFenn, profil: viewProfil };
+/* ---- Semestr hesabatı (çap / PDF üçün) ---- */
+let reportSem = null;
+
+function reportRows(key) {
+  const sem = state.semesters[key] || { courses: [] };
+  return sem.courses.map((r) => ({ r, m: compute(r) }));
+}
+
+function viewReport() {
+  const key = reportSem && state.semesters[reportSem] ? reportSem : state.active;
+  const rows = reportRows(key);
+  const gpa = semesterGpa((state.semesters[key] || { courses: [] }).courses);
+  const pass = rows.filter((x) => x.m.result === "Pass").length;
+  const fail = rows.filter((x) => x.m.result === "Fail").length;
+  const none = rows.filter((x) => x.m.result === "No Result").length;
+  const usedH = rows.reduce((a, x) => a + x.m.F, 0);
+  const credits = rows.reduce((a, x) => a + (x.m.credits || 0), 0);
+  const p = state.profile;
+  const today = new Date();
+  const dstr = String(today.getDate()).padStart(2, "0") + "." +
+    String(today.getMonth() + 1).padStart(2, "0") + "." + today.getFullYear();
+  const resAz = (res) => res === "Pass" ? "Keçdi" : res === "Fail" ? "Kəsildi" : "Nəticə yox";
+
+  return {
+    toolbar: `<span class="vtitle">Semestr hesabatı</span>`
+      + `<span class="vhint">${esc(key)}</span>`
+      + `<span class="tb-sp"></span>`
+      + `<button class="btn" type="button" data-print="1">Çap / PDF</button>`
+      + `<button class="btn" type="button" data-reportfile="${esc(key)}">HTML faylı endir</button>`
+      + `<button class="btn" type="button" data-go="profil">Bağla</button>`,
+    body: `<section class="panel report">
+      <div class="rep-head">
+        <h1>Semestr hesabatı</h1>
+        <p class="rep-sub">${esc(key)} · hazırlandı ${dstr}</p>
+        <dl class="rep-id">
+          ${[["Tələbə", p["Ad, Soyad, Ata adı"]], ["Tələbə kodu", p["Tələbə kodu"]],
+             ["Qrup", p["Qrup kodu"]], ["İxtisas", p["İxtisas"]]]
+            .filter(([, val]) => val).map(([k2, val]) =>
+              `<div><dt>${esc(k2)}</dt><dd>${esc(val)}</dd></div>`).join("")}
+        </dl>
+      </div>
+
+      <div class="kpi">
+        <div><b>${rows.length}</b><span>fənn</span></div>
+        <div><b>${credits}</b><span>kredit</span></div>
+        <div><b>${gpa == null ? "—" : gpa.toFixed(2)}</b><span>ÜOMG</span></div>
+        <div><b>${usedH}</b><span>qaib, saat</span></div>
+        <div><b>${pass}</b><span>keçdi</span></div>
+        <div><b>${fail}</b><span>kəsildi</span></div>
+        <div><b>${none}</b><span>nəticə yox</span></div>
+      </div>
+
+      <div class="tw"><table class="t">
+        <thead><tr>
+          <th class="ix">№</th><th>Fənn</th><th>Kod</th><th class="r">Kr</th>
+          <th class="r">Qaib</th><th class="r">Limit</th>
+          <th class="r">Giriş</th><th class="r">İmtahan</th><th class="r">Ümumi</th><th>Nəticə</th>
+        </tr></thead>
+        <tbody>${rows.map(({ r, m }, i) => `<tr>
+          <td class="ix">${i + 1}</td>
+          <td class="nm">${esc(r.name)}${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
+          <td class="code">${esc(m.code)}</td>
+          <td class="r">${dash(m.credits)}</td>
+          <td class="r">${m.F}</td>
+          <td class="r">${dash(m.G)}</td>
+          <td class="r">${m.O}</td>
+          <td class="r">${r.q == null ? "—" : r.q}</td>
+          <td class="r">${dash(m.R)}</td>
+          <td>${resAz(m.result)}${m.failedByAbsence ? " (qaib)" : ""}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+
+      <p class="rep-foot">Giriş balı = orta(seminar) × 2 + müstəqil iş + kollokvium + qaib balı, üstəgəl səhv balı.
+        Qaib limiti kredit sayına görə: 3 kredit → 3 saat, 4 → 9, 5 → 12, 6 → 15.
+        Ümumi bal 51-dən az, yaxud imtahan balı 17-dən az olduqda fənn kəsilmiş sayılır.</p>
+    </section>`,
+  };
+}
+
+function reportFile(key) {
+  const host = document.createElement("div");
+  const saved = reportSem;
+  reportSem = key;
+  const out = viewReport();
+  reportSem = saved;
+  host.innerHTML = out.body;
+  const css = `body{font-family:"Segoe UI",system-ui,sans-serif;font-size:12px;color:#111;background:#fff;margin:24px}
+h1{font-size:20px;margin:0 0 4px}.rep-sub{color:#666;margin:0 0 14px;font-size:12px}
+dl.rep-id{display:flex;flex-wrap:wrap;gap:6px 26px;margin:0 0 18px;padding:0}
+dl.rep-id div{display:flex;gap:8px}dl.rep-id dt{color:#666}dl.rep-id dd{margin:0;font-weight:600}
+.kpi{display:flex;flex-wrap:wrap;border:1px solid #ddd;margin:0 0 16px}
+.kpi>div{flex:1 1 90px;padding:8px 10px;border-right:1px solid #eee}
+.kpi b{display:block;font-size:17px}.kpi span{color:#666;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;background:#f3f4f6;border-bottom:1px solid #bbb;padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#555}
+td{padding:6px 8px;border-bottom:1px solid #eee}
+td.r,th.r{text-align:right}.nm small{display:block;color:#777;font-size:10px}
+.code{color:#777;font-family:ui-monospace,Consolas,monospace}
+.rep-foot{color:#666;font-size:10.5px;margin-top:16px;line-height:1.6}`;
+  return '<!doctype html>\n<html lang="az"><head><meta charset="utf-8">'
+    + '<title>Hesabat — ' + key + '</title><style>' + css + '</style></head><body>'
+    + host.innerHTML.replace(/class="tw"/g, "").replace(/class="t"/g, "")
+    + '</body></html>\n';
+}
+
+const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, qiymet: viewQiymet, fenn: viewFenn, profil: viewProfil, report: viewReport };
 
 /* ============================================================
    13. Çəkiliş
@@ -1523,6 +1666,11 @@ function render() {
   sel.innerHTML = keys.map((k) => `<option value="${esc(k)}" ${k === state.active ? "selected" : ""}>${esc(k)}</option>`).join("");
   document.getElementById("docname").textContent = state.active;
 
+  // sürüşmə mövqeyini saxla — qaib artıranda səhifə yuxarı/sola atmasın
+  const mainEl = document.getElementById("view");
+  const keepTop = mainEl ? mainEl.scrollTop : 0;
+  const keepLeft = [...document.querySelectorAll(".tw")].map((el) => el.scrollLeft);
+
   const active = document.activeElement;
   const keep = active && (active.id === "find" || (active.dataset && active.dataset.g != null))
     ? { g: active.dataset ? active.dataset.g : null, field: active.dataset ? active.dataset.field : null, k: active.dataset ? active.dataset.k : null, id: active.id, pos: active.selectionStart }
@@ -1534,6 +1682,11 @@ function render() {
   buildNav();
   paintStatus();
   paintSaveBar();
+
+  if (mainEl) mainEl.scrollTop = keepTop;
+  document.querySelectorAll(".tw").forEach((el, i) => {
+    if (keepLeft[i] != null) el.scrollLeft = keepLeft[i];
+  });
 
   if (keep) {
     const q = keep.id === "find" ? "#find"
@@ -1592,7 +1745,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -1665,6 +1818,82 @@ document.addEventListener("click", (e) => {
       }),
       "Yadda saxla",
       () => mutate((s) => { s.schedules[s.active][wk][dk].splice(i, 1); }));
+  }
+
+  /* ---- fənn əlavə et ---- */
+  if (t.dataset.addcourse) {
+    const have = activeSem().courses.map((c) => c.name);
+    const free = CATALOG.filter((c) => have.indexOf(c.name) < 0);
+    return openDialog("Fənn əlavə et", state.active,
+      `<div class="fld"><label>Kataloqdan seç</label><select data-fld="name">
+         <option value="">— seç —</option>
+         ${free.map((c) => `<option value="${esc(c.name)}">${esc(c.name)} · ${c.credits} kredit</option>`).join("")}
+       </select></div>
+       <div class="fld txt" style="margin-top:10px"><label>və ya adı özün yaz</label>
+         <input data-fld="custom" placeholder="kataloqda olmayan fənn"></div>`,
+      (val) => {
+        const name = String(val.custom || "").trim() || String(val.name || "").trim();
+        if (!name) return;
+        mutate((s) => {
+          const list = s.semesters[s.active].courses;
+          if (list.some((c) => c.name === name)) return;
+          list.push(row(name, 0));
+        });
+      }, "Əlavə et");
+  }
+
+  /* ---- fənnə toxunanda: dəqiq qaib / sil ---- */
+  if (t.dataset.course != null) {
+    const i = +t.dataset.course;
+    const r = activeSem().courses[i];
+    const m = compute(r);
+    return openDialog(r.name, m.G == null ? "limit təyin olunmayıb" : "limit " + m.G + " saat",
+      `<div class="fld"><label>İşlənmiş qaib (saat)</label>
+         <input class="mono" inputmode="numeric" data-fld="v" value="${m.F}"></div>
+       <p class="dlg-msg" style="margin-top:11px">Fənni silsən, onun qaibi və qiymətləri də silinir.</p>`,
+      (val) => mutate((s) => { s.semesters[s.active].courses[i].absent = Math.max(0, numOr(val.v)); }),
+      "Yadda saxla",
+      () => mutate((s) => {
+        s.semesters[s.active].courses.splice(i, 1);
+        selected = 0;
+      }));
+  }
+
+  /* ---- semestr əlavə et ---- */
+  if (t.dataset.addsem) {
+    const keys = Object.keys(state.semesters);
+    return openDialog("Yeni semestr", keys.length + " semestr var",
+      `<div class="fld txt"><label>Semestrin adı</label>
+         <input data-fld="name" placeholder="Kurs 2 • Semestr 2"></div>
+       <div class="fld" style="margin-top:10px"><label>Fənnləri haradan götürsün</label>
+         <select data-fld="from">
+           <option value="">boş başla</option>
+           ${keys.map((k) => `<option value="${esc(k)}">${esc(k)} — fənn adlarını köçür</option>`).join("")}
+         </select></div>
+       <p class="dlg-msg" style="margin-top:11px">Köçürəndə yalnız fənn adları gəlir; qaib və qiymətlər sıfırdan başlayır.</p>`,
+      (val) => {
+        const name = String(val.name || "").trim();
+        if (!name || state.semesters[name]) return;
+        const from = String(val.from || "");
+        mutate((s) => {
+          const src = s.semesters[from];
+          s.semesters[name] = {
+            courses: src ? src.courses.map((c) => row(c.name, 0)) : [],
+          };
+          s.schedules[name] = { alt: emptyWeek(), ust: emptyWeek() };
+          s.active = name;
+          resetSelection();
+        });
+      }, "Yarat");
+  }
+
+  /* ---- hesabat ---- */
+  if (t.dataset.report) { reportSem = t.dataset.report; current = "report"; render(); window.scrollTo({ top: 0 }); return; }
+  if (t.dataset.print) { window.print(); return; }
+  if (t.dataset.reportfile) {
+    const key = t.dataset.reportfile;
+    saveFile("hesabat-" + key.replace(/[^\w\u0400-\u04ff-]+/g, "-") + ".html", reportFile(key), "text/html;charset=utf-8");
+    return;
   }
 
   if (t.dataset.pick != null) { selected = +t.dataset.pick; return render(); }
