@@ -13,7 +13,7 @@ permissions:
 
 concurrency:
   group: cedvel
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -92,14 +92,14 @@ jobs:
               return anchor["type"] if weeks % 2 == 0 else other
 
 
-          def build(state, weeks=16, minutes_before=5):
+          def build(state, weeks=16, minutes_before=5, stamp_str=None):
               now = datetime.datetime.now()
-              utc = datetime.datetime.utcnow()
+              utc = datetime.datetime.now(datetime.timezone.utc)
               L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
                    "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
                    "X-WR-CALNAME:Qaib Jurnalı", "X-WR-TIMEZONE:Asia/Baku",
                    "REFRESH-INTERVAL;VALUE=DURATION:PT4H", "X-PUBLISHED-TTL:PT4H"]
-              ds = utc.strftime("%Y%m%dT%H%M00Z")
+              ds = stamp_str or utc.strftime("%Y%m%dT%H%M00Z")
               key = state["active"]
               sch = state["schedules"][key]
               cw = current_week_type(state.get("weekAnchor") or {"monday": "2026-09-28", "type": "ust"}, now)
@@ -170,7 +170,7 @@ jobs:
 
           def test_ics(minutes_ahead=15):
               now = datetime.datetime.now()
-              utc = datetime.datetime.utcnow()
+              utc = datetime.datetime.now(datetime.timezone.utc)
               start = now + datetime.timedelta(minutes=minutes_ahead)
               end = start + datetime.timedelta(minutes=10)
               L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
@@ -196,22 +196,29 @@ jobs:
               base = os.environ.get("FIREBASE_URL", "").strip().rstrip("/")
               key = os.environ.get("VAULT_KEY", "").strip()
               if not base or not key:
-                  sys.exit("FIREBASE_URL ve ya VAULT_KEY bos")
+                  sys.exit("XETA: FIREBASE_URL ve ya VAULT_KEY bos. Secrets-i yoxla.")
 
               url = base + "/vaults/" + urllib.parse.quote(key, safe="") + ".json"
               with urllib.request.urlopen(url, timeout=30) as r:
                   payload = json.loads(r.read().decode("utf-8"))
 
               if not payload:
-                  sys.exit("bulud bosdur")
+                  sys.exit("XETA: bulud bosdur. Proqramda 'Buluda gonder' bas.")
               if isinstance(payload.get("stateJson"), str):
                   state = json.loads(payload["stateJson"])
               else:
                   state = payload.get("state")
               if not state:
-                  sys.exit("state tapilmadi")
+                  sys.exit("XETA: melumat tapilmadi.")
 
-              text, lessons, exams, skipped = build(state)
+              # DTSTAMP melumatin son deyisme vaxtidir - her islemede deyismesin
+              ms = payload.get("updatedAt") or 0
+              stamp_str = None
+              if ms:
+                  d = datetime.datetime.fromtimestamp(ms / 1000.0, datetime.timezone.utc)
+                  stamp_str = d.strftime("%Y%m%dT%H%M00Z")
+
+              text, lessons, exams, skipped = build(state, 16, 5, stamp_str)
               io.open("qaib-cedvel.ics", "w", encoding="utf-8", newline="").write(text)
               print("qaib-cedvel.ics: %d ders, %d imtahan, %d saatsiz atildi"
                     % (lessons, exams, skipped))
