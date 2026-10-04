@@ -774,6 +774,8 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 .more[open] summary::before{transform:rotate(90deg)}
 .more summary:hover{color:var(--accent)}
 a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-content:center}
+
+.splitline{height:1px; background:var(--line); margin:14px 0 12px}
 </style>
 
 <div class="win">
@@ -813,7 +815,7 @@ a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-con
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-2308";
+var APP_BUILD = "20261005-0014";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1220,6 +1222,115 @@ function migrate(raw) {
   return out;
 }
 
+/* ---- Proqramın öz bildirişləri (Web Push) ----
+   Təqvim bildirişləri dəqiq vaxtlıdır, amma "Təqvim" adı ilə gəlir.
+   Bunlar isə Qaib Jurnalı adı və ikonu ilə gəlir: gündəlik xülasə və
+   imtahan xəbərdarlıqları. Göndərən tərəf GitHub-dakı avtomatikadır. */
+const VAPID_PUBLIC = "BPosmTVfUOaKJArBhwlWgUq8BglWhv_VGKSmQRkxcvPIgv2tCekCVFYi7uGE0HOHjchOi6sAreSD_mTkNNobJu8";
+let pushOn = false;
+let pushWhy = "";
+
+function pushCapable() {
+  return "serviceWorker" in navigator && "PushManager" in window &&
+    typeof Notification !== "undefined";
+}
+
+function deviceId() {
+  try {
+    let v = localStorage.getItem("qaib.devid");
+    if (!v) {
+      v = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem("qaib.devid", v);
+    }
+    return v;
+  } catch (e) { return "d0"; }
+}
+
+function b64ToBytes(str) {
+  const t = str.replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(t + "=".repeat((4 - (t.length % 4)) % 4));
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+function pushUrl(cfg, id) {
+  const base = String(cfg.url || "").trim().replace(/\/+$/, "");
+  return base + "/vaults/" + encodeURIComponent(String(cfg.key || "").trim()) +
+    "/push/" + encodeURIComponent(id) + ".json";
+}
+
+async function pushRefresh() {
+  if (!pushCapable()) { pushWhy = "cihaz dəstəkləmir"; return; }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sb = await reg.pushManager.getSubscription();
+    pushOn = !!sb && Notification.permission === "granted";
+    if (!pushOn) pushWhy = Notification.permission === "denied" ? "icazə verilməyib" : "";
+  } catch (e) { pushWhy = "yoxlanıla bilmədi"; }
+}
+
+async function pushEnable() {
+  if (!pushCapable()) {
+    throw new Error("Bu cihaz proqram bildirişlərini dəstəkləmir. iPhone-da proqram " +
+      "əsas ekrana əlavə olunmalı və oradan açılmalıdır.");
+  }
+  const cfg = cloudCfg();
+  if (!cfg || !cfg.url || !cfg.key) throw new Error("Əvvəlcə sinxronu qurmaq lazımdır.");
+
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error("İcazə verilmədi. Parametrlər → Bildirişlər → Qaib.");
+
+  const reg = await navigator.serviceWorker.ready;
+  let sb = await reg.pushManager.getSubscription();
+  if (!sb) {
+    sb = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: b64ToBytes(VAPID_PUBLIC),
+    });
+  }
+  const j = sb.toJSON();
+  if (!j.endpoint || !j.keys || !j.keys.p256dh) throw new Error("Abunəlik yarımçıq qaldı.");
+
+  const r = await fetch(pushUrl(cfg, deviceId()), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth,
+      at: Date.now(), ios: /iPhone|iPad|iPod/.test(navigator.userAgent),
+    }),
+  });
+  if (!r.ok) await cloudThrow(r);
+  pushOn = true;
+  pushWhy = "";
+}
+
+async function pushDisable() {
+  const cfg = cloudCfg();
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sb = await reg.pushManager.getSubscription();
+    if (sb) await sb.unsubscribe();
+  } catch (e) { /* davam */ }
+  if (cfg && cfg.url && cfg.key) {
+    try { await fetch(pushUrl(cfg, deviceId()), { method: "DELETE" }); } catch (e) {}
+  }
+  pushOn = false;
+}
+
+/* görünüşü yerində yoxlamaq üçün — şəbəkəsiz, dərhal */
+async function pushTestLocal() {
+  if (!pushCapable()) throw new Error("Bu cihaz dəstəkləmir.");
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error("İcazə verilmədi.");
+  const reg = await navigator.serviceWorker.ready;
+  const gun = todayLessonLine();
+  await reg.showNotification("Qaib Jurnalı", {
+    body: gun || "Bu gün dərs yoxdur.",
+    icon: ICON_HREF, badge: ICON_HREF, tag: "qaib-sinaq",
+  });
+}
+
 /* ---- Təqvim lenti (abunəlik) ----
    Sayt nüsxəsində webcal:// ünvanı verilir; iOS ona abunə olub özü yeniləyir. */
 const CAL_FILE = "qaib-cedvel.ics";
@@ -1427,7 +1538,7 @@ function makeCloudBackend(cfg) {
   return {
     push: async (payload) => {
       const r = await fetch(cloudEndpoint(cfg), {
-        method: "PUT",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
@@ -1956,7 +2067,8 @@ function viewProfil() {
           </section>` : ""}
 
           <section class="panel">
-            <div class="ph">Bildirişlər<span class="ph-r">${state.calHooked ? "qoşulub" : "qoşulmayıb"}</span></div>
+            <div class="ph">Bildirişlər<span class="ph-r">${((state.calHooked ? "təqvim" : "") +
+              (state.calHooked && pushOn ? " + " : "") + (pushOn ? "proqram" : "")) || "qoşulmayıb"}</span></div>
             <div class="pb">
               ${state.calHooked ? `
               <p class="dlg-msg" style="margin-bottom:11px"><b>Təqvim qoşulub.</b> Hər dərsdən
@@ -1972,6 +2084,19 @@ function viewProfil() {
               <div class="row">
                 <button class="btn primary" type="button" data-calhook="1">Bildirişləri qoş</button>
               </div>`}
+              <div class="splitline"></div>
+              <p class="dlg-msg"><b>Proqramın öz bildirişləri</b> — Qaib Jurnalı adı və ikonu ilə
+                gəlir: hər səhər <b>saat 9-da günün dərs cədvəli</b>, imtahanlara
+                <b>2 və 1 gün qalmış</b> xəbərdarlıq.${pushOn ? "" :
+                " Dərsə 5 dəqiqə qalmış bildiriş bundan getmir — o, təqvimdən gəlir, çünki dəqiq vaxt lazımdır."}</p>
+              <div class="row" style="margin-top:10px">
+                ${pushOn
+                  ? `<button class="btn" type="button" data-pushtest="1">Görünüşü yoxla</button>
+                     <button class="btn" type="button" data-pushoff="1">Söndür</button>`
+                  : `<button class="btn primary" type="button" data-pushon="1">Proqram bildirişlərini aç</button>`}
+              </div>
+              ${!pushOn && pushWhy ? `<p class="dlg-msg" style="margin-top:8px;opacity:.72">${esc(pushWhy)}</p>` : ""}
+
               <details class="more">
                 <summary>Başqa yollar</summary>
                 <div class="row" style="margin-top:9px">
@@ -2288,7 +2413,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -2532,6 +2657,42 @@ document.addEventListener("click", (e) => {
       }, "Yüklə");
   }
 
+  /* ---- proqram bildirişləri ---- */
+  if (t.dataset.pushon) {
+    return openDialog("Proqram bildirişləri", "bir dəfəlik icazə",
+      `<p class="dlg-msg">Təsdiqləyəndə telefon <b>«Bildirişlərə icazə verilsin?»</b> soruşacaq —
+         <b>İcazə ver</b>-i seç.</p>
+       <p class="dlg-msg" style="margin-top:11px">Bundan sonra hər səhər saat 9-da günün dərsləri,
+         imtahanlara 2 və 1 gün qalmış isə xəbərdarlıq <b>Qaib Jurnalı</b> adı və ikonu ilə gələcək.</p>
+       ${isiOS() && !isStandalone() ? `<p class="dlg-msg" style="margin-top:11px"><b>Qeyd:</b>
+         iPhone-da bu yalnız əsas ekrana əlavə edilmiş proqramda işləyir. Safari-dən açmısansa,
+         əvvəlcə əsas ekrandaki ikondan aç.</p>` : ""}`,
+      () => {
+        pushEnable().then(() => {
+          render();
+          setTimeout(() => openDialog("Açıldı", "",
+            `<p class="dlg-msg">Proqram bildirişləri qoşuldu.
+               <b>Görünüşü yoxla</b> ilə necə göründüyünü indi görə bilərsən.</p>`,
+            null, "Oldu"), 0);
+        }).catch((err) => {
+          pushRefresh().then(render);
+          setTimeout(() => openDialog("Alınmadı", "",
+            `<p class="dlg-msg">${esc(err.message || String(err))}</p>`, null, "Bağla"), 0);
+        });
+      }, "İcazə ver");
+  }
+  if (t.dataset.pushoff) {
+    return openDialog("Söndürülsün?", "",
+      `<p class="dlg-msg">Proqram bildirişləri dayanacaq.
+         Təqvimdən gələn dərs bildirişlərinə təsir etmir.</p>`,
+      () => { pushDisable().then(render); }, "Söndür");
+  }
+  if (t.dataset.pushtest) {
+    pushTestLocal().catch((err) => openDialog("Alınmadı", "",
+      `<p class="dlg-msg">${esc(err.message || String(err))}</p>`, null, "Bağla"));
+    return;
+  }
+
   /* ---- təqvimi qoş ---- */
   if (t.dataset.calhook) {
     if (!CAL_FEED) {
@@ -2738,6 +2899,21 @@ function icsFold(line) {
   return out.join(ICS_EOL);
 }
 
+/* Bu günün dərsləri bir sətirdə — sınaq bildirişi üçün */
+function todayLessonLine() {
+  try {
+    const d = new Date();
+    const dk = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()];
+    if (dk === "sun" || dk === "sat") return "";
+    const wk = currentWeekType();
+    const sch = (state.schedules || {})[state.active] || {};
+    const list = ((sch[wk] || {})[dk] || []).filter((x) => (x.subject || "").trim());
+    if (!list.length) return "";
+    return list.map((x) => ((x.time || "").split(/[–\-—]/)[0].trim() + " " + x.subject).trim())
+      .join(" · ");
+  } catch (e) { return ""; }
+}
+
 function buildIcs(weeks, minutesBefore) {
   weeks = weeks || 16;
   const mb = minutesBefore == null ? 5 : minutesBefore;
@@ -2928,6 +3104,7 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
 
 /* açılışdan sonra arxa planda yenilik yoxla */
 setTimeout(() => checkUpdate(true), 1500);
+setTimeout(() => { pushRefresh().then(render); }, 900);
 </script>
 
 </body>
