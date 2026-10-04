@@ -1,22 +1,25 @@
-# Qaib Jurnalı — təqvim lentini avtomatik yeniləyir.
-# Buluddaki cədvəli oxuyur, qaib-cedvel.ics faylını yenidən qurur.
-# Telefon bu fayla abunədir — fayl dəyişəndə təqvim özü yenilənir.
-name: Teqvim lentini yenile
+# Qaib Jurnalı — avtomatika.
+# Saatda bir dəfə işləyir və iki iş görür:
+#   1) buluddaki cədvəldən qaib-cedvel.ics faylını yenidən qurur
+#      (telefon ona abunədir — dərsdən 5 dəqiqə əvvəlki bildirişlər oradan gəlir)
+#   2) səhər saat 9-da günün dərs xülasəsini, imtahanlara 2 və 1 gün qalmış
+#      xəbərdarlığı proqramın öz adı və ikonu ilə göndərir
+name: Qaib avtomatikasi
 
 on:
   schedule:
-    - cron: "17 */4 * * *"      # hər 4 saatda bir
-  workflow_dispatch:            # əllə də işə salmaq olar
+    - cron: "7 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 concurrency:
-  group: cedvel
+  group: qaib-avto
   cancel-in-progress: false
 
 jobs:
-  build:
+  run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -25,10 +28,14 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: ICS qur
+      - name: Kitabxana
+        run: pip install --quiet pywebpush
+
+      - name: Lenti qur, bildirisleri gonder
         env:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           VAULT_KEY: ${{ secrets.VAULT_KEY }}
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
           TZ: Asia/Baku
         run: |
           python - << 'QAIB_PY'
@@ -190,44 +197,214 @@ jobs:
               return CRLF.join(L) + CRLF, start
 
 
+          AY = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul",
+                "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"]
+
+
+          def api(base, key, path, method="GET", data=None):
+              """Firebase RTDB REST. path: '' -> butov qovsaq, '/push' -> alt sahe."""
+              import urllib.request
+              u = (base + "/vaults/" + urllib.parse.quote(key, safe="") + path + ".json")
+              body = None if data is None else json.dumps(data).encode("utf-8")
+              req = urllib.request.Request(u, data=body, method=method,
+                                           headers={"Content-Type": "application/json"})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  raw = r.read().decode("utf-8")
+              return json.loads(raw) if raw and raw != "null" else None
+
+
+          def start_min(t):
+              r = parse_range(t)
+              return r[0] if r else 10 ** 6
+
+
+          def hhmm(m):
+              return "%02d:%02d" % (m // 60, m % 60)
+
+
+          def today_lessons(state, now):
+              """Bugunku derslerin siyahisi: [(dakika, ad, otaq)]"""
+              di = now.weekday()
+              if di > 4:
+                  return []
+              wk = current_week_type(state.get("weekAnchor") or
+                                     {"monday": "2026-09-28", "type": "ust"}, now)
+              sch = (state.get("schedules") or {}).get(state.get("active")) or {}
+              out = []
+              for e in (sch.get(wk) or {}).get(DAYS[di], []):
+                  subj = (e.get("subject") or "").strip()
+                  if not subj:
+                      continue
+                  out.append((start_min(e.get("time")), subj, (e.get("room") or "").strip()))
+              out.sort()
+              return out
+
+
+          def upcoming_exams(state, now):
+              """(gun_qalir, ad, tarix, otaq) - yalniz 1 ve 2 gun qalmislar."""
+              bugun = now.date()
+              out = []
+              for skey in (state.get("semesters") or {}):
+                  for r in (state["semesters"][skey].get("courses") or []):
+                      iso = r.get("examDate")
+                      if not iso:
+                          continue
+                      try:
+                          st = datetime.datetime.strptime(iso[:16], "%Y-%m-%dT%H:%M")
+                      except ValueError:
+                          continue
+                      qalan = (st.date() - bugun).days
+                      if qalan in (1, 2):
+                          out.append((qalan, r.get("name") or "?", st,
+                                      (r.get("examRoom") or "").strip()))
+              out.sort()
+              return out
+
+
+          def slug(ad):
+              """Firebase acarinda nokte, #, $, [, ], / olmaz - qisa hash isledirik."""
+              import hashlib
+              return hashlib.sha1(ad.encode("utf-8")).hexdigest()[:10]
+
+
+          def send_one(sub, payload, priv):
+              from pywebpush import webpush, WebPushException
+              try:
+                  webpush(
+                      subscription_info={"endpoint": sub["endpoint"],
+                                         "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
+                      data=json.dumps(payload, ensure_ascii=False),
+                      vapid_private_key=priv,
+                      vapid_claims={"sub": "mailto:qaib@users.noreply.github.com"},
+                      ttl=86400,
+                  )
+                  return 200
+              except WebPushException as e:
+                  code = getattr(getattr(e, "response", None), "status_code", 0)
+                  print("   push xetasi:", code, str(e)[:120])
+                  return code
+
+
+          def do_push(base, key, node, state, now, priv):
+              subs = node.get("push") or {}
+              if not subs:
+                  print("push: abune cihaz yoxdur")
+                  return
+              if now.hour < 9:
+                  print("push: saat 9-dan evveldir, gozleyir")
+                  return
+
+              gun = now.date().isoformat()
+              sent = ((node.get("sent") or {}).get(gun)) or {}
+              mesajlar = []
+
+              if not sent.get("digest"):
+                  ders = today_lessons(state, now)
+                  if now.weekday() > 4:
+                      pass                                  # hefte sonu - xulase yox
+                  elif ders:
+                      sat = " · ".join(
+                          hhmm(m) + " " + ad + ((" (" + ot + ")") if ot else "")
+                          for m, ad, ot in ders if m < 10 ** 6)
+                      if not sat:
+                          sat = " · ".join(ad for _, ad, _ in ders)
+                      mesajlar.append(("digest", {
+                          "title": "Bugünkü dərslər",
+                          "body": sat, "tag": "qaib-gun-" + gun}))
+                  else:
+                      mesajlar.append(("digest", {
+                          "title": "Bu gün dərs yoxdur",
+                          "body": "Cədvəldə bu günə dərs yazılmayıb.",
+                          "tag": "qaib-gun-" + gun}))
+
+              for qalan, ad, st, otaq in upcoming_exams(state, now):
+                  mk = "imtahan-%d-%s" % (qalan, slug(ad))
+                  if sent.get(mk):
+                      continue
+                  tarix = "%d %s, %02d:%02d" % (st.day, AY[st.month - 1], st.hour, st.minute)
+                  mesajlar.append((mk, {
+                      "title": "İmtahan — %d gün qaldı" % qalan,
+                      "body": ad + " · " + tarix + ((" · " + otaq) if otaq else ""),
+                      "tag": "qaib-" + mk}))
+
+              if not mesajlar:
+                  print("push: gonderilecek yeni mesaj yoxdur")
+                  return
+
+              olu = []
+              for mk, payload in mesajlar:
+                  ok = 0
+                  for sid, sub in subs.items():
+                      if not isinstance(sub, dict) or not sub.get("endpoint"):
+                          continue
+                      code = send_one(sub, payload, priv)
+                      if code in (404, 410):
+                          olu.append(sid)
+                      elif code and code < 400:
+                          ok += 1
+                  print("push: %-22s -> %d cihaz" % (mk, ok))
+                  api(base, key, "/sent/" + gun, "PATCH", {mk: True})
+
+              for sid in set(olu):
+                  api(base, key, "/push/" + sid, "DELETE")
+                  print("push: kohnelmis cihaz silindi:", sid)
+
+              # kohne nisanlari temizle (7 gunden evvel)
+              eski = [d for d in (node.get("sent") or {})
+                      if d < (now.date() - datetime.timedelta(days=7)).isoformat()]
+              for d in eski:
+                  api(base, key, "/sent/" + d, "DELETE")
+
+
           if __name__ == "__main__":
-              import urllib.request, sys
+              import sys
+              try:
+                  sys.stdout.reconfigure(encoding="utf-8")
+              except Exception:
+                  pass
 
               base = os.environ.get("FIREBASE_URL", "").strip().rstrip("/")
               key = os.environ.get("VAULT_KEY", "").strip()
+              priv = os.environ.get("VAPID_PRIVATE", "").strip()
               if not base or not key:
                   sys.exit("XETA: FIREBASE_URL ve ya VAULT_KEY bos. Secrets-i yoxla.")
 
-              url = base + "/vaults/" + urllib.parse.quote(key, safe="") + ".json"
-              with urllib.request.urlopen(url, timeout=30) as r:
-                  payload = json.loads(r.read().decode("utf-8"))
-
-              if not payload:
+              node = api(base, key, "")
+              if not node:
                   sys.exit("XETA: bulud bosdur. Proqramda 'Buluda gonder' bas.")
-              if isinstance(payload.get("stateJson"), str):
-                  state = json.loads(payload["stateJson"])
+              if isinstance(node.get("stateJson"), str):
+                  state = json.loads(node["stateJson"])
               else:
-                  state = payload.get("state")
+                  state = node.get("state")
               if not state:
                   sys.exit("XETA: melumat tapilmadi.")
 
-              # DTSTAMP melumatin son deyisme vaxtidir - her islemede deyismesin
-              ms = payload.get("updatedAt") or 0
+              now = datetime.datetime.now()
+
+              # 1) teqvim lenti
+              ms = node.get("updatedAt") or 0
               stamp_str = None
               if ms:
                   d = datetime.datetime.fromtimestamp(ms / 1000.0, datetime.timezone.utc)
                   stamp_str = d.strftime("%Y%m%dT%H%M00Z")
-
               text, lessons, exams, skipped = build(state, 16, 5, stamp_str)
               io.open("qaib-cedvel.ics", "w", encoding="utf-8", newline="").write(text)
-              print("qaib-cedvel.ics: %d ders, %d imtahan, %d saatsiz atildi"
-                    % (lessons, exams, skipped))
+              print("ics: %d ders, %d imtahan, %d saatsiz atildi" % (lessons, exams, skipped))
+
+              # 2) proqram bildirisleri
+              if not priv:
+                  print("push: VAPID_PRIVATE yoxdur, bu hisse atlanir")
+              else:
+                  try:
+                      do_push(base, key, node, state, now, priv)
+                  except Exception as e:
+                      print("push: ugursuz -", str(e)[:160])
           QAIB_PY
 
       - name: Deyisiklik varsa yaz
         run: |
           if git diff --quiet -- qaib-cedvel.ics; then
-            echo "deyisiklik yoxdur"
+            echo "lentde deyisiklik yoxdur"
             exit 0
           fi
           git config user.name "qaib-bot"
