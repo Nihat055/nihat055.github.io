@@ -1,7 +1,7 @@
 /* Qaib Jurnali - sade oflayn kes.
    Sened sorgulari sebekadan gelir (yenilikler derhal gorunsun),
    sebeka yoxdursa kesdeki nusxa verilir. */
-const CACHE = "qaib-20261004-0349";
+const CACHE = "qaib-20261004-0400";
 const SHELL = ["./", "./index.html", "./manifest.json",
                "./icon-180.png", "./icon-192.png", "./icon-512.png"];
 

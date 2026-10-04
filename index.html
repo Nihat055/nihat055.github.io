@@ -801,7 +801,7 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-0349";
+var APP_BUILD = "20261004-0400";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1240,6 +1240,24 @@ async function checkUpdate(force) {
 }
 
 async function applyUpdate() {
+  /* ƏVVƏLCƏ şəbəkəni yoxla: keşi silib sonra yükləyə bilməsək,
+     tətbiq boş ekranda qalardı. Təzə nüsxə əlçatan deyilsə, heç nəyə toxunmuruq. */
+  setSync("busy", "Yenilənir");
+  try {
+    const r = await fetch("index.html?probe=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const txt = await r.text();
+    if (txt.length < 5000) throw new Error("natamam cavab");
+  } catch (e) {
+    setSync("local", "Şəbəkə yoxdur — yeniləmə təxirə salındı");
+    if (typeof openDialog === "function") {
+      openDialog("Yeniləmə alınmadı", "",
+        "<p class=\"dlg-msg\">Təzə nüsxəni yükləmək üçün internet lazımdır. " +
+        "Proqram olduğu kimi işləməyə davam edir — şəbəkə qayıdanda yenidən cəhd et.</p>",
+        null, "Oldu");
+    }
+    return;
+  }
   try {
     if (window.caches) {
       const ks = await caches.keys();
@@ -2480,14 +2498,18 @@ document.addEventListener("click", (e) => {
 
   /* ---- sınaq bildirişi ---- */
   if (t.dataset.testics) {
-    const start = new Date(Date.now() + 3 * 60000);
-    const saat = String(start.getHours()).padStart(2, "0") + ":" + String(start.getMinutes()).padStart(2, "0");
-    return openDialog("Sınaq bildirişi", saat + "-də başlayır",
-      `<p class="dlg-msg">Təqvimə <b>3 dəqiqə sonra</b> başlayan bir sınaq hadisəsi əlavə edir.
-         Xəbərdarlıq başlamazdan <b>1 dəqiqə əvvəl</b> gəlir — yəni təxminən <b>2 dəqiqəyə</b>
-         telefonun bildiriş göstərəcək. Dərs bildirişləri də tam olaraq bu cür gəlir.</p>
+    const hhmm = (d) => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    const start = new Date(Date.now() + 10 * 60000);
+    const a1 = new Date(start.getTime() - 5 * 60000);
+    const a2 = new Date(start.getTime() - 2 * 60000);
+    return openDialog("Sınaq bildirişi", hhmm(start) + "-də başlayır",
+      `<p class="dlg-msg">Təqvimə <b>${hhmm(start)}</b>-də başlayan sınaq hadisəsi əlavə edir.
+         İki xəbərdarlıq qurulur:</p>
+       <p class="dlg-msg" style="margin-top:9px">
+         • <b>${hhmm(a1)}</b> — 5 dəqiqə qalmış <i>(dərs xəbərdarlığı ilə eyni)</i><br>
+         • <b>${hhmm(a2)}</b> — 2 dəqiqə qalmış</p>
        <p class="dlg-msg" style="margin-top:11px">Faylı endir → üstünə toxun → <b>Təqvimə əlavə et</b>.
-         Sonra proqramdan çıx və gözlə.</p>`,
+         Təqvim tətbiqini açıb hadisənin əlavə olunduğunu yoxla, sonra gözlə.</p>`,
       () => { saveFile("qaib-sinaq.ics", testIcs(), "text/calendar;charset=utf-8"); },
       "Faylı endir");
   }
@@ -2601,6 +2623,10 @@ const pad2 = (n) => String(n).padStart(2, "0");
 const icsStamp = (d) =>
   d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) +
   "T" + pad2(d.getHours()) + pad2(d.getMinutes()) + "00";
+/* DTSTAMP UTC olmalıdır — əvvəl yerli saata "Z" əlavə olunurdu, bu səhv idi */
+const icsStampUTC = (d) =>
+  d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate()) +
+  "T" + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + "00Z";
 
 /* "09:00 – 10:20" → {s:540, e:620};  tək saat yazılıbsa 80 dəqiqə sayılır */
 function parseRange(t) {
@@ -2638,7 +2664,7 @@ function buildIcs(weeks, minutesBefore) {
     "X-WR-CALNAME:Qaib Jurnalı", "X-WR-TIMEZONE:Asia/Baku",
   ];
   const now = new Date();
-  const stamp = icsStamp(now);
+  const stamp = icsStampUTC(now);
   const monThis = mondayOf(now);
   const cw = currentWeekType();
   let lessons = 0, exams = 0, skipped = 0;
@@ -2661,7 +2687,7 @@ function buildIcs(weeks, minutesBefore) {
         lessons++;
         L.push("BEGIN:VEVENT");
         L.push("UID:qaib-" + wk + "-" + dk + "-" + lessons + "-" + start.getTime() + "@qaib");
-        L.push("DTSTAMP:" + stamp + "Z");
+        L.push("DTSTAMP:" + stamp);
         L.push("DTSTART:" + icsStamp(start));
         L.push("DTEND:" + icsStamp(end));
         L.push("RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + icsStamp(until));
@@ -2685,7 +2711,7 @@ function buildIcs(weeks, minutesBefore) {
       exams++;
       L.push("BEGIN:VEVENT");
       L.push("UID:qaib-imtahan-" + exams + "-" + st.getTime() + "@qaib");
-      L.push("DTSTAMP:" + stamp + "Z");
+      L.push("DTSTAMP:" + stamp);
       L.push("DTSTART:" + icsStamp(st));
       L.push("DTEND:" + icsStamp(en));
       L.push(icsFold("SUMMARY:İmtahan — " + icsEsc(r.name)));
@@ -2705,21 +2731,24 @@ function buildIcs(weeks, minutesBefore) {
 
 /* Sınaq hadisəsi: 3 dəqiqə sonra başlayır, 1 dəqiqə əvvəl xəbərdarlıq */
 function testIcs() {
-  const start = new Date(Date.now() + 3 * 60000);
+  const start = new Date(Date.now() + 10 * 60000);
   const end = new Date(start.getTime() + 10 * 60000);
   const L = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
     "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Qaib Jurnalı",
     "BEGIN:VEVENT",
     "UID:qaib-sinaq-" + Date.now() + "@qaib",
-    "DTSTAMP:" + icsStamp(new Date()) + "Z",
+    "DTSTAMP:" + icsStampUTC(new Date()),
     "DTSTART:" + icsStamp(start),
     "DTEND:" + icsStamp(end),
     "SUMMARY:Qaib Jurnalı — sınaq bildirişi",
     "LOCATION:sınaq",
     "DESCRIPTION:Dərs bildirişlərinin necə gəldiyini yoxlamaq üçün yaradılıb. Silə bilərsən.",
-    "BEGIN:VALARM", "TRIGGER:-PT1M", "ACTION:DISPLAY",
-    "DESCRIPTION:Sınaq bildirişi — 1 dəqiqədən sonra başlayır",
+    "BEGIN:VALARM", "TRIGGER:-PT5M", "ACTION:DISPLAY",
+    "DESCRIPTION:Sınaq bildirişi — 5 dəqiqə qaldı (dərs xəbərdarlığı ilə eyni)",
+    "END:VALARM",
+    "BEGIN:VALARM", "TRIGGER:-PT2M", "ACTION:DISPLAY",
+    "DESCRIPTION:Sınaq bildirişi — 2 dəqiqə qaldı",
     "END:VALARM",
     "END:VEVENT", "END:VCALENDAR",
   ];
