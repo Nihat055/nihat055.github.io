@@ -801,7 +801,7 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-0400";
+var APP_BUILD = "20261004-0410";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -2453,10 +2453,12 @@ document.addEventListener("click", (e) => {
       `<p class="dlg-msg">Fayl 16 həftəlik dərsləri (alt/üst həftə üçün 2 həftədən bir təkrar) və
          yazılmış imtahanları əhatə edir.${out.skipped
            ? ` <b>${out.skipped} dərsin saatı yazılmayıb</b> — onlar faylda yoxdur.` : ""}</p>
-       <p class="dlg-msg" style="margin-top:11px">Endirdikdən sonra fayla toxun → <b>Təqvimə əlavə et</b>.
+       <p class="dlg-msg" style="margin-top:11px">${isStandalone()
+         ? "<b>Paylaş</b> düyməsinə bas → siyahıdan <b>Təqvim</b>-i seç → <b>Əlavə et</b>."
+         : "Endirdikdən sonra fayla toxun → <b>Təqvimə əlavə et</b>."}
          Dərs cədvəlini dəyişəndə faylı yenidən yarat.</p>`,
       () => { saveFile("qaib-cedvel.ics", out.text, "text/calendar;charset=utf-8"); },
-      "Faylı endir");
+      isStandalone() ? "Paylaş" : "Faylı endir");
   }
 
   if (t.dataset.export) {
@@ -2508,10 +2510,12 @@ document.addEventListener("click", (e) => {
        <p class="dlg-msg" style="margin-top:9px">
          • <b>${hhmm(a1)}</b> — 5 dəqiqə qalmış <i>(dərs xəbərdarlığı ilə eyni)</i><br>
          • <b>${hhmm(a2)}</b> — 2 dəqiqə qalmış</p>
-       <p class="dlg-msg" style="margin-top:11px">Faylı endir → üstünə toxun → <b>Təqvimə əlavə et</b>.
-         Təqvim tətbiqini açıb hadisənin əlavə olunduğunu yoxla, sonra gözlə.</p>`,
-      () => { saveFile("qaib-sinaq.ics", testIcs(), "text/calendar;charset=utf-8"); },
-      "Faylı endir");
+       <p class="dlg-msg" style="margin-top:11px">${isStandalone()
+         ? "<b>Paylaş</b> düyməsinə bas → açılan siyahıdan <b>Təqvim</b>-i seç → <b>Əlavə et</b>."
+         : "Faylı endir → üstünə toxun → <b>Təqvimə əlavə et</b>."}
+         Sonra Təqvim tətbiqini açıb hadisənin yerində olduğunu yoxla.</p>`,
+      () => { saveFile("qaib-sinaq.ics", testIcs(start), "text/calendar;charset=utf-8"); },
+      isStandalone() ? "Paylaş" : "Faylı endir");
   }
 
   /* ---- versiya ---- */
@@ -2730,8 +2734,8 @@ function buildIcs(weeks, minutesBefore) {
 }
 
 /* Sınaq hadisəsi: 3 dəqiqə sonra başlayır, 1 dəqiqə əvvəl xəbərdarlıq */
-function testIcs() {
-  const start = new Date(Date.now() + 10 * 60000);
+function testIcs(startAt) {
+  const start = startAt instanceof Date ? startAt : new Date(Date.now() + 10 * 60000);
   const end = new Date(start.getTime() + 10 * 60000);
   const L = [
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
@@ -2755,11 +2759,28 @@ function testIcs() {
   return L.join(ICS_EOL) + ICS_EOL;
 }
 
-async function saveFile(name, text, mime) {
+/* iOS-da ana ekran tətbiqləri fayl endirə bilmir — orada paylaşma vərəqi işləyir.
+   Ona görə sıra belədir: paylaşma → platformanın endirməsi → klassik endirmə. */
+const isStandalone = () =>
+  (window.navigator.standalone === true) ||
+  (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+
+function saveFile(name, text, mime) {
+  const type = (mime || "text/plain;charset=utf-8").split(";")[0];
+
+  // 1) Paylaşma vərəqi — jest itməsin deyə heç bir await-dən əvvəl çağırılır
   try {
-    const dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null;
-    if (dl && dl.save) { await dl.save({ filename: name, data: text }); return true; }
-  } catch (e) { /* aşağıdaki yolu sına */ }
+    if (navigator.share && navigator.canShare && window.File) {
+      const file = new File([text], name, { type });
+      if (navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: name }).catch(() => {});
+        return true;
+      }
+    }
+  } catch (e) { /* aşağıdaki yollara keç */ }
+
+  // 2) Klassik endirmə (masaüstü brauzerlər, Safari-nin adi rejimi)
+  let ok = false;
   try {
     const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -2770,10 +2791,19 @@ async function saveFile(name, text, mime) {
     document.body.appendChild(a);
     a.click();
     a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
-    return true;
-  } catch (e) { return false; }
+    setTimeout(() => URL.revokeObjectURL(url), 8000);
+    ok = true;
+  } catch (e) { ok = false; }
+
+  // 3) Claude pəncərəsində platformanın öz endirməsi
+  if (!ok && window.claude && window.claude.use) {
+    window.claude.use("downloads").then((dl) => {
+      if (dl && dl.save) dl.save({ filename: name, data: text }).catch(() => {});
+    }).catch(() => {});
+  }
+  return ok;
 }
+
 
 /* ============================================================
    18. Başlat
