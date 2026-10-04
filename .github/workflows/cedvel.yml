@@ -10,6 +10,11 @@ on:
   schedule:
     - cron: "7 * * * *"
   workflow_dispatch:
+    inputs:
+      sinaq:
+        description: "Telefona derhal sinaq bildirisi gonder"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -36,6 +41,7 @@ jobs:
           FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
           VAULT_KEY: ${{ secrets.VAULT_KEY }}
           VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+          SINAQ: ${{ inputs.sinaq }}
           TZ: Asia/Baku
         run: |
           python - << 'QAIB_PY'
@@ -285,11 +291,36 @@ jobs:
                   return code
 
 
+          def do_sinaq(subs, now, priv):
+              """Elle isə salinanda: saatdan ve nisandan asili olmayaraq bir bildiris."""
+              ok = 0
+              payload = {
+                  "title": "Sınaq bildirişi",
+                  "body": "Hər şey işləyir. Gündəlik cədvəl hər səhər saat 9-da bu cür gələcək.",
+                  "tag": "qaib-sinaq-" + now.strftime("%H%M%S"),
+              }
+              for sid, sub in subs.items():
+                  if not isinstance(sub, dict) or not sub.get("endpoint"):
+                      continue
+                  code = send_one(sub, payload, priv)
+                  if code and code < 400:
+                      ok += 1
+                  print("   cihaz %s -> %s" % (sid, code))
+              print("sinaq: %d cihaza gonderildi" % ok)
+              return ok
+
+
           def do_push(base, key, node, state, now, priv):
               subs = node.get("push") or {}
               if not subs:
-                  print("push: abune cihaz yoxdur")
+                  print("push: abune cihaz yoxdur - telefonda 'Proqram bildirislerini ac' basilmayib?")
                   return
+              print("push: %d abune cihaz" % len(subs))
+
+              if os.environ.get("SINAQ", "").strip().lower() == "true":
+                  do_sinaq(subs, now, priv)
+                  return
+
               if now.hour < 9:
                   print("push: saat 9-dan evveldir, gozleyir")
                   return
