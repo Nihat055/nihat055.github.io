@@ -1,0 +1,230 @@
+# Qaib Jurnalı — təqvim lentini avtomatik yeniləyir.
+# Buluddaki cədvəli oxuyur, qaib-cedvel.ics faylını yenidən qurur.
+# Telefon bu fayla abunədir — fayl dəyişəndə təqvim özü yenilənir.
+name: Teqvim lentini yenile
+
+on:
+  schedule:
+    - cron: "17 */4 * * *"      # hər 4 saatda bir
+  workflow_dispatch:            # əllə də işə salmaq olar
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cedvel
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: ICS qur
+        env:
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+          VAULT_KEY: ${{ secrets.VAULT_KEY }}
+          TZ: Asia/Baku
+        run: |
+          python - << 'QAIB_PY'
+          # -*- coding: utf-8 -*-
+          """Tetbiqdeki ile eyni mentiqle .ics qurur (tetbiqdeki buildIcs-in tam qarsiligi)."""
+          import io, json, re, os, datetime, urllib.parse
+
+          CRLF = "\r\n"
+          DAYS = ["mon", "tue", "wed", "thu", "fri"]
+          WEEK_AZ = {"ust": "Üst həftə", "alt": "Alt həftə"}
+
+
+          def fold(line):
+              b = line.encode("utf-8")
+              if len(b) <= 73:
+                  return line
+              out, cur, n = [], "", 0
+              for ch in line:
+                  c = len(ch.encode("utf-8"))
+                  if n + c > 73:
+                      out.append(cur); cur = " "; n = 1
+                  cur += ch; n += c
+              out.append(cur)
+              return CRLF.join(out)
+
+
+          def esc(s):
+              return (str(s).replace("\\", "\\\\").replace(";", "\\;")
+                      .replace(",", "\\,").replace("\n", "\\n"))
+
+
+          def stamp(d):
+              return d.strftime("%Y%m%dT%H%M00")
+
+
+          def stamp_utc(d):
+              return d.utctimetuple() and datetime.datetime(*d.utctimetuple()[:6]).strftime("%Y%m%dT%H%M00Z")
+
+
+          def parse_range(t):
+              m = re.search(r"(\d{1,2})[:.](\d{2})(?:\s*[–\-—]\s*(\d{1,2})[:.](\d{2}))?", str(t or ""))
+              if not m:
+                  return None
+              s = int(m.group(1)) * 60 + int(m.group(2))
+              e = int(m.group(3)) * 60 + int(m.group(4)) if m.group(3) else s + 80
+              if e <= s:
+                  e = s + 80
+              return s, e
+
+
+          def monday_of(d):
+              d = d.replace(hour=0, minute=0, second=0, microsecond=0)
+              return d - datetime.timedelta(days=d.weekday())
+
+
+          def current_week_type(anchor, now):
+              base = monday_of(datetime.datetime.strptime(anchor["monday"], "%Y-%m-%d"))
+              cur = monday_of(now)
+              weeks = round((cur - base).days / 7.0)
+              other = "alt" if anchor["type"] == "ust" else "ust"
+              return anchor["type"] if weeks % 2 == 0 else other
+
+
+          def build(state, weeks=16, minutes_before=5):
+              now = datetime.datetime.now()
+              utc = datetime.datetime.utcnow()
+              L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
+                   "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+                   "X-WR-CALNAME:Qaib Jurnalı", "X-WR-TIMEZONE:Asia/Baku",
+                   "REFRESH-INTERVAL;VALUE=DURATION:PT4H", "X-PUBLISHED-TTL:PT4H"]
+              ds = utc.strftime("%Y%m%dT%H%M00Z")
+              key = state["active"]
+              sch = state["schedules"][key]
+              cw = current_week_type(state.get("weekAnchor") or {"monday": "2026-09-28", "type": "ust"}, now)
+              mon_this = monday_of(now)
+              lessons = skipped = exams = 0
+
+              for wk in ("alt", "ust"):
+                  base = mon_this + datetime.timedelta(days=0 if wk == cw else 7)
+                  for di, dk in enumerate(DAYS):
+                      for e in sch.get(wk, {}).get(dk, []):
+                          subj = (e.get("subject") or "").strip()
+                          if not subj:
+                              continue
+                          tr = parse_range(e.get("time"))
+                          if not tr:
+                              skipped += 1
+                              continue
+                          start = (base + datetime.timedelta(days=di)).replace(
+                              hour=tr[0] // 60, minute=tr[0] % 60)
+                          end = start.replace(hour=tr[1] // 60, minute=tr[1] % 60)
+                          until = start + datetime.timedelta(days=weeks * 7)
+                          lessons += 1
+                          L += ["BEGIN:VEVENT",
+                                "UID:qaib-%s-%s-%d@qaib" % (wk, dk, lessons),
+                                "DTSTAMP:" + ds,
+                                "DTSTART:" + stamp(start),
+                                "DTEND:" + stamp(end),
+                                "RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + stamp(until),
+                                fold("SUMMARY:" + esc(subj))]
+                          if e.get("room"):
+                              L.append(fold("LOCATION:" + esc(e["room"])))
+                          desc = " · ".join([x for x in [e.get("teacher"), WEEK_AZ[wk]] if x])
+                          if desc:
+                              L.append(fold("DESCRIPTION:" + esc(desc)))
+                          L += ["BEGIN:VALARM", "TRIGGER:-PT%dM" % minutes_before, "ACTION:DISPLAY",
+                                fold("DESCRIPTION:" + esc("%s — %d dəqiqə qaldı" % (subj, minutes_before))),
+                                "END:VALARM", "END:VEVENT"]
+
+              for skey in state.get("semesters", {}):
+                  for r in state["semesters"][skey].get("courses", []):
+                      iso = r.get("examDate")
+                      if not iso:
+                          continue
+                      try:
+                          st = datetime.datetime.strptime(iso[:16], "%Y-%m-%dT%H:%M")
+                      except ValueError:
+                          continue
+                      if st < now:          # kecmis imtahanlar teqvime dusmesin
+                          continue
+                      exams += 1
+                      L += ["BEGIN:VEVENT",
+                            "UID:qaib-imtahan-%d@qaib" % exams,
+                            "DTSTAMP:" + ds,
+                            "DTSTART:" + stamp(st),
+                            "DTEND:" + stamp(st + datetime.timedelta(hours=2)),
+                            fold("SUMMARY:İmtahan — " + esc(r["name"]))]
+                      if r.get("examRoom"):
+                          L.append(fold("LOCATION:" + esc(r["examRoom"])))
+                      L += ["BEGIN:VALARM", "TRIGGER:-P2D", "ACTION:DISPLAY",
+                            fold("DESCRIPTION:" + esc(r["name"] + " imtahanına 2 gün qaldı")), "END:VALARM",
+                            "BEGIN:VALARM", "TRIGGER:-P1D", "ACTION:DISPLAY",
+                            fold("DESCRIPTION:" + esc(r["name"] + " imtahanına 1 gün qaldı")), "END:VALARM",
+                            "END:VEVENT"]
+
+              L.append("END:VCALENDAR")
+              return CRLF.join(L) + CRLF, lessons, exams, skipped
+
+
+          def test_ics(minutes_ahead=15):
+              now = datetime.datetime.now()
+              utc = datetime.datetime.utcnow()
+              start = now + datetime.timedelta(minutes=minutes_ahead)
+              end = start + datetime.timedelta(minutes=10)
+              L = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
+                   "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Qaib Jurnalı",
+                   "BEGIN:VEVENT",
+                   "UID:qaib-sinaq-%d@qaib" % int(now.timestamp()),
+                   "DTSTAMP:" + utc.strftime("%Y%m%dT%H%M00Z"),
+                   "DTSTART:" + stamp(start),
+                   "DTEND:" + stamp(end),
+                   fold("SUMMARY:" + esc("Qaib Jurnalı — sınaq bildirişi")),
+                   fold("DESCRIPTION:" + esc("Dərs bildirişlərini yoxlamaq üçündür. Silə bilərsən.")),
+                   "BEGIN:VALARM", "TRIGGER:-PT10M", "ACTION:DISPLAY",
+                   fold("DESCRIPTION:" + esc("Sınaq — 10 dəqiqə qaldı")), "END:VALARM",
+                   "BEGIN:VALARM", "TRIGGER:-PT5M", "ACTION:DISPLAY",
+                   fold("DESCRIPTION:" + esc("Sınaq — 5 dəqiqə qaldı")), "END:VALARM",
+                   "END:VEVENT", "END:VCALENDAR"]
+              return CRLF.join(L) + CRLF, start
+
+
+          if __name__ == "__main__":
+              import urllib.request, sys
+
+              base = os.environ.get("FIREBASE_URL", "").strip().rstrip("/")
+              key = os.environ.get("VAULT_KEY", "").strip()
+              if not base or not key:
+                  sys.exit("FIREBASE_URL ve ya VAULT_KEY bos")
+
+              url = base + "/vaults/" + urllib.parse.quote(key, safe="") + ".json"
+              with urllib.request.urlopen(url, timeout=30) as r:
+                  payload = json.loads(r.read().decode("utf-8"))
+
+              if not payload:
+                  sys.exit("bulud bosdur")
+              if isinstance(payload.get("stateJson"), str):
+                  state = json.loads(payload["stateJson"])
+              else:
+                  state = payload.get("state")
+              if not state:
+                  sys.exit("state tapilmadi")
+
+              text, lessons, exams, skipped = build(state)
+              io.open("qaib-cedvel.ics", "w", encoding="utf-8", newline="").write(text)
+              print("qaib-cedvel.ics: %d ders, %d imtahan, %d saatsiz atildi"
+                    % (lessons, exams, skipped))
+          QAIB_PY
+
+      - name: Deyisiklik varsa yaz
+        run: |
+          if git diff --quiet -- qaib-cedvel.ics; then
+            echo "deyisiklik yoxdur"
+            exit 0
+          fi
+          git config user.name "qaib-bot"
+          git config user.email "qaib-bot@users.noreply.github.com"
+          git add qaib-cedvel.ics
+          git commit -m "teqvim lenti yenilendi"
+          git push
