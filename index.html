@@ -762,6 +762,18 @@ table.t td.stripe{border-left-width:3px}
 .kpi > div:first-child b{color:var(--accent)}
 .seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
 table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
+
+/* ---- ikinci dərəcəli seçimlər ---- */
+.more{margin-top:12px; border-top:1px solid var(--line); padding-top:10px}
+.more summary{
+  cursor:pointer; font-size:13px; color:var(--muted);
+  list-style:none; display:inline-flex; align-items:center; gap:6px;
+}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:"A"; font-size:15px; transition:transform .18s ease}
+.more[open] summary::before{transform:rotate(90deg)}
+.more summary:hover{color:var(--accent)}
+a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-content:center}
 </style>
 
 <div class="win">
@@ -801,7 +813,7 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-0416";
+var APP_BUILD = "20261004-2308";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1193,6 +1205,7 @@ function migrate(raw) {
   );
 
   if (out.theme !== "light" && out.theme !== "dark") out.theme = "auto";
+  out.calHooked = out.calHooked === true;
   if (!out.guard || typeof out.guard !== "object" || typeof out.guard.hash !== "string" || !out.guard.hash) {
     delete out.guard;
   }
@@ -1206,6 +1219,20 @@ function migrate(raw) {
   out.version = 2;
   return out;
 }
+
+/* ---- Təqvim lenti (abunəlik) ----
+   Sayt nüsxəsində webcal:// ünvanı verilir; iOS ona abunə olub özü yeniləyir. */
+const CAL_FILE = "qaib-cedvel.ics";
+const CAL_HOST = (function () {
+  try { return location.host || ""; } catch (e) { return ""; }
+})();
+const CAL_FEED = (function () {
+  try {
+    if (location.protocol !== "https:" && location.protocol !== "http:") return "";
+    const dir = location.pathname.replace(/[^/]*$/, "");
+    return "webcal://" + location.host + dir + CAL_FILE;
+  } catch (e) { return ""; }
+})();
 
 /* ---- Görünüş: sistem / işıqlı / tünd ---- */
 function applyTheme() {
@@ -1929,16 +1956,29 @@ function viewProfil() {
           </section>` : ""}
 
           <section class="panel">
-            <div class="ph">Təqvim və bildirişlər</div>
+            <div class="ph">Bildirişlər<span class="ph-r">${state.calHooked ? "qoşulub" : "qoşulmayıb"}</span></div>
             <div class="pb">
-              <p class="dlg-msg" style="margin-bottom:11px">Dərs cədvəlindən və imtahanlardan təqvim faylı yaradır:
-                hər dərsdən <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> xəbərdarlıq.
-                Faylı bir dəfə təqvimə əlavə edirsən — sonra bildirişləri telefonun özü göndərir,
-                tətbiq qapalı olsa da, internet olmasa da.</p>
+              ${state.calHooked ? `
+              <p class="dlg-msg" style="margin-bottom:11px"><b>Təqvim qoşulub.</b> Hər dərsdən
+                <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> bildiriş gəlir.
+                Cədvəli dəyişəndə telefonun təqvimi özü yenilənir — əlavə heç nə etmək lazım deyil.</p>
               <div class="row">
-                <button class="btn" type="button" data-ics="1">Təqvim faylı yarat</button>
-                <button class="btn" type="button" data-testics="1">Sınaq bildirişi</button>
-              </div>
+                <button class="btn" type="button" data-calhook="1">Yenidən qoş</button>
+                <button class="btn" type="button" data-caldiag="1">Bildiriş gəlmirsə</button>
+              </div>` : `
+              <p class="dlg-msg" style="margin-bottom:11px">Bir dəfə qoşursan — sonra hər dərsdən
+                <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> telefonun özü bildiriş
+                göndərir. Tətbiq qapalı olsa da, internet olmasa da işləyir.</p>
+              <div class="row">
+                <button class="btn primary" type="button" data-calhook="1">Bildirişləri qoş</button>
+              </div>`}
+              <details class="more">
+                <summary>Başqa yollar</summary>
+                <div class="row" style="margin-top:9px">
+                  <button class="btn" type="button" data-ics="1">Fayl kimi endir</button>
+                  <button class="btn" type="button" data-testics="1">Sınaq bildirişi</button>
+                </div>
+              </details>
             </div>
           </section>
 
@@ -2248,7 +2288,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -2492,6 +2532,45 @@ document.addEventListener("click", (e) => {
       }, "Yüklə");
   }
 
+  /* ---- təqvimi qoş ---- */
+  if (t.dataset.calhook) {
+    if (!CAL_FEED) {
+      return openDialog("Əlçatan deyil", "yalnız onlayn nüsxədə",
+        `<p class="dlg-msg">Bu düymə saytdan açılan nüsxədə işləyir
+           (<b>${esc(CAL_HOST)}</b>). Kompüterdəki fayl nüsxəsində
+           <b>Fayl kimi endir</b> yolundan istifadə et.</p>`, null, "Bağla");
+    }
+    return openDialog("Bildirişləri qoş", isiOS() ? "iPhone" : "bu cihaz",
+      `<p class="dlg-msg">Aşağıdakı düymə telefonun <b>Təqvim</b> tətbiqini açacaq və
+         <b>Abunə ol</b> soruşacaq. Təsdiqlə — vəssalam.</p>
+       <p class="dlg-msg" style="margin-top:11px">Bundan sonra cədvəli burada dəyişsən,
+         təqvim özü yenilənir. Bir daha fayl endirmək lazım olmayacaq.</p>
+       <p class="dlg-msg" style="margin-top:11px"><b>Diqqət:</b> açılan pəncərədə
+         <b>«Xəbərdarlıqları sil»</b> sönülü qalsın — yoxsa bildirişlər gəlməz.</p>
+       <div class="row" style="margin-top:13px">
+         <a class="btn primary" href="${esc(CAL_FEED)}">Təqvimi aç və abunə ol</a>
+       </div>
+       <p class="dlg-msg" style="margin-top:11px;opacity:.75">Alınmasa, Safari-də bu ünvanı
+         əlinlə aç: <b>${esc(CAL_HOST + "/" + CAL_FILE)}</b></p>`,
+      () => { mutate((s) => { s.calHooked = true; }); }, "Qoşuldu");
+  }
+
+  /* ---- bildiriş gəlmirsə ---- */
+  if (t.dataset.caldiag) {
+    return openDialog("Bildiriş gəlmirsə", "üç yeri yoxla",
+      `<p class="dlg-msg"><b>1.</b> Təqvimdə hər hansı dərsə toxun →
+         <b>Xəbərdarlıq</b> sətrində «5 dəqiqə əvvəl» yazmalıdır.
+         «Yoxdur» yazırsa: <b>Parametrlər → Təqvim → Hesablar →
+         Abunə olunmuş təqvimlər</b> → «Xəbərdarlıqları sil» <b>sönülü</b> olsun.</p>
+       <p class="dlg-msg" style="margin-top:11px"><b>2.</b> <b>Parametrlər → Bildirişlər →
+         Təqvim</b> → «Bildirişlərə icazə ver» açıq, <b>«Planlı yekun»</b> isə sönülü olsun
+         (yekun açıq olsa bildiriş gec gəlir).</p>
+       <p class="dlg-msg" style="margin-top:11px"><b>3.</b> Dərs saatı <b>Yuxu</b> ya
+         <b>Narahat etmə</b> rejiminə düşürsə, bildiriş səssiz gəlir.
+         <b>Parametrlər → Fokus</b>-da Təqvimə icazə ver.</p>`,
+      null, "Bağla");
+  }
+
   /* ---- görünüş ---- */
   if (t.dataset.theme) {
     const th = t.dataset.theme;
@@ -2666,6 +2745,7 @@ function buildIcs(weeks, minutesBefore) {
     "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
     "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "X-WR-CALNAME:Qaib Jurnalı", "X-WR-TIMEZONE:Asia/Baku",
+    "REFRESH-INTERVAL;VALUE=DURATION:PT4H", "X-PUBLISHED-TTL:PT4H",
   ];
   const now = new Date();
   const stamp = icsStampUTC(now);
