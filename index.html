@@ -801,7 +801,7 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 
 <script>
 "use strict";
-var APP_BUILD = "20261004-0410";
+var APP_BUILD = "20261004-0416";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -2765,19 +2765,35 @@ const isStandalone = () =>
   (window.navigator.standalone === true) ||
   (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
 
+const isiOS = () =>
+  /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
 function saveFile(name, text, mime) {
   const type = (mime || "text/plain;charset=utf-8").split(";")[0];
 
-  // 1) Paylaşma vərəqi — jest itməsin deyə heç bir await-dən əvvəl çağırılır
-  try {
-    if (navigator.share && navigator.canShare && window.File) {
-      const file = new File([text], name, { type });
-      if (navigator.canShare({ files: [file] })) {
-        navigator.share({ files: [file], title: name }).catch(() => {});
-        return true;
+  // 1) iPhone/iPad: endirmə etibarsızdır — paylaşma vərəqi açılır.
+  //    Jest itməsin deyə heç bir await-dən əvvəl çağırılır.
+  //    Masaüstündə isə adi endirmə daha rahatdır, ona görə yalnız iOS-da.
+  if (isiOS()) {
+    try {
+      if (navigator.share && navigator.canShare && window.File) {
+        const file = new File([text], name, { type });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: name }).catch(() => {});
+          return true;
+        }
       }
-    }
-  } catch (e) { /* aşağıdaki yollara keç */ }
+    } catch (e) { /* aşağıdaki yollara keç */ }
+    // paylaşma alınmadısa, faylı yeni səhifədə aç — Safari oradan Təqvimə ötürə bilir
+    try {
+      const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
+      return true;
+    } catch (e) { /* aşağı davam */ }
+  }
 
   // 2) Klassik endirmə (masaüstü brauzerlər, Safari-nin adi rejimi)
   let ok = false;
