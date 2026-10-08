@@ -16,7 +16,7 @@
 <title>Qaib Jurnalı</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
 </head>
 <body>
 <style>
@@ -150,7 +150,7 @@ button,input,select{font:inherit;color:inherit}
 }
 
 .bottom{flex:none; z-index:30; background:var(--panel); border-top:1px solid var(--line-2)}
-.tabbar{display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); padding-bottom:env(safe-area-inset-bottom)}
+.tabbar{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); padding-bottom:env(safe-area-inset-bottom)}
 .tabbar .navitem{
   flex-direction:column; gap:3px; border-radius:0; padding:6px 1px 7px;
   font-size:11px; color:var(--muted); align-items:center; white-space:nowrap;
@@ -776,6 +776,33 @@ table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
 a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-content:center}
 
 .splitline{height:1px; background:var(--line); margin:14px 0 12px}
+
+/* ======================================================================
+   YAZI SECIMI — nov ve olcu
+   ====================================================================== */
+:root[data-font="sistem"]{
+  --f-ui:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",
+         system-ui,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"SF Mono","Segoe UI Mono","Cascadia Mono",Consolas,monospace;
+}
+:root[data-font="inter"]{
+  --f-ui:"Inter",system-ui,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+:root[data-font="plex"]{
+  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+
+/* olcu: yalniz mezmun ve dialoq boyuyur, baslq setri ve tab zolagi olduqu kimi qalir */
+:root[data-fs="l"] main{zoom:1.10}
+:root[data-fs="l"] .dlg{zoom:1.10}
+:root[data-fs="xl"] main{zoom:1.22}
+:root[data-fs="xl"] .dlg{zoom:1.22}
+
+/* ayarlar bolmesi — tek sutun, hedden genis olmasin */
+.stack{max-width:780px}
+.stack > .panel + .panel{margin-top:14px}
 </style>
 
 <div class="win">
@@ -815,7 +842,7 @@ a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-con
 
 <script>
 "use strict";
-var APP_BUILD = "20261005-0014";
+var APP_BUILD = "20261009-0022";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1208,6 +1235,8 @@ function migrate(raw) {
 
   if (out.theme !== "light" && out.theme !== "dark") out.theme = "auto";
   out.calHooked = out.calHooked === true;
+  if (FONTS.indexOf(out.font) < 0) out.font = "sistem";
+  if (SIZES.indexOf(out.fontSize) < 0) out.fontSize = "m";
   if (!out.guard || typeof out.guard !== "object" || typeof out.guard.hash !== "string" || !out.guard.hash) {
     delete out.guard;
   }
@@ -1351,6 +1380,19 @@ function applyTheme() {
   const root = document.documentElement;
   if (t === "light" || t === "dark") root.setAttribute("data-theme", t);
   else root.removeAttribute("data-theme");
+  root.setAttribute("data-font", fontNow());
+  root.setAttribute("data-fs", fsNow());
+}
+
+const FONTS = ["sistem", "inter", "plex"];
+const SIZES = ["m", "l", "xl"];
+function fontNow() {
+  const f = state && state.font;
+  return FONTS.indexOf(f) >= 0 ? f : "sistem";
+}
+function fsNow() {
+  const z = state && state.fontSize;
+  return SIZES.indexOf(z) >= 0 ? z : "m";
 }
 
 /* ---- Yenilik yoxlaması ----
@@ -1612,6 +1654,7 @@ const ICONS = {
   qiymet: '<svg viewBox="0 0 20 20"><path d="M3 17V3h11l3 3v11z"/><path d="M6 8h8M6 11.5h8M6 15h5"/></svg>',
   fenn: '<svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="M17 17l-3.9-3.9"/></svg>',
   profil: '<svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2"/><path d="M3.8 17c1.2-3 3.5-4.5 6.2-4.5S15 14 16.2 17"/></svg>',
+  ayarlar: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.8"/><path d="M10 1.8v2.4M10 15.8v2.4M3.2 10H5.6M14.4 10h2.4M5.2 5.2l1.7 1.7M13.1 13.1l1.7 1.7M14.8 5.2l-1.7 1.7M6.9 13.1l-1.7 1.7"/></svg>',
 };
 const VIEWS = [
   ["overview", "İcmal"],
@@ -1620,6 +1663,7 @@ const VIEWS = [
   ["qiymet", "Qiymət"],
   ["fenn", "Fənn"],
   ["profil", "Profil"],
+  ["ayarlar", "Ayarlar"],
 ];
 
 let current = "overview";
@@ -2013,7 +2057,7 @@ function viewFenn() {
 function viewProfil() {
   const p = state.profile;
   return {
-    toolbar: `<span class="vtitle">Profil və parametrlər</span>`,
+    toolbar: `<span class="vtitle">Profil və semestrlər</span>`,
     body: `
       <div class="two">
         <section class="panel">
@@ -2041,6 +2085,16 @@ function viewProfil() {
             <p class="hintbox">Semestr bitəndə yenisini əlavə et və ona keç — köhnəsi siyahıda arxiv kimi qalır, qiymətləri və qaibləri heç yerə getmir.</p>
           </section>
 
+        </div>
+      </div>`,
+  };
+}
+
+function viewAyarlar() {
+  return {
+    toolbar: `<span class="vtitle">Ayarlar</span>`,
+    body: `
+      <div class="stack">
           <section class="panel">
             <div class="ph">iPhone-a əlavə etmək</div>
             <ol class="steps">
@@ -2119,6 +2173,25 @@ function viewProfil() {
           </section>
 
           <section class="panel">
+            <div class="ph">Yazı</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Hansı yazı gözünə rahat gəlirsə onu seç —
+                dəyişiklik dərhal görünür.</p>
+              <span class="seg">
+                <button type="button" data-font="sistem" aria-pressed="${fontNow() === "sistem"}">Sistem</button>
+                <button type="button" data-font="inter" aria-pressed="${fontNow() === "inter"}">Inter</button>
+                <button type="button" data-font="plex" aria-pressed="${fontNow() === "plex"}">Plex</button>
+              </span>
+              <p class="dlg-msg" style="margin:14px 0 9px">Yazı ölçüsü</p>
+              <span class="seg">
+                <button type="button" data-fs="m" aria-pressed="${fsNow() === "m"}">Normal</button>
+                <button type="button" data-fs="l" aria-pressed="${fsNow() === "l"}">Böyük</button>
+                <button type="button" data-fs="xl" aria-pressed="${fsNow() === "xl"}">Ən böyük</button>
+              </span>
+            </div>
+          </section>
+
+          <section class="panel">
             <div class="ph">Görünüş</div>
             <div class="pb">
               <p class="dlg-msg" style="margin-bottom:11px">İşıqlı və tünd görünüş arasında seç.
@@ -2164,7 +2237,6 @@ function viewProfil() {
               <button class="btn danger" type="button" data-reset="1">Excel vəziyyətinə qaytar</button>
             </div>
           </section>
-        </div>
       </div>`,
   };
 }
@@ -2274,7 +2346,7 @@ td.r,th.r{text-align:right}.nm small{display:block;color:#777;font-size:10px}
     + '</body></html>\n';
 }
 
-const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, qiymet: viewQiymet, fenn: viewFenn, profil: viewProfil, report: viewReport };
+const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, qiymet: viewQiymet, fenn: viewFenn, profil: viewProfil, ayarlar: viewAyarlar, report: viewReport };
 
 /* ============================================================
    13. Çəkiliş
@@ -2295,7 +2367,7 @@ function paintStatus() {
     + (updateReady ? `<button class="flagbtn" type="button" data-update="1">yeni versiya var — yenilə</button>` : "")
     + (dirty ? `<span class="flag">saxlanılmamış dəyişiklik</span>` : "")
     + (remotePending ? `<span class="flag">başqa cihazda yenilik var</span>` : "")
-    + `<span class="sb-keys">1–6 bölmə · / axtarış · Ctrl+S saxla</span>`
+    + `<span class="sb-keys">1–7 bölmə · / axtarış · Ctrl+S saxla</span>`
     + `<span>${esc(SYNC.t)}${at ? " " + at : ""}</span></span>`;
 }
 
@@ -2413,7 +2485,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs]");
   if (!t) return;
   const host = document.getElementById("modal");
 
@@ -2730,6 +2802,16 @@ document.addEventListener("click", (e) => {
          <b>Narahat etmə</b> rejiminə düşürsə, bildiriş səssiz gəlir.
          <b>Parametrlər → Fokus</b>-da Təqvimə icazə ver.</p>`,
       null, "Bağla");
+  }
+
+  /* ---- yazı növü və ölçüsü ---- */
+  if (t.dataset.font) {
+    const f = t.dataset.font;
+    return mutate((s) => { s.font = f; });
+  }
+  if (t.dataset.fs) {
+    const z = t.dataset.fs;
+    return mutate((s) => { s.fontSize = z; });
   }
 
   /* ---- görünüş ---- */
