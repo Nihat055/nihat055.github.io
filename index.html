@@ -842,7 +842,7 @@ a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-con
 
 <script>
 "use strict";
-var APP_BUILD = "20261009-0022";
+var APP_BUILD = "20261012-2131";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1126,6 +1126,25 @@ function examCountdown(iso) {
   if (diff === 0) return { label: "Bu gün", tone: "crit" };
   if (diff === 1) return { label: "Sabah", tone: "crit" };
   return { label: diff + " gün qalıb", tone: diff <= 7 ? "warn" : "acc" };
+}
+
+/* Imtahan tarixi ucun gg.aa.iiii + saat girisi - native datetime-local
+   cihazin dil ayarindan asili olub mm/dd/yyyy gostere bilir, bu yolla
+   format hemise eynidir. */
+function isoToDmy(iso) {
+  if (!iso) return { d: "", t: "" };
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso);
+  if (!m) return { d: "", t: "" };
+  return { d: m[3] + "." + m[2] + "." + m[1], t: m[4] + ":" + m[5] };
+}
+function dmyToIso(dRaw, tRaw) {
+  const dm = /^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/.exec((dRaw || "").trim());
+  const tm = /^(\d{1,2}):(\d{2})$/.exec((tRaw || "").trim());
+  if (!dm || !tm) return null;
+  const day = +dm[1], mon = +dm[2], yr = +dm[3], hh = +tm[1], mi = +tm[2];
+  if (day < 1 || day > 31 || mon < 1 || mon > 12 || hh > 23 || mi > 59) return null;
+  const p = (n) => String(n).padStart(2, "0");
+  return yr + "-" + p(mon) + "-" + p(day) + "T" + p(hh) + ":" + p(mi);
 }
 
 const fmtDate = (iso) => {
@@ -1949,6 +1968,7 @@ function viewQiymet() {
   const r = sem.courses[si];
   const m = ms[si];
   const cd = examCountdown(r.examDate);
+  const dmy = isoToDmy(r.examDate);
 
   return {
     toolbar: `<span class="vtitle">Qiymətlər</span>`
@@ -2003,7 +2023,13 @@ function viewQiymet() {
           <div class="form">
             <div class="fld"><label>İmtahan balı</label><input inputmode="numeric" value="${r.q ?? ""}" data-g="${si}" data-field="q"></div>
             <div class="fld txt"><label>İmtahan otağı</label><input value="${esc(r.examRoom)}" placeholder="məs. 426" data-g="${si}" data-field="examRoom"></div>
-            <div class="fld txt" style="grid-column:1/-1"><label>İmtahan tarixi və saatı — ${cd.label}</label><input type="datetime-local" value="${esc(r.examDate)}" data-g="${si}" data-field="examDate"></div>
+            <div class="fld txt" style="grid-column:1/-1">
+              <label>İmtahan tarixi və saatı — ${cd.label}</label>
+              <div class="form" style="margin-top:3px">
+                <div class="fld txt"><input value="${esc(dmy.d)}" placeholder="gg.aa.iiii" inputmode="numeric" data-g="${si}" data-field="examDateD"></div>
+                <div class="fld txt"><input value="${esc(dmy.t)}" placeholder="SS:DD" inputmode="numeric" data-g="${si}" data-field="examDateT"></div>
+              </div>
+            </div>
           </div>
         </div>
         <div class="kpi" style="border-top:1px solid var(--line)">
@@ -2915,12 +2941,27 @@ document.addEventListener("input", (e) => {
   if (el.id === "find") { findQuery = el.value; return render(); }
   if (!el.dataset || el.dataset.g == null) return;
   const i = +el.dataset.g, field = el.dataset.field;
+
+  /* tarix/saat iki ayrı sahədir — hər ikisi tam yazılana qədər render
+     etmirik, yoxsa yarımçıq mətn hər hərfdə öz-özünə silinər */
+  if (field === "examDateD" || field === "examDateT") {
+    const g = el.dataset.g;
+    const dEl = document.querySelector(`[data-g="${g}"][data-field="examDateD"]`);
+    const tEl = document.querySelector(`[data-g="${g}"][data-field="examDateT"]`);
+    if (!dEl || !tEl) return;
+    const dRaw = dEl.value.trim(), tRaw = tEl.value.trim();
+    if (!dRaw && !tRaw) { mutate((s) => { s.semesters[s.active].courses[i].examDate = ""; }); return; }
+    const iso = dmyToIso(dRaw, tRaw);
+    if (iso) mutate((s) => { s.semesters[s.active].courses[i].examDate = iso; });
+    return;
+  }
+
   const raw = el.value.trim();
   const asNum = raw === "" ? null : Number(raw.replace(",", "."));
   mutate((s) => {
     const r = s.semesters[s.active].courses[i];
     if (field === "sem") r.sem[+el.dataset.k] = Number.isNaN(asNum) ? null : asNum;
-    else if (field === "examRoom" || field === "examDate") r[field] = raw;
+    else if (field === "examRoom") r[field] = raw;
     else r[field] = Number.isNaN(asNum) ? null : asNum;
   });
 });
