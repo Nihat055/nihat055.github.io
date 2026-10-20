@@ -838,7 +838,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261021-1600";
+var APP_BUILD = "20261021-1700";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1368,10 +1368,15 @@ async function pushTestLocal() {
   const perm = await Notification.requestPermission();
   if (perm !== "granted") throw new Error("İcazə verilmədi.");
   const reg = await navigator.serviceWorker.ready;
-  const gun = todayLessonLine();
-  await reg.showNotification("Qaib Jurnalı", {
-    body: gun || "Bu gün dərs yoxdur.",
-    icon: ICON_HREF, badge: ICON_HREF, tag: "qaib-sinaq",
+  const nx = typeof nextLesson === "function" ? nextLesson() : null;
+  const p2 = (n) => String(n).padStart(2, "0");
+  const hm = (m) => p2(Math.floor(m / 60)) + ":" + p2(m % 60);
+  const title = nx ? nx.e.subject : "Nümunə dərs";
+  const body = "5 dəqiqəyə başlayır\n"
+    + (nx ? hm(nx.tr.s) + "–" + hm(nx.tr.e) + (nx.e.room ? " · Otaq " + nx.e.room : "") : "09:00–10:20 · Otaq 101")
+    + (nx && nx.e.teacher ? "\n" + nx.e.teacher : "");
+  await reg.showNotification(title, {
+    body, icon: "icon-192.png", badge: "badge-96.png", tag: "qaib-sinaq", renotify: true, timestamp: Date.now(),
   });
 }
 
@@ -2290,41 +2295,40 @@ function viewAyarlar() {
           </section>` : ""}
 
           <section class="panel">
-            <div class="ph">Bildirişlər<span class="ph-r">${((state.calHooked ? "təqvim" : "") +
-              (state.calHooked && pushOn ? " + " : "") + (pushOn ? "proqram" : "")) || "qoşulmayıb"}</span></div>
+            <div class="ph">Bildirişlər<span class="ph-r">${pushOn ? "açıqdır" : "bağlıdır"}</span></div>
             <div class="pb">
-              ${state.calHooked ? `
-              <p class="dlg-msg" style="margin-bottom:11px"><b>Təqvim qoşulub.</b> Hər dərsdən
-                <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> bildiriş gəlir.
-                Cədvəli dəyişəndə telefonun təqvimi özü yenilənir — əlavə heç nə etmək lazım deyil.</p>
+              <p class="dlg-msg">Hamısı <b>Qaib Jurnalı</b> adı ilə gəlir:</p>
+              <ol class="steps" style="padding:12px 0 4px">
+                <li>hər dərsdən <b>5 dəqiqə əvvəl</b> — fənn, saat və otaq</li>
+                <li>səhər <b>günün dərs siyahısı</b></li>
+                <li>imtahana <b>2 gün və 1 gün</b> qalmış xəbərdarlıq</li>
+              </ol>
+              <p class="dlg-msg" style="margin:8px 0 12px">Cədvəli burada dəyişib <b>Saxla</b> bassan,
+                bildirişlər özü yenilənir — təqvimə heç nə əlavə etmək lazım deyil.</p>
               <div class="row">
-                <button class="btn" type="button" data-calhook="1">Yenidən qoş</button>
-                <button class="btn" type="button" data-caldiag="1">Bildiriş gəlmirsə</button>
-              </div>` : `
-              <p class="dlg-msg" style="margin-bottom:11px">Bir dəfə qoşursan — sonra hər dərsdən
-                <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> telefonun özü bildiriş
-                göndərir. Tətbiq qapalı olsa da, internet olmasa da işləyir.</p>
-              <div class="row">
-                <button class="btn primary" type="button" data-calhook="1">Bildirişləri qoş</button>
-              </div>`}
-              <div class="splitline"></div>
-              <p class="dlg-msg"><b>Proqramın öz bildirişləri</b> — Qaib Jurnalı adı və ikonu ilə
-                gəlir: hər səhər <b>saat 9-da günün dərs cədvəli</b>, imtahanlara
-                <b>2 və 1 gün qalmış</b> xəbərdarlıq.${pushOn ? "" :
-                " Dərsə 5 dəqiqə qalmış bildiriş bundan getmir — o, təqvimdən gəlir, çünki dəqiq vaxt lazımdır."}</p>
-              <div class="row" style="margin-top:10px">
                 ${pushOn
-                  ? `<button class="btn" type="button" data-pushtest="1">Görünüşü yoxla</button>
-                     <button class="btn" type="button" data-pushoff="1">Söndür</button>`
-                  : `<button class="btn primary" type="button" data-pushon="1">Proqram bildirişlərini aç</button>`}
+                  ? `<button class="btn" type="button" data-pushtest="1">Necə görünür?</button>
+                     <button class="btn danger" type="button" data-pushoff="1">Söndür</button>`
+                  : `<button class="btn primary" type="button" data-pushon="1">Bildirişləri aç</button>`}
               </div>
               ${!pushOn && pushWhy ? `<p class="dlg-msg" style="margin-top:8px;opacity:.72">${esc(pushWhy)}</p>` : ""}
 
+              ${state.calHooked ? `<div class="note warn" style="margin-top:14px; align-items:flex-start">
+                <span><b>Təqvim də qoşulub</b> — xatırlatmalar iki dəfə gələ bilər, dərslər təqvimdə üst-üstə düşə bilər.
+                  Telefonda: <b>Parametrlər → Təqvim → Hesablar → Abunə olunmuş təqvimlər → Qaib Jurnalı → Hesabı sil</b>.
+                  Fayl kimi əlavə etdiklərini isə Təqvim tətbiqində dərsə toxunub <b>Tədbiri sil → Bütün gələcək tədbirlər</b> ilə sil.</span>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <button class="btn" type="button" data-calunhook="1">Təqvimi ayırdım</button>
+              </div>` : ""}
+
               <details class="more">
-                <summary>Başqa yollar</summary>
-                <div class="row" style="margin-top:9px">
-                  <button class="btn" type="button" data-ics="1">Fayl kimi endir</button>
-                  <button class="btn" type="button" data-testics="1">Sınaq bildirişi</button>
+                <summary>Təqvim ilə (köhnə yol)</summary>
+                <p class="dlg-msg" style="margin-top:10px">Telefonun Təqvim tətbiqinə abunə olmaq — internetsiz də işləyir,
+                  amma proqram bildirişləri açıqdırsa lazım deyil.</p>
+                <div class="row" style="margin-top:10px">
+                  <button class="btn" type="button" data-calhook="1">Təqvimə abunə ol</button>
+                  <button class="btn" type="button" data-caldiag="1">Bildiriş gəlmirsə</button>
                 </div>
               </details>
             </div>
@@ -2703,7 +2707,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more],[data-calunhook]");
   // <html> özü də data-theme/data-font daşıyır — boş yerə toxunuş onu "düymə" saymasın
   if (!t || t === document.documentElement) return;
   const host = document.getElementById("modal");
@@ -2970,11 +2974,11 @@ document.addEventListener("click", (e) => {
 
   /* ---- proqram bildirişləri ---- */
   if (t.dataset.pushon) {
-    return openDialog("Proqram bildirişləri", "bir dəfəlik icazə",
+    return openDialog("Bildirişləri aç", "bir dəfəlik icazə",
       `<p class="dlg-msg">Təsdiqləyəndə telefon <b>«Bildirişlərə icazə verilsin?»</b> soruşacaq —
          <b>İcazə ver</b>-i seç.</p>
-       <p class="dlg-msg" style="margin-top:11px">Bundan sonra hər səhər saat 9-da günün dərsləri,
-         imtahanlara 2 və 1 gün qalmış isə xəbərdarlıq <b>Qaib Jurnalı</b> adı və ikonu ilə gələcək.</p>
+       <p class="dlg-msg" style="margin-top:11px">Bundan sonra hər dərsdən 5 dəqiqə əvvəl, səhər günün
+         siyahısı və imtahanlardan əvvəl xəbərdarlıq <b>Qaib Jurnalı</b> adı ilə gələcək.</p>
        ${isiOS() && !isStandalone() ? `<p class="dlg-msg" style="margin-top:11px"><b>Qeyd:</b>
          iPhone-da bu yalnız əsas ekrana əlavə edilmiş proqramda işləyir. Safari-dən açmısansa,
          əvvəlcə əsas ekrandaki ikondan aç.</p>` : ""}`,
@@ -2982,8 +2986,8 @@ document.addEventListener("click", (e) => {
         pushEnable().then(() => {
           render();
           setTimeout(() => openDialog("Açıldı", "",
-            `<p class="dlg-msg">Proqram bildirişləri qoşuldu.
-               <b>Görünüşü yoxla</b> ilə necə göründüyünü indi görə bilərsən.</p>`,
+            `<p class="dlg-msg">Bildirişlər qoşuldu.
+               <b>Necə görünür?</b> düyməsi ilə nümunəsini indi görə bilərsən.</p>`,
             null, "Oldu"), 0);
         }).catch((err) => {
           pushRefresh().then(render);
@@ -2994,8 +2998,7 @@ document.addEventListener("click", (e) => {
   }
   if (t.dataset.pushoff) {
     return openDialog("Söndürülsün?", "",
-      `<p class="dlg-msg">Proqram bildirişləri dayanacaq.
-         Təqvimdən gələn dərs bildirişlərinə təsir etmir.</p>`,
+      `<p class="dlg-msg">Dərs xatırlatmaları, günün siyahısı və imtahan xəbərdarlıqları bu cihaza gəlməyəcək.</p>`,
       () => { pushDisable().then(render); }, "Söndür");
   }
   if (t.dataset.pushtest) {
@@ -3025,6 +3028,10 @@ document.addEventListener("click", (e) => {
        <p class="dlg-msg" style="margin-top:11px;opacity:.75">Alınmasa, Safari-də bu ünvanı
          əlinlə aç: <b>${esc(CAL_HOST + "/" + CAL_FILE)}</b></p>`,
       () => { mutate((s) => { s.calHooked = true; }); }, "Qoşuldu");
+  }
+
+  if (t.dataset.calunhook) {
+    return mutate((s) => { s.calHooked = false; });
   }
 
   /* ---- bildiriş gəlmirsə ---- */

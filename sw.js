@@ -1,9 +1,9 @@
 /* Qaib Jurnali - sade oflayn kes.
    Sened sorgulari sebekadan gelir (yenilikler derhal gorunsun),
    sebeka yoxdursa kesdeki nusxa verilir. */
-const CACHE = "qaib-20261021-1600";
+const CACHE = "qaib-20261021-1700";
 const SHELL = ["./", "./index.html", "./manifest.json",
-               "./icon-180.png", "./icon-192.png", "./icon-512.png"];
+               "./icon-180.png", "./icon-192.png", "./icon-512.png", "./badge-96.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(
@@ -31,9 +31,10 @@ self.addEventListener("push", (e) => {
   e.waitUntil(self.registration.showNotification(title, {
     body: d.body || "",
     icon: "./icon-192.png",
-    badge: "./icon-192.png",
+    badge: "./badge-96.png",          // Android: status sətrində tək rəngli nişan
     tag: d.tag || "qaib",
     renotify: true,
+    timestamp: Date.now(),
     data: { url: d.url || "./" },
   }));
 });
