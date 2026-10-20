@@ -154,7 +154,7 @@ b,strong{font-weight:600}
 }
 .page{width:100%; max-width:1180px; margin:0 auto}
 
-.logo{width:26px; height:26px; flex:none; color:var(--accent); display:block}
+.logo{width:26px; height:26px; flex:none; display:block}
 
 /* ---- yuxarı sətir ---- */
 .titlebar{
@@ -529,20 +529,19 @@ ol.steps li::before{
 }
 .splash.gone .splash-in{transform:scale(1.12); opacity:0}
 .splash-logo{
-  width:88px; height:88px; overflow:visible;
-  filter:drop-shadow(0 14px 30px color-mix(in srgb, var(--accent) 38%, transparent));
-  animation:sp-bump .5s .95s cubic-bezier(.3,.7,.3,1) both;
+  width:96px; height:96px; overflow:visible;
+  filter:drop-shadow(0 16px 30px rgba(8,16,32,.32));
+  animation:sp-bump .55s 1.2s cubic-bezier(.3,.7,.3,1) both;
 }
-.sp-bg{fill:var(--accent); transform-box:fill-box; transform-origin:center; animation:sp-bg .65s cubic-bezier(.2,.9,.25,1.12) both}
-.sp-c{
-  fill:#fff; transform-box:fill-box; transform-origin:center; opacity:0;
-  animation:sp-cell .42s cubic-bezier(.2,.9,.3,1.35) both; animation-delay:calc(.28s + var(--i) * .06s);
-}
-.sp-c.dim{--o:.38}
-.splash-name{margin-top:22px; font-size:22px; font-weight:700; letter-spacing:-.025em; color:var(--ink); animation:sp-up .55s .62s cubic-bezier(.2,.8,.2,1) both}
-.splash-sub{margin-top:4px; font-size:14px; color:var(--muted); animation:sp-up .55s .74s cubic-bezier(.2,.8,.2,1) both}
+.sp-bg{transform-box:fill-box; transform-origin:center; animation:sp-bg .6s cubic-bezier(.2,.9,.25,1.1) both}
+.sp-track{opacity:0; animation:qj-fade .35s .3s ease both}
+.sp-arc{stroke-dashoffset:300; animation:sp-arc .9s .38s cubic-bezier(.5,.05,.2,1) both}
+.sp-q{transform-box:fill-box; transform-origin:center; animation:sp-q .5s .7s cubic-bezier(.2,.9,.3,1.35) both}
+.splash-name{margin-top:24px; font-size:22px; font-weight:700; letter-spacing:-.025em; color:var(--ink); animation:sp-up .55s .85s cubic-bezier(.2,.8,.2,1) both}
+.splash-sub{margin-top:4px; font-size:14px; color:var(--muted); animation:sp-up .55s .97s cubic-bezier(.2,.8,.2,1) both}
 @keyframes sp-bg{from{transform:scale(.35) rotate(-14deg); opacity:0} to{transform:none; opacity:1}}
-@keyframes sp-cell{from{transform:scale(0); opacity:0} to{transform:scale(1); opacity:var(--o,1)}}
+@keyframes sp-arc{0%{stroke-dashoffset:300; opacity:0} 5%{opacity:1} 100%{stroke-dashoffset:0; opacity:1}}
+@keyframes sp-q{from{opacity:0; transform:scale(.35) rotate(-20deg)} to{opacity:1; transform:none}}
 @keyframes sp-up{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
 @keyframes sp-bump{0%,100%{transform:none} 45%{transform:scale(1.06)}}
 .win.reveal{animation:win-in .6s cubic-bezier(.2,.8,.2,1) both}
@@ -772,19 +771,17 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="qj-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2333"/><stop offset="1" stop-color="#0b0f18"/></linearGradient>
+    <linearGradient id="qj-ring" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#30d158"/><stop offset="1" stop-color="#7af08e"/></linearGradient>
+  </defs>
   <symbol id="qj-logo" viewBox="0 0 32 32">
-    <rect width="32" height="32" rx="8" fill="currentColor"/>
-    <g fill="#fff">
-      <rect x="7" y="7" width="5" height="5" rx="1.4"/>
-      <rect x="13.5" y="7" width="5" height="5" rx="1.4"/>
-      <rect x="20" y="7" width="5" height="5" rx="1.4"/>
-      <rect x="7" y="13.5" width="5" height="5" rx="1.4"/>
-      <rect x="13.5" y="13.5" width="5" height="5" rx="1.4" opacity=".38"/>
-      <rect x="20" y="13.5" width="5" height="5" rx="1.4" opacity=".38"/>
-      <rect x="7" y="20" width="5" height="5" rx="1.4"/>
-      <rect x="13.5" y="20" width="5" height="5" rx="1.4"/>
-      <rect x="20" y="20" width="5" height="5" rx="1.4" opacity=".38"/>
-    </g>
+    <rect width="32" height="32" rx="8" fill="url(#qj-bg)"/>
+    <rect x=".25" y=".25" width="31.5" height="31.5" rx="7.75" fill="none" stroke="#fff" stroke-opacity=".09" stroke-width=".5"/>
+    <circle cx="16" cy="16" r="7.7" fill="none" stroke="#30d158" stroke-opacity=".24" stroke-width="3.4"/>
+    <circle cx="16" cy="16" r="7.7" fill="none" stroke="url(#qj-ring)" stroke-width="3.4" stroke-linecap="round"
+            pathLength="360" stroke-dasharray="300 360" transform="rotate(-90 16 16)"/>
+    <path d="M15.65 18.76Q14.24 18.76 13.35 17.84Q12.46 16.92 12.46 15.45Q12.46 13.9 13.37 12.93Q14.26 11.97 15.76 11.97Q17.16 11.97 18.03 12.89Q18.9 13.81 18.9 15.32Q18.9 16.86 17.99 17.81Q17.96 17.84 17.93 17.87Q17.91 17.9 17.87 17.93L19.54 19.53H17.47L16.6 18.65Q16.17 18.76 15.65 18.76ZM15.71 13.24Q14.94 13.24 14.48 13.83Q14.02 14.41 14.02 15.37Q14.02 16.35 14.48 16.92Q14.94 17.48 15.68 17.48Q16.44 17.48 16.89 16.93Q17.34 16.37 17.34 15.4Q17.34 14.38 16.9 13.81Q16.47 13.24 15.71 13.24Z" fill="#fff"/>
   </symbol>
 </svg>
 
@@ -824,16 +821,15 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 <div class="splash" id="splash" aria-hidden="true">
   <div class="splash-in">
     <svg class="splash-logo" viewBox="0 0 32 32">
-      <rect class="sp-bg" width="32" height="32" rx="8"/>
-      <rect class="sp-c" style="--i:0" x="7" y="7" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c" style="--i:1" x="13.5" y="7" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c" style="--i:2" x="20" y="7" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c" style="--i:1" x="7" y="13.5" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c dim" style="--i:2" x="13.5" y="13.5" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c dim" style="--i:3" x="20" y="13.5" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c" style="--i:2" x="7" y="20" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c" style="--i:3" x="13.5" y="20" width="5" height="5" rx="1.4"/>
-      <rect class="sp-c dim" style="--i:4" x="20" y="20" width="5" height="5" rx="1.4"/>
+      <defs>
+        <linearGradient id="sp-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2333"/><stop offset="1" stop-color="#0b0f18"/></linearGradient>
+    <linearGradient id="sp-ring" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#30d158"/><stop offset="1" stop-color="#7af08e"/></linearGradient>
+      </defs>
+      <rect class="sp-bg" width="32" height="32" rx="8" fill="url(#sp-bg)"/>
+      <circle class="sp-track" cx="16" cy="16" r="7.7" fill="none" stroke="#30d158" stroke-opacity=".24" stroke-width="3.4"/>
+      <circle class="sp-arc" cx="16" cy="16" r="7.7" fill="none" stroke="url(#sp-ring)" stroke-width="3.4" stroke-linecap="round"
+              pathLength="360" stroke-dasharray="300 360" transform="rotate(-90 16 16)"/>
+      <path class="sp-q" d="M15.65 18.76Q14.24 18.76 13.35 17.84Q12.46 16.92 12.46 15.45Q12.46 13.9 13.37 12.93Q14.26 11.97 15.76 11.97Q17.16 11.97 18.03 12.89Q18.9 13.81 18.9 15.32Q18.9 16.86 17.99 17.81Q17.96 17.84 17.93 17.87Q17.91 17.9 17.87 17.93L19.54 19.53H17.47L16.6 18.65Q16.17 18.76 15.65 18.76ZM15.71 13.24Q14.94 13.24 14.48 13.83Q14.02 14.41 14.02 15.37Q14.02 16.35 14.48 16.92Q14.94 17.48 15.68 17.48Q16.44 17.48 16.89 16.93Q17.34 16.37 17.34 15.4Q17.34 14.38 16.9 13.81Q16.47 13.24 15.71 13.24Z" fill="#fff"/>
     </svg>
     <span class="splash-name">Qaib Jurnalı</span>
     <span class="splash-sub">Davamiyyət · cədvəl · qiymətlər</span>
@@ -842,7 +838,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261021-1400";
+var APP_BUILD = "20261021-1600";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1424,6 +1420,17 @@ function fsNow() {
 let updateReady = false;
 let lastUpdCheck = 0;
 
+/* serverdəki index.html-in həqiqi versiyası — version.json ilə uyğun gəlməyə bilər
+   (fayllardan biri yüklənməyib və ya GitHub hələ yayımlamayıb) */
+async function serverBuild() {
+  const r = await fetch("index.html?probe=" + Date.now(), { cache: "no-store" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const txt = await r.text();
+  if (txt.length < 5000) throw new Error("natamam cavab");
+  const m = /var APP_BUILD = "([^"]+)"/.exec(txt);
+  return m ? m[1] : null;
+}
+
 async function checkUpdate(force) {
   if (location.protocol.indexOf("http") !== 0) return false;
   const now = Date.now();
@@ -1434,6 +1441,9 @@ async function checkUpdate(force) {
     if (!r.ok) return false;
     const j = await r.json();
     if (j && j.build && String(j.build) !== String(APP_BUILD)) {
+      // yalnız serverdəki səhifə həqiqətən yenidirsə təklif et — yoxsa "Yenilə" dövrəyə düşür
+      const sb = await serverBuild().catch(() => null);
+      if (sb === String(APP_BUILD)) return false;
       updateReady = true;
       if (typeof paintStatus === "function") paintStatus();
       return true;
@@ -1445,12 +1455,11 @@ async function checkUpdate(force) {
 async function applyUpdate() {
   /* ƏVVƏLCƏ şəbəkəni yoxla: keşi silib sonra yükləyə bilməsək,
      tətbiq boş ekranda qalardı. Təzə nüsxə əlçatan deyilsə, heç nəyə toxunmuruq. */
+  const was = { s: SYNC.s, t: SYNC.t };
   setSync("busy", "Yenilənir");
+  let sb = null;
   try {
-    const r = await fetch("index.html?probe=" + Date.now(), { cache: "no-store" });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const txt = await r.text();
-    if (txt.length < 5000) throw new Error("natamam cavab");
+    sb = await serverBuild();
   } catch (e) {
     setSync("local", "Şəbəkə yoxdur — yeniləmə təxirə salındı");
     if (typeof openDialog === "function") {
@@ -1459,6 +1468,17 @@ async function applyUpdate() {
         "Proqram olduğu kimi işləməyə davam edir — şəbəkə qayıdanda yenidən cəhd et.</p>",
         null, "Oldu");
     }
+    return;
+  }
+  if (sb === String(APP_BUILD)) {
+    // serverdə yeni səhifə hələ yoxdur — yenidən yükləmək eyni nüsxəni gətirərdi
+    updateReady = false;
+    setSync(was.s, was.t);
+    paintStatus();
+    openDialog("Yeni nüsxə hələ hazır deyil", "versiya " + APP_BUILD,
+      "<p class=\"dlg-msg\">Serverdə hələ köhnə səhifə var. GitHub yeni faylları adətən " +
+      "1–2 dəqiqəyə yayımlayır — bir azdan yenidən yoxla.</p>",
+      null, "Oldu");
     return;
   }
   try {
@@ -3423,7 +3443,7 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
     }
     setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 600);
   };
-  setTimeout(bitir, az ? 0 : 1350);
+  setTimeout(bitir, az ? 0 : 1700);
 })();
 
 /* icmal açıqdırsa, "növbəti dərs" kartı hər dəqiqə yenilənir */
