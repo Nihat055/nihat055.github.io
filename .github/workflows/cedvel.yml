@@ -2,8 +2,8 @@
 # Saatda bir dəfə işləyir və iki iş görür:
 #   1) buluddaki cədvəldən qaib-cedvel.ics faylını yenidən qurur
 #      (telefon ona abunədir — dərsdən 5 dəqiqə əvvəlki bildirişlər oradan gəlir)
-#   2) səhər saat 9-da günün dərs xülasəsini, imtahanlara 2 və 1 gün qalmış
-#      xəbərdarlığı proqramın öz adı və ikonu ilə göndərir
+#   2) imtahanlara 2 və 1 gün qalmış xəbərdarlığı proqramın öz adı ilə göndərir
+#      (günün siyahısı və dərsdən 5 dəqiqə əvvəlki xatırlatmalar xatirlatma.yml-dədir)
 name: Qaib avtomatikasi
 
 on:
@@ -296,7 +296,7 @@ jobs:
               ok = 0
               payload = {
                   "title": "Sınaq bildirişi",
-                  "body": "Hər şey işləyir. Gündəlik cədvəl hər səhər saat 9-da bu cür gələcək.",
+                  "body": "Hər şey işləyir. Dərs xatırlatmaları bu cür gələcək.",
                   "tag": "qaib-sinaq-" + now.strftime("%H%M%S"),
               }
               for sid, sub in subs.items():
@@ -329,33 +329,14 @@ jobs:
               sent = ((node.get("sent") or {}).get(gun)) or {}
               mesajlar = []
 
-              if not sent.get("digest"):
-                  ders = today_lessons(state, now)
-                  if now.weekday() > 4:
-                      pass                                  # hefte sonu - xulase yox
-                  elif ders:
-                      sat = " · ".join(
-                          hhmm(m) + " " + ad + ((" (" + ot + ")") if ot else "")
-                          for m, ad, ot in ders if m < 10 ** 6)
-                      if not sat:
-                          sat = " · ".join(ad for _, ad, _ in ders)
-                      mesajlar.append(("digest", {
-                          "title": "Bugünkü dərslər",
-                          "body": sat, "tag": "qaib-gun-" + gun}))
-                  else:
-                      mesajlar.append(("digest", {
-                          "title": "Bu gün dərs yoxdur",
-                          "body": "Cədvəldə bu günə dərs yazılmayıb.",
-                          "tag": "qaib-gun-" + gun}))
-
               for qalan, ad, st, otaq in upcoming_exams(state, now):
                   mk = "imtahan-%d-%s" % (qalan, slug(ad))
                   if sent.get(mk):
                       continue
-                  tarix = "%d %s, %02d:%02d" % (st.day, AY[st.month - 1], st.hour, st.minute)
+                  tarix = "%d %s, saat %02d:%02d" % (st.day, AY[st.month - 1], st.hour, st.minute)
                   mesajlar.append((mk, {
-                      "title": "İmtahan — %d gün qaldı" % qalan,
-                      "body": ad + " · " + tarix + ((" · " + otaq) if otaq else ""),
+                      "title": ("Sabah imtahan: " if qalan == 1 else "2 gün sonra imtahan: ") + ad,
+                      "body": tarix + (("\nOtaq " + otaq) if otaq else ""),
                       "tag": "qaib-" + mk}))
 
               if not mesajlar:
