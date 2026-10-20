@@ -1,0 +1,3234 @@
+<!doctype html>
+<html lang="az" translate="no">
+<head>
+<meta charset="utf-8">
+<meta name="google" content="notranslate">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Qaib">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#2347e0">
+<meta name="color-scheme" content="light dark">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="manifest" href="manifest.json">
+<title>Qaib Jurnalı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap">
+</head>
+<body>
+<style>
+:root{
+  --ground:#eef1f4;
+  --panel:#ffffff;
+  --panel-2:#f3f5f8;
+  --panel-3:#e9edf1;
+  --ink:#1a1f26;
+  --ink-2:#33404d;
+  --muted:#59656f;
+  --line:#dfe4e9;
+  --line-2:#c8d0d8;
+  --accent:#2b5f9e;
+  --accent-ink:#ffffff;
+  --sel:#e5eef8;
+  --ok:#17663c;
+  --warn:#845300;
+  --crit:#9c1d16;
+  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0c1014;
+    --panel:#141a21;
+    --panel-2:#1a212a;
+    --panel-3:#212a34;
+    --ink:#e2e8ee;
+    --ink-2:#b4c0cc;
+    --muted:#96a2ae;
+    --line:#222b35;
+    --line-2:#303b46;
+    --accent:#6fa8dc;
+    --accent-ink:#0c1014;
+    --sel:#1a2634;
+    --ok:#4fbf84;
+    --warn:#d79a3c;
+    --crit:#ec6b61;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0c1014;
+  --panel:#141a21;
+  --panel-2:#1a212a;
+  --panel-3:#212a34;
+  --ink:#e2e8ee;
+  --ink-2:#b4c0cc;
+  --muted:#96a2ae;
+  --line:#222b35;
+  --line-2:#303b46;
+  --accent:#6fa8dc;
+  --accent-ink:#0c1014;
+  --sel:#1a2634;
+  --ok:#4fbf84;
+  --warn:#d79a3c;
+  --crit:#ec6b61;
+}
+
+*{box-sizing:border-box}
+html{
+  -webkit-text-size-adjust:100%;
+  touch-action:pan-x pan-y;      /* iki barmaqla yaxınlaşdırma və cüt toxunuş söndürülür */
+  overscroll-behavior:none;      /* kənarda rezin sıçrayış olmasın */
+}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--f-ui); font-size:14px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior:none;
+  -webkit-tap-highlight-color:transparent;
+}
+button,input,select{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+
+/* ====================  pəncərə  ==================== */
+.win{height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden}
+.mid{flex:1; min-height:0; display:flex; min-width:0; overflow:hidden}
+.content{flex:1; min-width:0; min-height:0; display:flex; flex-direction:column}
+
+.titlebar{
+  position:relative; z-index:30; min-height:42px; flex:none; flex-wrap:wrap;
+  display:flex; align-items:center; gap:9px; padding:0 10px;
+  background:var(--panel); border-bottom:1px solid var(--line-2);
+}
+.mark{display:flex; gap:1.5px; align-items:flex-end; height:13px; flex:none}
+.mark i{display:block; width:3px; background:var(--accent)}
+.mark i:nth-child(1){height:6px}
+.mark i:nth-child(2){height:10px}
+.mark i:nth-child(3){height:13px; background:var(--warn)}
+.mark i:nth-child(4){height:8px}
+.appname{font-size:13.5px; font-weight:600; letter-spacing:-.005em; white-space:nowrap}
+.vdiv{width:1px; height:15px; background:var(--line-2); flex:none}
+.docname{
+  font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden;
+  text-overflow:ellipsis; min-width:0;
+}
+.tb-right{margin-left:auto; display:flex; align-items:center; gap:9px; flex:none}
+
+.sel{
+  appearance:none; background:var(--panel-2); border:1px solid var(--line-2);
+  border-radius:4px; padding:5px 22px 5px 9px; font-size:12.5px;
+  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 12px) 51%, calc(100% - 8px) 51%;
+  background-size:4px 4px, 4px 4px; background-repeat:no-repeat;
+  max-width:46vw; text-overflow:ellipsis;
+}
+.led{display:flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); white-space:nowrap}
+.led::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--muted); flex:none}
+.led[data-s="ok"]::before{background:var(--ok)}
+.led[data-s="local"]::before{background:var(--warn)}
+.led[data-s="busy"]::before{background:var(--accent)}
+
+/* ====================  yan panel / tablar  ==================== */
+.sidebar{display:none}
+.navitem{
+  display:flex; align-items:center; gap:9px; width:100%; text-align:left;
+  background:none; border:0; border-radius:4px; padding:6px 9px; cursor:pointer;
+  color:var(--ink-2); font-size:13.5px;
+}
+.navitem:hover{background:var(--panel-2)}
+.navitem[aria-current="true"]{background:var(--sel); color:var(--accent); font-weight:600}
+.navitem svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.navitem .cnt{margin-left:auto; font-family:var(--f-mono); font-size:11px; color:var(--muted)}
+.navitem[aria-current="true"] .cnt{color:var(--accent)}
+.navgroup{
+  font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted);
+  padding:13px 9px 5px; font-weight:600;
+}
+
+.bottom{flex:none; z-index:30; background:var(--panel); border-top:1px solid var(--line-2)}
+.tabbar{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); padding-bottom:env(safe-area-inset-bottom)}
+.tabbar .navitem{
+  flex-direction:column; gap:3px; border-radius:0; padding:6px 1px 7px;
+  font-size:11px; color:var(--muted); align-items:center; white-space:nowrap;
+}
+.tabbar .navitem[aria-current="true"]{background:none; box-shadow:inset 0 2px 0 var(--accent)}
+.tabbar .navitem svg{width:18px;height:18px}
+.tabbar .navitem .cnt{display:none}
+.tabbar .navitem > span{min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis}
+
+/* ====================  alət sətri  ==================== */
+.toolbar{
+  flex:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  padding:9px 16px; background:var(--panel-2); border-bottom:1px solid var(--line);
+  min-height:44px;
+}
+.vtitle{font-size:13.5px; font-weight:600; letter-spacing:-.005em; margin-right:4px}
+.vhint{font-size:12.5px; color:var(--muted); line-height:1.4}
+.tb-sp{margin-left:auto}
+
+.btn{
+  background:var(--panel); border:1px solid var(--line-2); border-radius:4px;
+  padding:5px 12px; font-size:13px; cursor:pointer; white-space:nowrap;
+}
+.btn[disabled]{opacity:.45; cursor:default}
+.btn[disabled]:hover{border-color:var(--line-2); color:inherit}
+.btn:hover{border-color:var(--accent); color:var(--accent)}
+.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1); color:var(--accent-ink)}
+.btn.danger:hover{border-color:var(--crit); color:var(--crit)}
+.seg{display:inline-flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden}
+.seg button{background:var(--panel); border:0; border-right:1px solid var(--line-2); padding:5px 12px; font-size:13px; color:var(--muted); cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--sel); color:var(--accent); font-weight:600}
+.find{
+  background:var(--panel); border:1px solid var(--line-2); border-radius:4px;
+  padding:5px 10px; font-size:13px; width:min(280px,52vw);
+}
+.find:focus{border-color:var(--accent); outline:none}
+
+/* ====================  məzmun  ==================== */
+main{
+  flex:1; min-width:0; min-height:0; padding:14px 14px 18px;
+  overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+}
+.panel{background:var(--panel); border:1px solid var(--line); border-radius:5px; overflow:hidden}
+main > * + *{margin-top:14px}
+.two > * + *{margin-top:14px}
+.two > div > .panel + .panel{margin-top:14px}
+.ph{
+  display:flex; align-items:center; gap:8px; padding:7px 11px;
+  background:var(--panel-2); border-bottom:1px solid var(--line);
+  font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+}
+.ph .ph-r{margin-left:auto; font-weight:400; text-transform:none; letter-spacing:0; font-size:12px}
+.pb{padding:11px}
+
+/* KPI zolağı — hairline bölünmüş, kart yox */
+.kpi{display:flex; flex-wrap:wrap}
+.kpi > div{
+  flex:1 1 90px; padding:9px 11px 10px; border-right:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.kpi > div:last-child{border-right:0}
+.kpi b{display:block; font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:20px; font-weight:500; letter-spacing:-.02em; line-height:1.15}
+.kpi span{display:block; font-size:11.5px; color:var(--muted); margin-top:2px}
+.kpi b.c-ok{color:var(--ok)} .kpi b.c-warn{color:var(--warn)} .kpi b.c-crit{color:var(--crit)}
+
+/* ====================  cədvəllər  ==================== */
+.tw{overflow-x:auto}
+table.t{width:100%; border-collapse:collapse; font-size:13.5px}
+table.t th{
+  text-align:left; padding:7px 10px; font-size:11px; font-weight:600;
+  text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
+  background:var(--panel-2); border-bottom:1px solid var(--line-2); white-space:nowrap;
+}
+table.t td{padding:0 10px; height:39px; border-bottom:1px solid var(--line); vertical-align:middle}
+table.t tbody tr:last-child td{border-bottom:0}
+table.t tbody tr:hover{background:var(--panel-2)}
+table.t tbody tr[aria-selected="true"]{background:var(--sel)}
+table.t .r{text-align:right; font-family:var(--f-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+table.t .c{text-align:center}
+table.t .nm{font-weight:500; min-width:160px}
+table.t .nm small{display:block; font-weight:400; font-size:12px; color:var(--muted); margin-top:-2px}
+table.t .ix{width:32px; color:var(--muted); font-family:var(--f-mono); font-size:12px; text-align:right}
+table.t tr.clk{cursor:pointer}
+table.t td.stripe{border-left:2px solid transparent; padding-left:8px}
+table.t tr.lv-warn td.stripe{border-left-color:var(--warn)}
+table.t tr.lv-crit td.stripe{border-left-color:var(--crit)}
+.code{font-family:var(--f-mono); font-size:12px; color:var(--muted); white-space:nowrap}
+
+/* vəziyyət nişanı — doldurulmuş "pill" yox, çərçivəli etiket */
+.tag{
+  display:inline-block; font-family:var(--f-mono); font-size:10.5px; font-weight:500;
+  letter-spacing:.04em; text-transform:uppercase; padding:2px 6px; border-radius:3px;
+  border:1px solid currentColor; white-space:nowrap;
+}
+.tag.ok{color:var(--ok)} .tag.warn{color:var(--warn)} .tag.crit{color:var(--crit)}
+.tag.neu{color:var(--muted)} .tag.acc{color:var(--accent)}
+
+/* sətir içi nazik qaib zolağı */
+.bar{display:flex; gap:1px; height:7px; min-width:68px; align-items:stretch}
+.bar i{flex:1 0 2px; background:var(--line-2); border-radius:1px}
+.bar i.on{background:var(--accent)}
+.bar.lv-warn i.on{background:var(--warn)}
+.bar.lv-crit i.on{background:var(--crit)}
+.bar i.gap{margin-right:3px}
+
+/* ədəd artırıcı — real proqramlardakı spinner */
+.spin{display:inline-flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden; background:var(--panel)}
+.spin button{
+  width:24px; height:24px; border:0; background:none; cursor:pointer;
+  font-family:var(--f-mono); font-size:13px; color:var(--ink-2); padding:0;
+}
+.spin button:hover{background:var(--sel); color:var(--accent)}
+.spin button:first-child{border-right:1px solid var(--line)}
+.spin button:last-child{border-left:1px solid var(--line)}
+.spin .v{
+  min-width:30px; text-align:center; font-family:var(--f-mono); font-variant-numeric:tabular-nums;
+  font-size:12.5px; display:grid; place-items:center; background:var(--panel-2);
+}
+
+/* ====================  dərs cədvəli: gün sütunları  ==================== */
+.board{display:grid; gap:11px; grid-template-columns:1fr; padding:12px}
+.col{border:1px solid var(--line); border-radius:5px; overflow:hidden; display:flex; flex-direction:column}
+.col-h{
+  display:flex; align-items:center; gap:7px; padding:7px 10px;
+  background:var(--panel-2); border-bottom:1px solid var(--line);
+  font-size:12.5px; font-weight:600;
+}
+.col-h.today{color:var(--accent)}
+.col-h .n{margin-left:auto; font-family:var(--f-mono); font-size:11.5px; color:var(--muted); font-weight:400}
+.col-b{display:flex; flex-direction:column; gap:1px; background:var(--line); flex:1}
+.ls{
+  display:block; width:100%; text-align:left; background:var(--panel); border:0;
+  border-left:2px solid transparent; padding:9px 10px; cursor:pointer; color:inherit;
+}
+.ls:hover{background:var(--sel)}
+.ls .tm{
+  display:block; font-family:var(--f-mono); font-size:12px; font-weight:500;
+  color:var(--accent); letter-spacing:-.01em;
+}
+.ls b{display:block; font-size:13px; font-weight:500; margin-top:3px; line-height:1.35}
+.ls .mt{display:block; font-family:var(--f-mono); font-size:11px; color:var(--muted); margin-top:4px}
+.ls.lv-warn{border-left-color:var(--warn)}
+.ls.lv-crit{border-left-color:var(--crit)}
+.col-empty{padding:16px 10px; background:var(--panel); color:var(--muted); font-size:12.5px; text-align:center}
+.col-f{padding:7px; background:var(--panel); border-top:1px solid var(--line)}
+.addbtn{
+  width:100%; border:1px dashed var(--line-2); background:none; border-radius:4px;
+  padding:7px; font-size:12.5px; color:var(--muted); cursor:pointer;
+}
+.addbtn:hover{border-color:var(--accent); color:var(--accent); border-style:solid}
+
+/* ====================  sahələr  ==================== */
+.form{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:9px}
+.fld label{display:block; font-size:11px; letter-spacing:.02em; color:var(--muted); margin-bottom:4px}
+.fld input, .fld select, .semrow input{
+  width:100%; background:var(--panel); color:var(--ink);
+  border:1px solid var(--line-2); border-radius:4px;
+  padding:6px 9px; font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:13.5px;
+}
+.fld.txt input{font-family:var(--f-ui)}
+.fld input:focus, .fld select:focus, .semrow input:focus{border-color:var(--accent); outline:none}
+.semrow input::placeholder{color:var(--muted); opacity:1}
+.semrow{display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px}
+.semrow input{text-align:center; padding:7px 2px; font-size:14px; font-weight:500}
+@media (max-width:560px){ .semrow{grid-template-columns:repeat(4,minmax(0,1fr))} }
+
+dl.kv{margin:0}
+dl.kv > div{display:flex; justify-content:space-between; gap:14px; padding:7px 11px; border-bottom:1px solid var(--line); align-items:baseline}
+dl.kv > div:last-child{border-bottom:0}
+dl.kv dt{font-size:12.5px; color:var(--muted); flex:none}
+dl.kv dd{margin:0; font-size:13.5px; text-align:right; word-break:break-word}
+dl.kv dd button{background:none; border:0; padding:0; font:inherit; color:var(--ink); cursor:pointer; text-align:right; border-bottom:1px dashed var(--line-2)}
+dl.kv dd button:hover{color:var(--accent); border-bottom-color:var(--accent)}
+
+.flabel{font-size:11.5px; color:var(--muted); margin:0 0 8px}
+ol.steps{margin:0; padding:12px 14px 14px 34px; display:flex; flex-direction:column; gap:8px}
+ol.steps li{font-size:13px; line-height:1.55}
+ol.steps li::marker{color:var(--accent); font-family:var(--f-mono); font-size:12px}
+.flag{color:var(--warn); font-weight:500}
+.dlg-f .del{margin-right:auto}
+.hintbox{font-size:12.5px; line-height:1.6; color:var(--muted); padding:9px 11px; border-top:1px solid var(--line); background:var(--panel-2)}
+.blank{padding:24px 12px; text-align:center; color:var(--muted); font-size:13px}
+
+/* ====================  status sətri  ==================== */
+.statusbar{
+  display:flex; align-items:center; gap:10px; min-height:26px; padding:3px 11px;
+  background:var(--panel-2); border-top:1px solid var(--line);
+  font-family:var(--f-mono); font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden;
+}
+.statusbar .sb-r{margin-left:auto; display:flex; gap:10px; align-items:center; min-width:0; overflow:hidden}
+.statusbar s{text-decoration:none; opacity:.4}
+.sb-keys{display:none}
+
+/* ====================  dialoq  ==================== */
+.modal{position:fixed; inset:0; z-index:60; display:grid; align-items:end; justify-items:stretch}
+.modal[hidden]{display:none}
+.modal::before{content:""; position:absolute; inset:0; background:rgba(8,12,18,.45)}
+.dlg{
+  position:relative; background:var(--panel); border:1px solid var(--line-2);
+  border-radius:8px 8px 0 0; max-height:88vh; display:flex; flex-direction:column;
+}
+.dlg-t{
+  display:flex; align-items:center; gap:8px; padding:9px 12px; flex:none;
+  background:var(--panel-2); border-bottom:1px solid var(--line); border-radius:7px 7px 0 0;
+}
+.dlg-t strong{font-size:13.5px; font-weight:600}
+.dlg-t em{font-style:normal; font-size:11.5px; color:var(--muted); margin-left:auto; font-family:var(--f-mono)}
+.dlg-b{padding:13px 12px; overflow:auto}
+.dlg-f{
+  display:flex; justify-content:flex-end; gap:7px; padding:10px 12px; flex:none;
+  border-top:1px solid var(--line); background:var(--panel-2);
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
+}
+.dlg-msg{font-size:13px; color:var(--ink-2); margin:0; line-height:1.6}
+
+/* ====================  geniş ekran  ==================== */
+@media (min-width:920px){
+  .sidebar{
+    display:block; width:206px; flex:none; background:var(--panel);
+    border-right:1px solid var(--line); padding:6px 7px 14px;
+    overflow-y:auto; overscroll-behavior:contain;
+  }
+  .tabbar{display:none}
+  .bottom{border-top:1px solid var(--line-2)}
+  main{padding:16px 18px 24px}
+  .sb-keys{display:inline}
+  .docname{font-size:12px}
+  .modal{place-items:center}
+  .dlg{width:min(520px,92vw); border-radius:8px}
+  .dlg-t{border-radius:7px 7px 0 0}
+  .dlg-f{padding-bottom:10px}
+  .board{grid-template-columns:repeat(5,minmax(0,1fr))}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
+  .two > * + *{margin-top:0}
+}
+@media (max-width:759px){
+  .hide-sm{display:none}
+  .vdiv, .docname{display:none}
+  .titlebar{gap:7px; padding:0 9px}
+  .led{font-size:0; gap:0}
+  .led::before{width:8px; height:8px}
+  .board{padding:10px}
+}
+
+/* ====================  hesabat  ==================== */
+.linkbtn{
+  background:none; border:0; padding:0; font:inherit; color:inherit; cursor:pointer;
+  text-align:left; border-bottom:1px dashed var(--line-2);
+}
+.linkbtn:hover{color:var(--accent); border-bottom-color:var(--accent)}
+.report .rep-head{padding:16px 16px 4px}
+.report h1{font-family:var(--f-ui); font-size:19px; font-weight:600; letter-spacing:-.01em; margin:0 0 3px}
+.report .rep-sub{color:var(--muted); font-size:12.5px; margin:0 0 14px}
+dl.rep-id{display:flex; flex-wrap:wrap; gap:6px 26px; margin:0 0 14px}
+dl.rep-id > div{display:flex; gap:8px; align-items:baseline}
+dl.rep-id dt{color:var(--muted); font-size:12px}
+dl.rep-id dd{margin:0; font-size:13px; font-weight:600}
+.report .rep-foot{
+  color:var(--muted); font-size:12px; line-height:1.65;
+  padding:12px 16px 16px; border-top:1px solid var(--line); margin:0;
+}
+
+/* ====================  çap  ==================== */
+@media print{
+  .titlebar, .sidebar, .bottom, .toolbar, .tabbar, .statusbar{display:none !important}
+  .win{height:auto; overflow:visible; display:block}
+  .mid, .content{display:block; overflow:visible}
+  main{overflow:visible; padding:0; display:block}
+  body{background:#fff; color:#000; font-size:11pt}
+  .panel{border:1px solid #bbb; border-radius:0; box-shadow:none}
+  .ph{background:#f2f2f2; color:#333}
+  .kpi > div{border-color:#ddd}
+  table.t th{background:#f2f2f2; color:#333}
+  table.t td{border-color:#eee}
+  .report .rep-head, .report .rep-foot{color:#000}
+  .tw{overflow:visible}
+  tr{break-inside:avoid}
+}
+
+/* ====================  tətbiq hissi  ==================== */
+/* idarəetmə elementlərində mətn seçilməsin, uzun basanda menyu çıxmasın */
+.titlebar, .toolbar, .statusbar, .sidebar, .tabbar,
+.navitem, .btn, .seg button, .spin button, .addbtn, .linkbtn,
+.ph, .kpi, .tag, .col-h, .ls, .cell, table.t thead th{
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+}
+/* oxunan və yazılan yerlərdə seçmə qalır */
+input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
+  -webkit-user-select:text; user-select:text; -webkit-touch-callout:default;
+}
+
+@media (max-width:759px){
+  /* iOS 16px-dən kiçik xanaya toxunanda ekranı özbaşına yaxınlaşdırır — qarşısını alır */
+  .fld input, .fld select, .semrow input, .find, .ta, .sel,
+  input, select, textarea{ font-size:16px }
+  .semrow input{ padding:7px 1px }
+  .ta{ font-size:13px }        /* JSON mətni: yaxınlaşma yalnız fokusda olur, burada lazım deyil */
+}
+
+/* ====================  açılış ekranı  ==================== */
+.splash{
+  position:fixed; inset:0; z-index:200; display:flex;
+  flex-direction:column; align-items:center; justify-content:center; gap:16px;
+  background:var(--ground);
+  transition:opacity .3s ease, visibility .3s;
+}
+.splash.gone{opacity:0; visibility:hidden; pointer-events:none}
+.splash-mark{display:flex; gap:5px; align-items:flex-end; height:52px}
+.splash-mark i{
+  display:block; width:9px; border-radius:2px; background:var(--accent);
+  transform-origin:bottom; animation:qj-rise .5s cubic-bezier(.22,.9,.3,1) both;
+}
+.splash-mark i:nth-child(1){height:24px; animation-delay:.00s}
+.splash-mark i:nth-child(2){height:38px; animation-delay:.06s}
+.splash-mark i:nth-child(3){height:52px; background:var(--warn); animation-delay:.12s}
+.splash-mark i:nth-child(4){height:31px; animation-delay:.18s}
+.splash-name{
+  font-size:14px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); animation:qj-fade .45s .2s ease both;
+}
+@keyframes qj-rise{from{transform:scaleY(.05); opacity:0} to{transform:scaleY(1); opacity:1}}
+
+/* ====================  hərəkət  ==================== */
+@keyframes qj-fade{from{opacity:0} to{opacity:1}}
+@keyframes qj-fade-up{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
+@keyframes qj-dlg-in{from{opacity:0; transform:translateY(16px) scale(.985)} to{opacity:1; transform:none}}
+
+/* bölmə dəyişəndə məzmun pillə-pillə görünür (hər toxunuşda yox) */
+main.enter > *{animation:qj-fade-up .24s cubic-bezier(.22,.61,.36,1) both}
+main.enter > *:nth-child(2){animation-delay:.05s}
+main.enter > *:nth-child(3){animation-delay:.1s}
+main.enter > *:nth-child(4){animation-delay:.14s}
+
+.modal::before{animation:qj-fade .18s ease both}
+.dlg{animation:qj-dlg-in .22s cubic-bezier(.22,.61,.36,1) both}
+
+.btn, .navitem, .seg button, .spin button, .addbtn, .linkbtn,
+.ls, .cell, .sel, .find, .fld input, .fld select, .semrow input{
+  transition:background-color .14s ease, border-color .14s ease,
+             color .14s ease, box-shadow .14s ease, transform .1s ease;
+}
+table.t tbody tr{transition:background-color .13s ease}
+.btn:active, .spin button:active, .addbtn:active, .seg button:active{transform:scale(.97)}
+.ls:active, .cell:active{transform:scale(.995)}
+.bar i{transition:background-color .2s ease}
+.kpi b{transition:color .18s ease}
+.led::before{transition:background-color .25s ease}
+.tabbar .navitem[aria-current="true"]{transition:box-shadow .18s ease}
+
+@media (prefers-reduced-motion: reduce){
+  .splash{transition:none}
+  main.enter > *{animation:none}
+}
+
+.flagbtn{
+  background:none; border:0; padding:0 2px; cursor:pointer;
+  font-family:var(--f-mono); font-size:11px; color:var(--accent);
+  font-weight:600; text-decoration:underline; text-underline-offset:2px;
+}
+.flagbtn:hover{filter:brightness(1.2)}
+
+/* ======================================================================
+   MÜASİRLƏŞDİRMƏ — rənglər dərinləşdirildi, səthlər bir-birindən ayrıldı
+   (sonda gəldiyi üçün yuxarıdaki dəyərləri əvəz edir)
+   ====================================================================== */
+:root{
+  --ground:#e7ecf4;
+  --panel:#ffffff;
+  --panel-2:#f1f5fb;
+  --panel-3:#e3eaf4;
+  --ink:#111724;
+  --ink-2:#2e3a4e;
+  --muted:#596782;
+  --line:#dae1ed;
+  --line-2:#bfcadb;
+  --accent:#2f54eb;
+  --accent-ink:#ffffff;
+  --sel:#e6ecfe;
+  --ok:#0b7a4b;
+  --warn:#a65a00;
+  --crit:#c01a3d;
+  --shadow-1:0 1px 2px rgba(17,23,36,.05), 0 1px 3px rgba(17,23,36,.06);
+  --shadow-2:0 6px 18px -8px rgba(17,23,36,.22);
+  --shadow-3:0 18px 44px -16px rgba(17,23,36,.34);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#070a10;
+    --panel:#121a24;
+    --panel-2:#18212e;
+    --panel-3:#202b3a;
+    --ink:#e6ecf6;
+    --ink-2:#b7c5d7;
+    --muted:#8c9cb4;
+    --line:#1e2835;
+    --line-2:#2c3a4c;
+    --accent:#89a5ff;
+    --accent-ink:#080c14;
+    --sel:#17223a;
+    --ok:#34d399;
+    --warn:#f0b24a;
+    --crit:#fb7185;
+    --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+    --shadow-2:0 6px 18px -8px rgba(0,0,0,.7);
+    --shadow-3:0 18px 44px -16px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#070a10;
+  --panel:#121a24;
+  --panel-2:#18212e;
+  --panel-3:#202b3a;
+  --ink:#e6ecf6;
+  --ink-2:#b7c5d7;
+  --muted:#8c9cb4;
+  --line:#1e2835;
+  --line-2:#2c3a4c;
+  --accent:#89a5ff;
+  --accent-ink:#080c14;
+  --sel:#17223a;
+  --ok:#34d399;
+  --warn:#f0b24a;
+  --crit:#fb7185;
+  --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
+  --shadow-2:0 6px 18px -8px rgba(0,0,0,.7);
+  --shadow-3:0 18px 44px -16px rgba(0,0,0,.8);
+}
+
+/* ---- səthlər: düz deyil, bir-birindən ayrılmış ---- */
+.panel{border-radius:10px; box-shadow:var(--shadow-1); border-color:var(--line)}
+.titlebar{box-shadow:0 1px 0 var(--line-2), 0 6px 16px -14px rgba(0,0,0,.6)}
+.toolbar{background:var(--panel-2)}
+.ph{background:var(--panel-2); color:var(--ink-2); letter-spacing:.04em}
+.bottom{box-shadow:0 -6px 16px -14px rgba(0,0,0,.6)}
+
+/* ---- aksent: daha doymuş, lazım olan yerdə görünür ---- */
+.mark i{border-radius:1.5px}
+.navitem[aria-current="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
+.tabbar .navitem[aria-current="true"]{box-shadow:inset 0 2.5px 0 var(--accent)}
+.btn:hover{background:var(--sel); border-color:var(--accent); color:var(--accent)}
+.btn.primary{box-shadow:var(--shadow-1)}
+.btn.primary:hover{background:var(--accent); filter:brightness(1.12)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
+.spin{box-shadow:var(--shadow-1)}
+.spin .v{background:var(--panel-3)}
+.find:focus, .fld input:focus, .fld select:focus, .semrow input:focus, .ta:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* ---- nişanlar: boş çərçivə yox, rəngli dolğu ---- */
+.tag{
+  border-color:color-mix(in srgb, currentColor 32%, transparent);
+  background:color-mix(in srgb, currentColor 13%, transparent);
+  font-weight:600;
+}
+
+/* ---- rəqəmlər daha oxunaqlı ---- */
+.kpi b{font-size:22px; font-weight:500; color:var(--ink)}
+.kpi > div:first-child b{color:var(--accent)}
+.kpi b.c-ok{color:var(--ok)} .kpi b.c-warn{color:var(--warn)} .kpi b.c-crit{color:var(--crit)}
+.kpi > div{background:var(--panel)}
+
+/* ---- qaib zolağı: qalın, yumşaq, dolğun ---- */
+.bar{height:9px}
+.bar i{background:var(--panel-3); border-radius:2.5px}
+.bar i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff) 0%, var(--accent) 100%)}
+.bar.lv-warn i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--warn) 88%, #fff) 0%, var(--warn) 100%)}
+.bar.lv-crit i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--crit) 88%, #fff) 0%, var(--crit) 100%)}
+
+/* ---- cədvəl: başlıq daha aydın, sətirlər daha canlı ---- */
+table.t th{background:var(--panel-3); color:var(--ink-2); border-bottom-color:var(--line-2)}
+table.t tbody tr:hover{background:var(--panel-2)}
+table.t tbody tr[aria-selected="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
+table.t td.stripe{border-left-width:3px}
+
+/* ---- cədvəl sütunları və dialoq ---- */
+.col{border-radius:8px; box-shadow:var(--shadow-1)}
+.col-h{background:var(--panel-2)}
+.ls .tm{color:var(--accent); font-weight:600}
+.addbtn:hover{background:var(--sel)}
+.dlg{border-radius:14px; box-shadow:var(--shadow-3); border-color:var(--line-2)}
+.dlg-t{background:var(--panel-2); border-radius:13px 13px 0 0}
+.modal::before{background:rgba(6,10,18,.58); backdrop-filter:blur(2px)}
+
+/* ---- yan panel və status ---- */
+.sidebar{background:var(--panel)}
+.statusbar{background:var(--panel-2); color:var(--muted)}
+.splash-mark i{border-radius:3px}
+
+@media (min-width:920px){
+  .dlg{border-radius:14px}
+  .dlg-t{border-radius:13px 13px 0 0}
+}
+
+/* ======================================================================
+   DAHA QABARIQ GÖRÜNÜŞ — başlıq sətri aksent rəngini daşıyır
+   ====================================================================== */
+:root{
+  --ground:#e3e9f3;
+  --panel-2:#eef3fb;
+  --panel-3:#dde6f3;
+  --ink:#0d1320;
+  --line:#d4dceb;
+  --line-2:#b4c2d8;
+  --accent:#2347e0;
+  --sel:#e2e9ff;
+  --ok:#09713f;
+  --warn:#9c5200;
+  --crit:#bb1239;
+  --titlebar-bg:var(--accent);
+  --titlebar-ink:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#05080d;
+    --panel:#111924;
+    --panel-2:#17202d;
+    --panel-3:#1f2b3b;
+    --accent:#7e9dff;
+    --sel:#16213a;
+    --ok:#3ddc9a;
+    --warn:#f5b84f;
+    --crit:#ff7f95;
+    --titlebar-bg:var(--panel);
+    --titlebar-ink:var(--ink);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#05080d;
+  --panel:#111924;
+  --panel-2:#17202d;
+  --panel-3:#1f2b3b;
+  --accent:#7e9dff;
+  --sel:#16213a;
+  --ok:#3ddc9a;
+  --warn:#f5b84f;
+  --crit:#ff7f95;
+  --titlebar-bg:var(--panel);
+  --titlebar-ink:var(--ink);
+}
+
+/* ---- başlıq sətri ---- */
+.titlebar{
+  background:var(--titlebar-bg); color:var(--titlebar-ink);
+  border-bottom:0; box-shadow:0 2px 10px -4px rgba(10,20,60,.45);
+}
+.titlebar .appname{color:currentColor}
+.titlebar .docname{color:color-mix(in srgb, currentColor 72%, transparent)}
+.titlebar .vdiv{background:color-mix(in srgb, currentColor 32%, transparent)}
+.titlebar .mark i{background:currentColor}
+.titlebar .mark i:nth-child(3){background:#ffc96b}
+.titlebar .led{color:color-mix(in srgb, currentColor 78%, transparent)}
+.titlebar .sel{
+  background:color-mix(in srgb, currentColor 14%, transparent);
+  border-color:color-mix(in srgb, currentColor 30%, transparent);
+  color:currentColor;
+  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
+                   linear-gradient(135deg,currentColor 50%,transparent 50%);
+  background-position:calc(100% - 12px) 51%, calc(100% - 8px) 51%;
+  background-size:4px 4px, 4px 4px; background-repeat:no-repeat;
+}
+.titlebar .sel option{color:var(--ink); background:var(--panel)}
+.titlebar .btn{
+  background:color-mix(in srgb, currentColor 13%, transparent);
+  border-color:color-mix(in srgb, currentColor 30%, transparent);
+  color:currentColor;
+}
+.titlebar .btn:hover{background:color-mix(in srgb, currentColor 24%, transparent); color:currentColor}
+/* SƏHV İDİ: background:currentColor + color eyni qaydada → fon və yazı eyni rəng olurdu.
+   İndi hər ikisi açıq şəkildə öz nişanəsindən gəlir. */
+.titlebar .btn.primary{
+  background:var(--titlebar-ink);
+  border-color:var(--titlebar-ink);
+  color:var(--titlebar-bg);
+  font-weight:600;
+}
+.titlebar .btn.primary:hover{
+  background:var(--titlebar-ink); border-color:var(--titlebar-ink);
+  color:var(--titlebar-bg); filter:none; opacity:.9;
+}
+/* saxlanmış vəziyyətdə sönük olsun, amma həmişə oxunsun —
+   color-mix yox, sadə opacity: hər brauzerdə eyni nəticə verir */
+.titlebar .btn.primary[disabled]{
+  background:var(--titlebar-ink);
+  border-color:var(--titlebar-ink);
+  color:var(--titlebar-bg);
+  opacity:.58;
+}
+.titlebar .btn[disabled]{opacity:.62}
+/* tünd rejimdə başlıq panel rəngindədir — alt xətt lazımdır */
+:root[data-theme="dark"] .titlebar{border-bottom:1px solid var(--line-2)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .titlebar{border-bottom:1px solid var(--line-2)}
+}
+
+/* ---- açılış ekranı başlıqla uyğun ---- */
+.splash{background:var(--titlebar-bg)}
+.splash-mark i{background:var(--titlebar-ink)}
+.splash-mark i:nth-child(3){background:#ffc96b}
+.splash-name{color:color-mix(in srgb, var(--titlebar-ink) 76%, transparent)}
+
+/* ---- daha canlı detallar ---- */
+.ph{background:color-mix(in srgb, var(--accent) 6%, var(--panel-2))}
+.navitem[aria-current="true"]{background:var(--sel); color:var(--accent)}
+.tag{background:color-mix(in srgb, currentColor 16%, transparent)}
+.kpi > div:first-child b{color:var(--accent)}
+.seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
+table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
+
+/* ---- ikinci dərəcəli seçimlər ---- */
+.more{margin-top:12px; border-top:1px solid var(--line); padding-top:10px}
+.more summary{
+  cursor:pointer; font-size:13px; color:var(--muted);
+  list-style:none; display:inline-flex; align-items:center; gap:6px;
+}
+.more summary::-webkit-details-marker{display:none}
+.more summary::before{content:"A"; font-size:15px; transition:transform .18s ease}
+.more[open] summary::before{transform:rotate(90deg)}
+.more summary:hover{color:var(--accent)}
+a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-content:center}
+
+.splitline{height:1px; background:var(--line); margin:14px 0 12px}
+
+/* ======================================================================
+   YAZI SECIMI — nov ve olcu
+   ====================================================================== */
+:root[data-font="sistem"]{
+  --f-ui:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",
+         system-ui,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"SF Mono","Segoe UI Mono","Cascadia Mono",Consolas,monospace;
+}
+:root[data-font="inter"]{
+  --f-ui:"Inter",system-ui,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+:root[data-font="plex"]{
+  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+
+/* olcu: yalniz mezmun ve dialoq boyuyur, baslq setri ve tab zolagi olduqu kimi qalir */
+:root[data-fs="l"] main{zoom:1.10}
+:root[data-fs="l"] .dlg{zoom:1.10}
+:root[data-fs="xl"] main{zoom:1.22}
+:root[data-fs="xl"] .dlg{zoom:1.22}
+
+/* ayarlar bolmesi — tek sutun, hedden genis olmasin */
+.stack{max-width:780px}
+.stack > .panel + .panel{margin-top:14px}
+</style>
+
+<div class="win">
+  <header class="titlebar">
+    <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="appname">Qaib Jurnalı</span>
+    <span class="vdiv" aria-hidden="true"></span>
+    <span class="docname" id="docname"></span>
+    <span class="tb-right">
+      <button class="btn" id="btnDiscard" type="button" data-discard="1" hidden>Geri qaytar</button>
+      <button class="btn primary" id="btnSave" type="button" data-save="1" disabled>Saxlanıldı</button>
+      <select class="sel" id="semPick" aria-label="Semestr"></select>
+      <span class="led" id="sync" data-s="busy">Yüklənir</span>
+    </span>
+  </header>
+
+  <div class="mid">
+    <nav class="sidebar" id="sidebar" aria-label="Bölmələr"></nav>
+    <div class="content">
+      <div class="toolbar" id="toolbar"></div>
+      <main id="view" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <footer class="statusbar" id="statusbar"></footer>
+    <nav class="tabbar" id="tabbar" aria-label="Bölmələr"></nav>
+  </div>
+</div>
+
+<div class="modal" id="modal" hidden></div>
+
+<div class="splash" id="splash" aria-hidden="true">
+  <span class="splash-mark"><i></i><i></i><i></i><i></i></span>
+  <span class="splash-name">Qaib Jurnalı</span>
+</div>
+
+<script>
+"use strict";
+var APP_BUILD = "20261012-2131";
+var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
+var ICON_HREF = "icon-180.png";
+
+/* ============================================================
+   0. iPhone / Windows — proqram kimi açılma üçün meta
+   ============================================================ */
+(function () {
+  const head = document.head;
+  const add = (tag, attrs) => {
+    const sel = tag + Object.entries(attrs)
+      .filter(([k]) => k === "name" || k === "rel")
+      .map(([k, v]) => `[${k}="${v}"]`).join("");
+    if (head.querySelector(sel)) return;
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+    head.appendChild(el);
+  };
+  document.documentElement.lang = "az";
+  document.documentElement.setAttribute("translate", "no");
+  add("meta", { name: "google", content: "notranslate" });
+  add("meta", { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover" });
+  /* iOS-da iki barmaq jesti ilə yaxınlaşdırmanı bağla */
+  ["gesturestart", "gesturechange", "gestureend"].forEach((ev) =>
+    document.addEventListener(ev, (e) => e.preventDefault(), { passive: false }));
+  add("meta", { name: "apple-mobile-web-app-capable", content: "yes" });
+  add("meta", { name: "mobile-web-app-capable", content: "yes" });
+  add("meta", { name: "apple-mobile-web-app-title", content: "Qaib" });
+  add("meta", { name: "apple-mobile-web-app-status-bar-style", content: "default" });
+  add("meta", { name: "theme-color", content: "#2347e0" });
+  add("link", { rel: "apple-touch-icon", href: ICON_HREF });
+  add("link", { rel: "icon", href: ICON_HREF });
+  if (location.protocol.indexOf("http") === 0) add("link", { rel: "manifest", href: "manifest.json" });
+})();
+
+/* ============================================================
+   1. Fənn kataloqu  (Excel: "Data" vərəqi)
+   ============================================================ */
+const HOUR_RATE = 2200 / 60;              // Excel: (2200/60)
+const QAIB_BY_CREDIT = { 3: 3, 4: 9, 5: 12, 6: 15 };  // Excel: "Qaib sayı" sütunu
+
+const CATALOG = [
+  ["End942", "Xarici dildə işgüzar və akademik kommunikasiya 2", 5, "İsgəndərova Nərgiz"],
+  ["Azd019", "Azərbaycan dilində işgüzar və akademik kommunikasiya", 4, "Talıbova Sevinc"],
+  ["Tur650", "Turizm coğrafiyası", 5, "İsmayılova Lalə"],
+  ["Mal452", "Marketinqin əsasları", 5, "Bayramova İlfanə"],
+  ["Riy180", "Biznes riyaziyyatı", 6, "Fətəliyeva Aynurə"],
+  ["Mik300", "Mikroiqtisadiyyat", 5, "Aslanova İlhamə"],
+  ["End942", "Xarici dildə işgüzar və akademik kommunikasiya 1", 5, ""],
+  ["End943", "Xarici dildə işgüzar və akademik kommunikasiya 3", 5, "Rzazadə Nigar"],
+  ["Bid014", "Biznes statistikası", 5, "Dünyamalıyeva Vəfa Rəşid"],
+  ["Mak260", "Makroiqtisadiyyat", 5, "Aslanova İlhamə Eybulla"],
+  ["Tur220", "Turizmdə nəqliyyat", 5, "Abbasova Könül Akif"],
+  ["Tur450", "Turizmdə vasitəçilər", 4, "Tağısoy Xədicə Elşən"],
+  ["Tur200", "Turizmdə marketinq və marketinq araşdırmaları", 6, "Atakişiyeva Nərgiz Nəriman"],
+  ["Tur590", "Turizm hüququ", 5, ""],
+  ["Eko390", "İnsan resurslarının idarə edilməsi", 4, ""],
+  ["Muh320", "Mühasibat uçotu", 5, ""],
+  ["Tur600", "Qonaqpərvərlik sahəsinin idarə edilməsi", 5, ""],
+  ["Tur111", "Azərbaycanın turizm ehtiyatları", 5, ""],
+  ["Com160", "İnformasiya texnologiyaları (ixtisas üzrə)", 3, ""],
+  ["Met250", "Multikulturalizmə giriş", 3, ""],
+  ["Tur610", "İdarəetmə uçotu və korporativ qərarların verilməsi", 5, ""],
+  ["Tur155", "Turizm məhsulunun hazırlanması", 5, ""],
+  ["Tur630", "Destinasiyaların idarə edilməsi", 4, ""],
+  ["Tur620", "Dayanıqlı turizm", 4, ""],
+  ["Tur190", "Bronlaşdırma sistemləri", 4, ""],
+  ["Met700", "Kəmiyyət əsaslı tədqiqat metodları", 4, ""],
+  ["Tur145", "Turizmdə bədən dilinin tətbiqi", 4, ""],
+  ["Tur165", "Turist davranışı və psixologiyası", 5, ""],
+  ["Tur125", "Turizm siyasəti və planlaşdırılması", 5, ""],
+  ["Met710", "Keyfiyyət əsaslı tədqiqat metodları", 5, ""],
+  ["Tur135", "Turizm iqtisadiyyatı", 5, ""],
+  ["Tur175", "Sağlamlıq turizmi", 5, ""],
+  ["Men032", "Otel menecmenti", 5, ""],
+  ["Tur185", "Azərbaycanın turizm marşrutları", 5, ""],
+  ["Tur195", "Tarixi və mədəni turizm", 5, ""],
+  ["Tur210", "Ekoloji turizm", 5, ""],
+  ["Tur215", "Biznes və konqres turizmi", 5, ""],
+  ["Tur151", "Ekskursiya işinin təşkili", 5, ""],
+  ["Tur340", "Aqroturizm", 5, ""],
+  ["Tec061", "Təcrübə 1 (tədris)", 6, ""],
+  ["Tec062", "Təcrübə 2 (tədris)", 6, ""],
+  ["Tec063", "Təcrübə 3 (istehsalat)", 9, ""],
+  ["Yda060", "Yekun Attestasiyalar", 9, ""],
+  ["Tar140", "Azərbaycan tarixi", 5, ""],
+  ["End941", "Xarici dildə işgüzar və akademik kommunikasiya 1", 5, ""],
+  ["Tur640", "Turizmə giriş", 5, ""],
+  ["Eko472", "Menecmentin əsasları", 5, ""],
+  ["Met330", "Sosial tədqiqata giriş", 4, "Yusifli Xəlil Toğrul"],
+  ["Mmt045", "Mülki müdafiə və ilkin tibbi yardım", 6, ""],
+].map(([code, name, credits, teacher]) => ({ code, name, credits, teacher }));
+
+const BY_NAME = new Map();
+for (const c of CATALOG) if (!BY_NAME.has(c.name)) BY_NAME.set(c.name, c);
+
+const cat = (name) => BY_NAME.get(name) || { code: "—", name, credits: null, teacher: "" };
+const qaibLimit = (credits) => (credits != null && QAIB_BY_CREDIT[credits] != null ? QAIB_BY_CREDIT[credits] : null);
+
+/* ============================================================
+   2. Excel-dən götürülmüş başlanğıc vəziyyət
+   ============================================================ */
+const DAYS = [
+  ["mon", "Bazar ertəsi", "B.e"],
+  ["tue", "Çərşənbə axşamı", "Ç.a"],
+  ["wed", "Çərşənbə", "Çər"],
+  ["thu", "Cümə axşamı", "C.a"],
+  ["fri", "Cümə", "Cümə"],
+];
+const SEM_SLOTS = 8;                       // Excel: V..AC "Seminar grade"
+
+/* Dərs cədvəli: hər gündə sərbəst sayda dərs olur və hər dərsin öz saatı var
+   (alt qrup dərsləri qalanlardan fərqli saata düşə bilir). */
+const emptyWeek = () => Object.fromEntries(DAYS.map(([k]) => [k, []]));
+const lesson = (time, subject, room, teacher) => ({ time, subject, room, teacher });
+
+const T1 = "09:00 – 10:20", T2 = "10:30 – 11:50", T3 = "12:00 – 13:20", T4 = "13:50 – 15:10";
+
+function ustWeek() {
+  return {
+    mon: [
+      lesson(T1, "Makroiqtisadiyyat", "424S", "Aslanova İlhamə Eybulla"),
+      lesson(T2, "Turizmdə vasitəçilər", "422S", "Tağısoy Xədicə Elşən"),
+    ],
+    tue: [
+      lesson(T1, "Turizmdə vasitəçilər", "202M", "Tağısoy Xədicə Elşən"),
+      lesson(T2, "Turizmdə nəqliyyat", "203M", "Abbasova Könül Akif"),
+      lesson(T3, "Turizmdə marketinq və marketinq araşdırmaları", "430M", "Atakişiyeva Nərgiz Nəriman"),
+    ],
+    wed: [
+      lesson(T1, "Sosial tədqiqata giriş", "421M", "Yusifli Xəlil Toğrul"),
+      lesson(T2, "Turizmdə marketinq və marketinq araşdırmaları", "509S", "Atakişiyeva Nərgiz Nəriman"),
+      lesson(T3, "Xarici dildə işgüzar və akademik kommunikasiya 3", "420P", "Rzazadə Nigar"),
+    ],
+    thu: [
+      lesson(T1, "Sosial tədqiqata giriş", "515S", "Yusifli Xəlil Toğrul"),
+      lesson(T2, "Biznes statistikası", "102M", "Dünyamalıyeva Vəfa Rəşid"),
+      lesson(T3, "Makroiqtisadiyyat", "102M", "Aslanova İlhamə Eybulla"),
+      lesson(T4, "Turizmdə marketinq və marketinq araşdırmaları", "430M", "Atakişiyeva Nərgiz Nəriman"),
+    ],
+    fri: [
+      lesson(T1, "Xarici dildə işgüzar və akademik kommunikasiya 3", "510P", "Rzazadə Nigar"),
+      lesson(T2, "Biznes statistikası", "407S", "Qasımov Cəsarət"),
+      lesson(T3, "Turizmdə nəqliyyat", "410S", "Nərimanbəyli Vüqar İlqar"),
+    ],
+  };
+}
+
+/** row: absent = işlənmiş qaib saatı (Excel F), q = imtahan balı (Excel Q) */
+const row = (name, absent, o = {}) => ({
+  name,
+  absent: absent || 0,
+  examRoom: o.examRoom || "",
+  examDate: o.examDate || "",
+  q: o.q ?? null,
+  s: o.s ?? null,
+  t: o.t ?? null,
+  u: o.u ?? null,
+  sem: Object.assign(Array.from({ length: SEM_SLOTS }, () => null), o.sem || []),
+  ad: o.ad ?? null,
+});
+
+/* Semestrlərin fənn siyahısı və profil sahələrinin adları — şəxsi məlumat deyil. */
+const COURSES = {
+  "Kurs 1 • Semestr 2": [
+    "Xarici dildə işgüzar və akademik kommunikasiya 2",
+    "Azərbaycan dilində işgüzar və akademik kommunikasiya",
+    "Marketinqin əsasları",
+    "Biznes riyaziyyatı",
+    "Turizm coğrafiyası",
+    "Mikroiqtisadiyyat",
+  ],
+  "Kurs 2 • Semestr 1": [
+    "Xarici dildə işgüzar və akademik kommunikasiya 3",
+    "Biznes statistikası",
+    "Makroiqtisadiyyat",
+    "Turizmdə nəqliyyat",
+    "Turizmdə vasitəçilər",
+    "Turizmdə marketinq və marketinq araşdırmaları",
+    "Sosial tədqiqata giriş",
+  ],
+};
+
+const PROFILE_FIELDS = [
+  "Ad, Soyad, Ata adı", "Tələbə kodu", "Qrup kodu", "Fakültə", "İxtisas",
+  "Digital.edu login", "Digital.edu kod", "Teams login",
+  "Universitet telefonu", "Universitet e-poçtu", "Ünvan", "Sayt",
+];
+
+const PERSONAL = null;   // acig hostda sexsi melumat saxlanilmir
+
+const BASELINE = {
+  version: 2,
+  active: "Kurs 2 • Semestr 1",
+  // Həftə növbəsi: bu bazar ertəsindən başlayan həftə "ust" sayılır,
+  // sonrakı həftələr avtomatik olaraq bir-birini növbələyir.
+  weekAnchor: { monday: "2026-09-28", type: "ust" },
+  semesters: Object.fromEntries(Object.keys(COURSES).map((key) => [key, {
+    courses: COURSES[key].map((name, i) => {
+      const p = (typeof PERSONAL !== "undefined" && PERSONAL && PERSONAL.rows[key] && PERSONAL.rows[key][i]) || {};
+      return row(name, p.absent, p);
+    }),
+  }])),
+  schedules: {
+    "Kurs 1 • Semestr 2": { alt: emptyWeek(), ust: emptyWeek() },
+    "Kurs 2 • Semestr 1": { alt: emptyWeek(), ust: ustWeek() },
+  },
+  profile: Object.assign(
+    Object.fromEntries(PROFILE_FIELDS.map((k) => [k, ""])),
+    (typeof PERSONAL !== "undefined" && PERSONAL && PERSONAL.profile) || {}
+  ),
+};
+
+/* ============================================================
+   3. Excel formullarının eyni qarşılığı
+   ============================================================ */
+const roundHalfUp = (x) => (x < 0 ? -Math.round(-x) : Math.round(x));
+const numOr = (v, d = 0) => (v == null || v === "" || Number.isNaN(Number(v)) ? d : Number(v));
+
+/** Bir fənn sətrinin bütün hesablanan sütunları. */
+function compute(r) {
+  const c = cat(r.name);
+  const credits = c.credits;                         // Excel D: VLOOKUP(Data!C)
+  const G = qaibLimit(credits);                      // Excel G: VLOOKUP(Data!H)
+  const F = numOr(r.absent);                         // Excel F
+  const H = G == null ? null : G - F;                // Excel H: G-F
+  const I = H == null ? null : H / 2;                // Excel I: H/2
+  const atLimit = G != null && F >= G;               // Excel J: "LIMIT"
+  const failedByAbsence = G != null && F > G;        // Excel K: "Fail"
+
+  const semVals = r.sem.filter((v) => v != null && v !== "").map(Number);
+  // Excel AE: IFERROR(ROUND(AVERAGE(V:AC)*2+SUM(S:U),0),0)+AD
+  const AE = (semVals.length
+    ? roundHalfUp((semVals.reduce((a, b) => a + b, 0) / semVals.length) * 2 + numOr(r.s) + numOr(r.t) + numOr(r.u))
+    : 0) + numOr(r.ad);
+
+  const O = AE;                                      // Excel O: =AE
+  const P = 51 - O === 51 ? null : 51 - O;           // Excel P
+  const Q = numOr(r.q);                              // Excel Q
+  const R = Q + O === 0 ? null : Q + O;              // Excel R
+
+  // Excel AF
+  let result;
+  if (failedByAbsence) result = "Fail";
+  else if (Q === 0 || R == null || R === 0) result = "No Result";
+  else if (Q < 17) result = "Fail";
+  else result = R >= 51 ? "Pass" : "Fail";
+
+  let level = "ok";
+  if (failedByAbsence) level = "crit";
+  else if (atLimit) level = "crit";
+  else if (G != null && G > 0 && F / G >= 0.75) level = "warn";
+
+  return {
+    code: c.code, credits, teacher: c.teacher, G, F, H, I,
+    atLimit, failedByAbsence, AE, O, P, Q, R, result, level,
+    pay25: credits == null ? null : HOUR_RATE * credits * 0.25,
+    paySub: credits == null ? null : HOUR_RATE * credits,
+  };
+}
+
+/** Excel AI6: SUMPRODUCT(G*1,R)/SUMPRODUCT(G*1) */
+function semesterGpa(courses) {
+  let top = 0, bot = 0;
+  for (const r of courses) {
+    const m = compute(r);
+    if (m.G == null) continue;
+    top += m.G * (m.R == null ? 0 : m.R);
+    bot += m.G;
+  }
+  return bot === 0 ? null : top / bot;
+}
+
+/** Excel N: Days remaining */
+function examCountdown(iso) {
+  if (!iso) return { label: "Təyin olunmayıb", tone: "neutral" };
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return { label: "Təyin olunmayıb", tone: "neutral" };
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const diff = Math.floor((d - today) / 86400000);
+  if (diff < 0) return { label: "Keçib", tone: "neutral" };
+  if (diff === 0) return { label: "Bu gün", tone: "crit" };
+  if (diff === 1) return { label: "Sabah", tone: "crit" };
+  return { label: diff + " gün qalıb", tone: diff <= 7 ? "warn" : "acc" };
+}
+
+/* Imtahan tarixi ucun gg.aa.iiii + saat girisi - native datetime-local
+   cihazin dil ayarindan asili olub mm/dd/yyyy gostere bilir, bu yolla
+   format hemise eynidir. */
+function isoToDmy(iso) {
+  if (!iso) return { d: "", t: "" };
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso);
+  if (!m) return { d: "", t: "" };
+  return { d: m[3] + "." + m[2] + "." + m[1], t: m[4] + ":" + m[5] };
+}
+function dmyToIso(dRaw, tRaw) {
+  const dm = /^(\d{1,2})[.\/](\d{1,2})[.\/](\d{4})$/.exec((dRaw || "").trim());
+  const tm = /^(\d{1,2}):(\d{2})$/.exec((tRaw || "").trim());
+  if (!dm || !tm) return null;
+  const day = +dm[1], mon = +dm[2], yr = +dm[3], hh = +tm[1], mi = +tm[2];
+  if (day < 1 || day > 31 || mon < 1 || mon > 12 || hh > 23 || mi > 59) return null;
+  const p = (n) => String(n).padStart(2, "0");
+  return yr + "-" + p(mon) + "-" + p(day) + "T" + p(hh) + ":" + p(mi);
+}
+
+const fmtDate = (iso) => {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
+  const p = (n) => String(n).padStart(2, "0");
+  return `${p(d.getDate())}.${p(d.getMonth() + 1)}.${d.getFullYear()} · ${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+const money = (n) => (n == null ? "—" : n.toLocaleString("az-AZ", { maximumFractionDigits: 2 }) + " ₼");
+const dash = (v) => (v == null || v === "" ? "—" : v);
+const esc = (s) => String(s).replace(/[&<>"']/g, (m) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+
+/* ============================================================
+   4. Vəziyyət, saxlama və sinxron
+   Auto-save YOXDUR: dəyişikliklər yalnız "Saxla" düyməsi ilə yazılır.
+   Sinxron arxa ucu mühitə görə seçilir:
+     · Claude qabığında  → Claude-un öz bazası (canlı izləmə)
+     · GitHub Pages-də   → Firebase Realtime Database (REST, SDK-sız)
+   ============================================================ */
+const LS_KEY = "qaib-jurnali-v2";
+const LS_OLD = "qaib-jurnali-v1";
+const CFG_KEY = "qaib-sinxron-cfg";
+
+let state = structuredClone(BASELINE);
+let savedJson = JSON.stringify(state);   // ən son saxlanılmış nüsxə
+let dirty = false;                        // saxlanılmamış dəyişiklik var?
+let backend = null;                       // { push, pull, watch? }
+let remotePending = null;                 // başqa cihazdan gələn, qəbul olunmamış nüsxə
+
+const CLOUD_MODE = typeof CLOUD_SYNC !== "undefined" && CLOUD_SYNC;
+
+const SYNC = { s: "busy", t: "Yüklənir", at: null };
+function setSync(s, text) {
+  SYNC.s = s; SYNC.t = text;
+  if (s === "ok") SYNC.at = new Date();
+  const el = document.getElementById("sync");
+  if (el) { el.dataset.s = s; el.textContent = text; }
+  if (typeof paintStatus === "function") paintStatus();
+  if (typeof paintSaveBar === "function") paintSaveBar();
+}
+
+/* ---- Həftə növbəsi — bazar ertəsi dəyişir ---- */
+function mondayOf(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+function currentWeekType() {
+  const a = state.weekAnchor || BASELINE.weekAnchor;
+  const base = mondayOf(new Date(a.monday + "T00:00:00"));
+  const now = mondayOf(new Date());
+  const weeks = Math.round((now - base) / 604800000);
+  const same = ((weeks % 2) + 2) % 2 === 0;
+  const other = a.type === "ust" ? "alt" : "ust";
+  return same ? a.type : other;
+}
+const weekName = (t) => (t === "ust" ? "Üst həftə" : "Alt həftə");
+
+/* ---- Köhnə nüsxələri yeni formata gətir ---- */
+function migrate(raw) {
+  const out = structuredClone(BASELINE);
+  if (!raw || typeof raw !== "object") return out;
+  Object.assign(out, raw);
+
+  const oldTimes = Array.isArray(raw.times) ? raw.times : null;
+
+  for (const key of Object.keys(out.semesters || {})) {
+    const sem = out.semesters[key] || {};
+    sem.courses = (sem.courses || []).map((r) => {
+      const merged = Object.assign(row(r.name, r.absent), r);
+      merged.sem = Object.assign(Array.from({ length: SEM_SLOTS }, () => null), (r.sem || []).slice(0, SEM_SLOTS));
+      return merged;
+    });
+    out.semesters[key] = sem;
+  }
+
+  out.schedules = out.schedules || {};
+  for (const key of Object.keys(out.semesters)) {
+    const sch = out.schedules[key] || {};
+    for (const wk of ["alt", "ust"]) {
+      const src = sch[wk] || {};
+      const fixed = {};
+      for (const [dk] of DAYS) {
+        const arr = Array.isArray(src[dk]) ? src[dk] : [];
+        fixed[dk] = arr.map((e, i) => {
+          if (!e || typeof e !== "object") return null;
+          const subject = String(e.subject || "").trim();
+          if (!subject) return null;
+          const t = e.time != null && String(e.time) !== ""
+            ? String(e.time)
+            : (oldTimes && oldTimes[i] ? String(oldTimes[i]).replace("\n", " – ") : "");
+          return { time: t, subject, room: String(e.room || ""), teacher: String(e.teacher || "") };
+        }).filter(Boolean);
+      }
+      sch[wk] = fixed;
+    }
+    out.schedules[key] = sch;
+  }
+
+  // profil sahələri həmişə tam olsun — gələn nüsxə natamam olsa da
+  out.profile = Object.assign(
+    Object.fromEntries(PROFILE_FIELDS.map((k) => [k, ""])),
+    (raw.profile && typeof raw.profile === "object") ? raw.profile : {}
+  );
+
+  if (out.theme !== "light" && out.theme !== "dark") out.theme = "auto";
+  out.calHooked = out.calHooked === true;
+  if (FONTS.indexOf(out.font) < 0) out.font = "sistem";
+  if (SIZES.indexOf(out.fontSize) < 0) out.fontSize = "m";
+  if (!out.guard || typeof out.guard !== "object" || typeof out.guard.hash !== "string" || !out.guard.hash) {
+    delete out.guard;
+  }
+
+  delete out.times;
+  delete out.week;
+  const a = out.weekAnchor;
+  if (!a || typeof a !== "object" || !a.monday) out.weekAnchor = structuredClone(BASELINE.weekAnchor);
+  else if (a.type !== "alt" && a.type !== "ust") a.type = "ust";
+  if (!out.semesters[out.active]) out.active = Object.keys(out.semesters)[0];
+  out.version = 2;
+  return out;
+}
+
+/* ---- Proqramın öz bildirişləri (Web Push) ----
+   Təqvim bildirişləri dəqiq vaxtlıdır, amma "Təqvim" adı ilə gəlir.
+   Bunlar isə Qaib Jurnalı adı və ikonu ilə gəlir: gündəlik xülasə və
+   imtahan xəbərdarlıqları. Göndərən tərəf GitHub-dakı avtomatikadır. */
+const VAPID_PUBLIC = "BPosmTVfUOaKJArBhwlWgUq8BglWhv_VGKSmQRkxcvPIgv2tCekCVFYi7uGE0HOHjchOi6sAreSD_mTkNNobJu8";
+let pushOn = false;
+let pushWhy = "";
+
+function pushCapable() {
+  return "serviceWorker" in navigator && "PushManager" in window &&
+    typeof Notification !== "undefined";
+}
+
+function deviceId() {
+  try {
+    let v = localStorage.getItem("qaib.devid");
+    if (!v) {
+      v = "d" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      localStorage.setItem("qaib.devid", v);
+    }
+    return v;
+  } catch (e) { return "d0"; }
+}
+
+function b64ToBytes(str) {
+  const t = str.replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(t + "=".repeat((4 - (t.length % 4)) % 4));
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+function pushUrl(cfg, id) {
+  const base = String(cfg.url || "").trim().replace(/\/+$/, "");
+  return base + "/vaults/" + encodeURIComponent(String(cfg.key || "").trim()) +
+    "/push/" + encodeURIComponent(id) + ".json";
+}
+
+async function pushRefresh() {
+  if (!pushCapable()) { pushWhy = "cihaz dəstəkləmir"; return; }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sb = await reg.pushManager.getSubscription();
+    pushOn = !!sb && Notification.permission === "granted";
+    if (!pushOn) pushWhy = Notification.permission === "denied" ? "icazə verilməyib" : "";
+  } catch (e) { pushWhy = "yoxlanıla bilmədi"; }
+}
+
+async function pushEnable() {
+  if (!pushCapable()) {
+    throw new Error("Bu cihaz proqram bildirişlərini dəstəkləmir. iPhone-da proqram " +
+      "əsas ekrana əlavə olunmalı və oradan açılmalıdır.");
+  }
+  const cfg = cloudCfg();
+  if (!cfg || !cfg.url || !cfg.key) throw new Error("Əvvəlcə sinxronu qurmaq lazımdır.");
+
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error("İcazə verilmədi. Parametrlər → Bildirişlər → Qaib.");
+
+  const reg = await navigator.serviceWorker.ready;
+  let sb = await reg.pushManager.getSubscription();
+  if (!sb) {
+    sb = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: b64ToBytes(VAPID_PUBLIC),
+    });
+  }
+  const j = sb.toJSON();
+  if (!j.endpoint || !j.keys || !j.keys.p256dh) throw new Error("Abunəlik yarımçıq qaldı.");
+
+  const r = await fetch(pushUrl(cfg, deviceId()), {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      endpoint: j.endpoint, p256dh: j.keys.p256dh, auth: j.keys.auth,
+      at: Date.now(), ios: /iPhone|iPad|iPod/.test(navigator.userAgent),
+    }),
+  });
+  if (!r.ok) await cloudThrow(r);
+  pushOn = true;
+  pushWhy = "";
+}
+
+async function pushDisable() {
+  const cfg = cloudCfg();
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    const sb = await reg.pushManager.getSubscription();
+    if (sb) await sb.unsubscribe();
+  } catch (e) { /* davam */ }
+  if (cfg && cfg.url && cfg.key) {
+    try { await fetch(pushUrl(cfg, deviceId()), { method: "DELETE" }); } catch (e) {}
+  }
+  pushOn = false;
+}
+
+/* görünüşü yerində yoxlamaq üçün — şəbəkəsiz, dərhal */
+async function pushTestLocal() {
+  if (!pushCapable()) throw new Error("Bu cihaz dəstəkləmir.");
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") throw new Error("İcazə verilmədi.");
+  const reg = await navigator.serviceWorker.ready;
+  const gun = todayLessonLine();
+  await reg.showNotification("Qaib Jurnalı", {
+    body: gun || "Bu gün dərs yoxdur.",
+    icon: ICON_HREF, badge: ICON_HREF, tag: "qaib-sinaq",
+  });
+}
+
+/* ---- Təqvim lenti (abunəlik) ----
+   Sayt nüsxəsində webcal:// ünvanı verilir; iOS ona abunə olub özü yeniləyir. */
+const CAL_FILE = "qaib-cedvel.ics";
+const CAL_HOST = (function () {
+  try { return location.host || ""; } catch (e) { return ""; }
+})();
+const CAL_FEED = (function () {
+  try {
+    if (location.protocol !== "https:" && location.protocol !== "http:") return "";
+    const dir = location.pathname.replace(/[^/]*$/, "");
+    return "webcal://" + location.host + dir + CAL_FILE;
+  } catch (e) { return ""; }
+})();
+
+/* ---- Görünüş: sistem / işıqlı / tünd ---- */
+function applyTheme() {
+  const t = (state && state.theme) || "auto";
+  const root = document.documentElement;
+  if (t === "light" || t === "dark") root.setAttribute("data-theme", t);
+  else root.removeAttribute("data-theme");
+  root.setAttribute("data-font", fontNow());
+  root.setAttribute("data-fs", fsNow());
+}
+
+const FONTS = ["sistem", "inter", "plex"];
+const SIZES = ["m", "l", "xl"];
+function fontNow() {
+  const f = state && state.font;
+  return FONTS.indexOf(f) >= 0 ? f : "sistem";
+}
+function fsNow() {
+  const z = state && state.fontSize;
+  return SIZES.indexOf(z) >= 0 ? z : "m";
+}
+
+/* ---- Yenilik yoxlaması ----
+   Cihaz köhnə nüsxəni yaddaşda saxlaya bilir. Server tərəfdəki version.json
+   ilə müqayisə edib, fərq varsa istifadəçiyə bir toxunuşluq yeniləmə verir. */
+let updateReady = false;
+let lastUpdCheck = 0;
+
+async function checkUpdate(force) {
+  if (location.protocol.indexOf("http") !== 0) return false;
+  const now = Date.now();
+  if (!force && now - lastUpdCheck < 600000) return updateReady;   // 10 dəqiqədə bir
+  lastUpdCheck = now;
+  try {
+    const r = await fetch("version.json?t=" + now, { cache: "no-store" });
+    if (!r.ok) return false;
+    const j = await r.json();
+    if (j && j.build && String(j.build) !== String(APP_BUILD)) {
+      updateReady = true;
+      if (typeof paintStatus === "function") paintStatus();
+      return true;
+    }
+  } catch (e) { /* şəbəkə yoxdur */ }
+  return false;
+}
+
+async function applyUpdate() {
+  /* ƏVVƏLCƏ şəbəkəni yoxla: keşi silib sonra yükləyə bilməsək,
+     tətbiq boş ekranda qalardı. Təzə nüsxə əlçatan deyilsə, heç nəyə toxunmuruq. */
+  setSync("busy", "Yenilənir");
+  try {
+    const r = await fetch("index.html?probe=" + Date.now(), { cache: "no-store" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const txt = await r.text();
+    if (txt.length < 5000) throw new Error("natamam cavab");
+  } catch (e) {
+    setSync("local", "Şəbəkə yoxdur — yeniləmə təxirə salındı");
+    if (typeof openDialog === "function") {
+      openDialog("Yeniləmə alınmadı", "",
+        "<p class=\"dlg-msg\">Təzə nüsxəni yükləmək üçün internet lazımdır. " +
+        "Proqram olduğu kimi işləməyə davam edir — şəbəkə qayıdanda yenidən cəhd et.</p>",
+        null, "Oldu");
+    }
+    return;
+  }
+  try {
+    if (window.caches) {
+      const ks = await caches.keys();
+      await Promise.all(ks.map((k) => caches.delete(k)));
+    }
+  } catch (e) { /* davam */ }
+  try {
+    if (navigator.serviceWorker) {
+      const rs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(rs.map((r) => r.unregister()));
+    }
+  } catch (e) { /* davam */ }
+  location.replace(location.pathname + "?v=" + Date.now());
+}
+
+/* ---- Qoruma kodu ----
+   Kod açıq saxlanılmır: yalnız ondan alınan barmaq izi yadda qalır.
+   Məqsəd güclü şifrələmə deyil, səhv toxunuşla məlumatı silməyin qarşısını almaqdır. */
+function guardFingerprint(pin) {
+  const txt = "qaib\u00A7" + String(pin == null ? "" : pin);
+  let a = 0x811c9dc5, b = 0x01000193;
+  for (let i = 0; i < txt.length; i++) {
+    const ch = txt.charCodeAt(i);
+    a = Math.imul(a ^ ch, 16777619) >>> 0;
+    b = Math.imul(b + ch + i + 1, 2654435761) >>> 0;
+  }
+  return a.toString(16).padStart(8, "0") + b.toString(16).padStart(8, "0");
+}
+const guardOn = () => !!(state.guard && typeof state.guard.hash === "string" && state.guard.hash);
+const guardOk = (pin) => guardOn() && guardFingerprint(pin) === state.guard.hash;
+
+/* ---- dəyişiklik: yalnız yaddaşda, diskə yazılmır ---- */
+function mutate(fn) {
+  fn(state);
+  dirty = true;
+  render();
+}
+
+async function commit() {
+  savedJson = JSON.stringify(state);
+  dirty = false;
+  remotePending = null;
+  try { localStorage.setItem(LS_KEY, savedJson); } catch (e) { /* kvota */ }
+  render();
+  if (!backend) { setSync("local", CLOUD_MODE ? "Sinxron qurulmayıb" : "Yalnız bu cihazda"); return; }
+  setSync("busy", "Saxlanılır");
+  try {
+    await backend.push({ updatedAt: Date.now(), stateJson: savedJson });
+    setSync("ok", "Saxlanıldı");
+  } catch (err) {
+    setSync("local", "Saxlanmadı — " + ((err && err.message) || "xəta"));
+  }
+}
+
+/* ---- dəyişiklikləri ləğv et; başqa cihazdan nüsxə varsa onu götürür ---- */
+function discard() {
+  const src = remotePending || JSON.parse(savedJson);
+  remotePending = null;
+  state = migrate(src);
+  savedJson = JSON.stringify(state);
+  dirty = false;
+  if (typeof resetSelection === "function") resetSelection();
+  render();
+}
+
+/* ---- uzaqdan gələn nüsxə ---- */
+function payloadState(payload) {
+  if (!payload) return null;
+  if (typeof payload.stateJson === "string") {
+    try { return JSON.parse(payload.stateJson); } catch (e) { return null; }
+  }
+  return payload.state || null;    // köhnə format
+}
+
+function onRemote(payload) {
+  const raw = payloadState(payload);
+  if (!raw) { setSync("ok", "Hazırdır"); return; }
+  const incoming = migrate(raw);
+  const incomingJson = JSON.stringify(incoming);
+  if (incomingJson === savedJson) { setSync("ok", "Sinxron"); return; }
+  if (dirty) {
+    remotePending = raw;
+    setSync("busy", "Başqa cihazda dəyişiklik var");
+    return;
+  }
+  state = incoming;
+  savedJson = incomingJson;
+  try { localStorage.setItem(LS_KEY, savedJson); } catch (e) {}
+  setSync("ok", "Sinxron");
+  render();
+}
+
+/* ---- arxa uc 1: Claude qabığının bazası ---- */
+async function initClaudeBackend() {
+  let db = null, uid = null;
+  try { db = await (window.claude && window.claude.use ? window.claude.use("db") : null); } catch (e) { db = null; }
+  try {
+    const user = await (window.claude && window.claude.use ? window.claude.use("user") : null);
+    if (user) uid = await user.id();
+  } catch (e) { uid = null; }
+  if (!db) return;
+  const ref = uid ? db.collection("data/users/" + uid).doc("state") : db.doc("shared/state");
+  backend = {
+    push: (payload) => ref.set(payload),
+    pull: async () => { const s = await ref.get(); return s.exists ? s.data() : null; },
+    watch: (cb) => ref.onSnapshot(
+      (snap) => {
+        if (!snap.exists) { cb(null); return; }
+        if (snap.metadata.hasPendingWrites) return;
+        cb(snap.data());
+      },
+      () => setSync("local", "Yalnız bu cihazda")
+    ),
+  };
+}
+
+/* ---- arxa uc 2: Firebase Realtime Database (REST) ---- */
+function cloudCfg() {
+  try { const r = localStorage.getItem(CFG_KEY); return r ? JSON.parse(r) : null; } catch (e) { return null; }
+}
+function cloudCfgSave(cfg) {
+  try { localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+}
+function cloudEndpoint(cfg) {
+  const base = String(cfg.url || "").trim().replace(/\/+$/, "");
+  return base + "/vaults/" + encodeURIComponent(String(cfg.key || "").trim()) + ".json";
+}
+function cloudError(status) {
+  if (status === 400) return "baza məlumatı qəbul etmədi";
+  if (status === 401 || status === 403) return "açar qəbul olunmadı, qaydaları yoxla";
+  if (status === 404) return "baza ünvanı tapılmadı";
+  return "HTTP " + status;
+}
+async function cloudThrow(r) {
+  let detail = "";
+  try { const j = await r.json(); if (j && j.error) detail = " (" + String(j.error).slice(0, 80) + ")"; } catch (e) {}
+  throw new Error(cloudError(r.status) + detail);
+}
+function makeCloudBackend(cfg) {
+  return {
+    push: async (payload) => {
+      const r = await fetch(cloudEndpoint(cfg), {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!r.ok) await cloudThrow(r);
+    },
+    pull: async () => {
+      const r = await fetch(cloudEndpoint(cfg) + "?t=" + Date.now(), { cache: "no-store" });
+      if (!r.ok) await cloudThrow(r);
+      return await r.json();
+    },
+  };
+}
+async function initCloudBackend() {
+  const cfg = cloudCfg();
+  if (!cfg || !cfg.url || !cfg.key) { setSync("local", "Sinxron qurulmayıb"); return; }
+  backend = makeCloudBackend(cfg);
+}
+
+/* buluddan yenidən oxu — canlı izləmə olmayan rejimdə */
+function cloudRefresh() {
+  if (!backend || backend.watch || dirty) return;
+  setSync("busy", "Yoxlanılır");
+  backend.pull().then(onRemote).catch(() => setSync("local", "Şəbəkə yoxdur"));
+}
+
+async function initStore() {
+  try {
+    const cached = localStorage.getItem(LS_KEY) || localStorage.getItem(LS_OLD);
+    if (cached) {
+      state = migrate(JSON.parse(cached));
+      savedJson = JSON.stringify(state);
+      render();
+    }
+  } catch (e) { /* korlanmış keş */ }
+
+  if (CLOUD_MODE) await initCloudBackend();
+  else await initClaudeBackend();
+
+  if (!backend) {
+    if (!CLOUD_MODE) setSync("local", "Yalnız bu cihazda");
+    return;
+  }
+  if (backend.watch) {
+    backend.watch(onRemote);
+  } else {
+    try { onRemote(await backend.pull()); }
+    catch (e) { setSync("local", "Şəbəkə yoxdur"); }
+  }
+}
+
+/* tətbiq yenidən görünən kimi buluddan yoxla */
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) return;
+  cloudRefresh();
+  checkUpdate(false);
+});
+
+window.addEventListener("beforeunload", (e) => {
+  if (!dirty) return;
+  e.preventDefault();
+  e.returnValue = "";
+});
+
+/* ============================================================
+   5. Naviqasiya
+   ============================================================ */
+const ICONS = {
+  overview: '<svg viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>',
+  qaib: '<svg viewBox="0 0 20 20"><path d="M3 16.5V9M7.7 16.5V4M12.3 16.5v-5M17 16.5V8"/><path d="M2 18h16"/></svg>',
+  cedvel: '<svg viewBox="0 0 20 20"><rect x="2.5" y="3.5" width="15" height="14" rx="1"/><path d="M2.5 7.5h15M7.5 7.5v10M12.5 7.5v10"/></svg>',
+  qiymet: '<svg viewBox="0 0 20 20"><path d="M3 17V3h11l3 3v11z"/><path d="M6 8h8M6 11.5h8M6 15h5"/></svg>',
+  fenn: '<svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="M17 17l-3.9-3.9"/></svg>',
+  profil: '<svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2"/><path d="M3.8 17c1.2-3 3.5-4.5 6.2-4.5S15 14 16.2 17"/></svg>',
+  ayarlar: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.8"/><path d="M10 1.8v2.4M10 15.8v2.4M3.2 10H5.6M14.4 10h2.4M5.2 5.2l1.7 1.7M13.1 13.1l1.7 1.7M14.8 5.2l-1.7 1.7M6.9 13.1l-1.7 1.7"/></svg>',
+};
+const VIEWS = [
+  ["overview", "İcmal"],
+  ["qaib", "Qaib"],
+  ["cedvel", "Cədvəl"],
+  ["qiymet", "Qiymət"],
+  ["fenn", "Fənn"],
+  ["profil", "Profil"],
+  ["ayarlar", "Ayarlar"],
+];
+
+let current = "overview";
+let lastView = null;          // animasiya yalnız bölmə dəyişəndə işləsin
+let enterTimer = null;
+let findQuery = "";
+let selected = 0;
+let viewWeek = null;              // Cədvəldə baxılan həftə (null = bu həftə)
+
+function resetSelection() { selected = 0; viewWeek = null; }
+
+const activeSem = () => state.semesters[state.active] || { courses: [] };
+const shownWeek = () => viewWeek || currentWeekType();
+function weekBlock(wk) {
+  if (!state.schedules[state.active]) state.schedules[state.active] = { alt: emptyWeek(), ust: emptyWeek() };
+  const sch = state.schedules[state.active];
+  if (!sch[wk]) sch[wk] = emptyWeek();
+  return sch[wk];
+}
+const todayKey = () => (DAYS[new Date().getDay() - 1] || [])[0] || null;
+const TONE = { neutral: "neu", crit: "crit", warn: "warn", acc: "acc" };
+
+/* "09:00 – 10:20" → 540, sıralama üçün */
+function timeKey(s) {
+  const m = String(s || "").match(/(\d{1,2})[:.](\d{2})/);
+  return m ? Number(m[1]) * 60 + Number(m[2]) : 9999;
+}
+/* günün dərsləri saat sırası ilə; ilkin indeks saxlanılır */
+function dayLessons(wk, dk) {
+  return weekBlock(wk)[dk]
+    .map((e, i) => ({ e, i }))
+    .sort((a, b) => timeKey(a.e.time) - timeKey(b.e.time) || a.i - b.i);
+}
+
+function navCount(k) {
+  const sem = activeSem();
+  if (k === "qaib" || k === "qiymet") return sem.courses.length;
+  if (k === "fenn") return CATALOG.length;
+  if (k === "cedvel") return DAYS.reduce((a, [dk]) => a + weekBlock(shownWeek())[dk].length, 0);
+  return "";
+}
+
+function buildNav() {
+  const items = VIEWS.map(([k, label]) => {
+    const c = navCount(k);
+    return `<button class="navitem" type="button" data-go="${k}" aria-current="${k === current}">`
+      + ICONS[k] + `<span>${label}</span>` + (c === "" ? "" : `<span class="cnt">${c}</span>`) + `</button>`;
+  });
+  document.getElementById("sidebar").innerHTML =
+    `<p class="navgroup">Semestr</p>` + items.slice(0, 4).join("")
+    + `<p class="navgroup">Arayış</p>` + items.slice(4).join("");
+  document.getElementById("tabbar").innerHTML = items.join("");
+}
+
+function go(k) {
+  if (current === k) return;
+  current = k;
+  render();
+  window.scrollTo({ top: 0 });
+}
+
+/* ============================================================
+   6. Ortaq parçalar
+   ============================================================ */
+function barHtml(m) {
+  if (m.G == null) return `<span class="code">—</span>`;
+  let s = "";
+  for (let i = 0; i < m.G; i++) {
+    s += `<i class="${i < m.F ? "on" : ""}${i % 2 === 1 && i !== m.G - 1 ? " gap" : ""}"></i>`;
+  }
+  return `<span class="bar lv-${m.level}" role="img" aria-label="${m.F} / ${m.G} saat">${s}</span>`;
+}
+
+function statusTag(m) {
+  if (m.failedByAbsence) return `<span class="tag crit">Limit aşılıb</span>`;
+  if (m.atLimit) return `<span class="tag crit">Limitdə</span>`;
+  if (m.level === "warn") return `<span class="tag warn">Diqqət</span>`;
+  return `<span class="tag ok">Normal</span>`;
+}
+
+function spinHtml(i, v) {
+  return `<span class="spin">`
+    + `<button type="button" data-absent="${i}" data-delta="-1" aria-label="Bir saat azalt">−</button>`
+    + `<span class="v">${v}</span>`
+    + `<button type="button" data-absent="${i}" data-delta="1" aria-label="Bir saat artır">+</button>`
+    + `</span>`;
+}
+
+/* ============================================================
+   7. İcmal
+   ============================================================ */
+function viewOverview() {
+  const sem = activeSem();
+  const ms = sem.courses.map(compute);
+  const usedH = ms.reduce((a, m) => a + m.F, 0);
+  const leftL = ms.reduce((a, m) => a + (m.I > 0 ? m.I : 0), 0);
+  const risk = ms.filter((m) => m.level !== "ok").length;
+
+  const cw = currentWeekType();
+  const tk = todayKey();
+  const shownDay = tk || "mon";
+  const rows = dayLessons(cw, shownDay);
+  const dayName = DAYS.find(([k]) => k === shownDay)[1];
+
+  const lessons = rows.length === 0
+    ? `<p class="blank">Bu gün üçün cədvəldə dərs yoxdur.</p>`
+    : `<div class="tw"><table class="t"><thead><tr>
+         <th>Saat</th><th>Fənn</th><th class="hide-sm">Otaq</th><th class="r">Qaib</th><th></th>
+       </tr></thead><tbody>${rows.map(({ e }) => {
+          const ci = sem.courses.findIndex((c) => c.name === e.subject);
+          const m = ci >= 0 ? compute(sem.courses[ci]) : null;
+          return `<tr class="${m ? "lv-" + m.level : ""}">
+            <td class="stripe r" style="white-space:nowrap">${esc(e.time) || "—"}</td>
+            <td class="nm">${esc(e.subject)}${e.teacher ? `<small>${esc(e.teacher)}</small>` : ""}</td>
+            <td class="hide-sm code">${esc(e.room) || "—"}</td>
+            <td class="r">${m && m.G != null ? m.F + " / " + m.G : "—"}</td>
+            <td class="r" style="width:96px">${ci >= 0
+              ? `<button class="btn" type="button" data-absent="${ci}" data-delta="2">+ 1 dərs</button>`
+              : `<span class="code">—</span>`}</td>
+          </tr>`;
+        }).join("")}</tbody></table></div>`;
+
+  const today0 = new Date(); today0.setHours(0, 0, 0, 0);
+  const exams = sem.courses
+    .map((r) => ({ r, cd: examCountdown(r.examDate) }))
+    .filter((x) => x.r.examDate && new Date(x.r.examDate) >= today0)
+    .sort((a, b) => new Date(a.r.examDate) - new Date(b.r.examDate));
+
+  return {
+    toolbar: `<span class="vtitle">İcmal</span>`
+      + `<span class="vhint">${esc(dayName)}${tk ? "" : " · növbəti dərs günü"} · ${esc(weekName(cw))}</span>`,
+    body: `
+      <section class="panel">
+        <div class="ph">Semestr göstəriciləri<span class="ph-r">${esc(state.active)}</span></div>
+        <div class="kpi">
+          <div><b>${sem.courses.length}</b><span>fənn</span></div>
+          <div><b>${usedH}</b><span>işlənmiş qaib, saat</span></div>
+          <div><b>${leftL % 1 ? leftL.toFixed(1) : leftL}</b><span>qalan dərs</span></div>
+          <div><b class="${risk ? "c-warn" : "c-ok"}">${risk}</b><span>diqqət tələb edir</span></div>
+        </div>
+      </section>
+
+      <div class="two">
+        <section class="panel">
+          <div class="ph">${esc(dayName)} — dərslər<span class="ph-r">${rows.length} dərs</span></div>
+          ${lessons}
+        </section>
+
+        <section class="panel">
+          <div class="ph">İmtahan cədvəli<span class="ph-r">${exams.length} planlaşdırılıb</span></div>
+          ${exams.length === 0
+            ? `<p class="blank">İmtahan tarixi yazılmayıb. <b>Qiymət</b> bölməsindən əlavə et.</p>`
+            : `<div class="tw"><table class="t"><thead><tr>
+                 <th>Fənn</th><th>Tarix</th><th class="hide-sm">Otaq</th><th class="r">Qalıb</th>
+               </tr></thead><tbody>${exams.map(({ r, cd }) => `<tr>
+                 <td class="nm">${esc(r.name)}</td>
+                 <td class="r">${fmtDate(r.examDate)}</td>
+                 <td class="hide-sm code">${esc(r.examRoom) || "—"}</td>
+                 <td class="r"><span class="tag ${TONE[cd.tone]}">${cd.label}</span></td>
+               </tr>`).join("")}</tbody></table></div>`}
+        </section>
+      </div>`,
+  };
+}
+
+/* ============================================================
+   8. Qaib  —  sıra Excel-dəki kimi sabitdir, qaib dəyişəndə tərpənmir
+   ============================================================ */
+function viewQaib() {
+  const sem = activeSem();
+  return {
+    toolbar: `<span class="vtitle">Qaib hesabatı</span>`
+      + `<button class="btn" type="button" data-addcourse="1">Fənn əlavə et</button>`
+      + `<span class="vhint">Limit kredit sayına görə: 3→3, 4→9, 5→12, 6→15 saat</span>`,
+    body: sem.courses.length === 0
+      ? `<section class="panel"><p class="blank">Bu semestrdə fənn yoxdur.</p></section>`
+      : `<section class="panel">
+          <div class="ph">Fənnlər<span class="ph-r">${sem.courses.length} sətir</span></div>
+          <div class="tw"><table class="t">
+            <thead><tr>
+              <th class="ix">№</th><th>Fənn</th>
+              <th class="hide-sm">Kod</th><th class="hide-sm r">Kr</th>
+              <th class="hide-sm r">Qaib</th><th class="hide-sm r">Limit</th>
+              <th class="only-sm r">Qaib / limit</th>
+              <th class="hide-sm r">Qalan</th><th class="r">Dərs</th>
+              <th class="hide-sm">Yüklənmə</th><th>Vəziyyət</th><th class="c">Düzəliş</th>
+            </tr></thead>
+            <tbody>${sem.courses.map((r, i) => {
+              const m = compute(r);
+              return `<tr class="lv-${m.level}">
+                <td class="ix stripe">${i + 1}</td>
+                <td class="nm"><button class="linkbtn" type="button" data-course="${i}">${esc(r.name)}</button>${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
+                <td class="hide-sm code">${esc(m.code)}</td>
+                <td class="hide-sm r">${dash(m.credits)}</td>
+                <td class="hide-sm r">${m.F}</td>
+                <td class="hide-sm r">${dash(m.G)}</td>
+                <td class="only-sm r">${m.F} <span class="code">/ ${dash(m.G)}</span></td>
+                <td class="hide-sm r">${m.H == null ? "—" : m.H}</td>
+                <td class="r">${m.I == null ? "—" : m.I % 1 ? m.I.toFixed(1) : m.I}</td>
+                <td class="hide-sm">${barHtml(m)}</td>
+                <td>${statusTag(m)}</td>
+                <td class="c">${spinHtml(i, m.F)}</td>
+              </tr>`;
+            }).join("")}</tbody>
+          </table></div>
+          <p class="hintbox">Fənn adına toxunsan, dəqiq qaib saatını yaza və ya fənni silə bilərsən. Sıra Excel faylındakı kimidir və qaib dəyişəndə yerini dəyişmir. Qalan dərs = qalan saat ÷ 2; zolaqda hər cüt blok bir dərsdir.</p>
+        </section>`,
+  };
+}
+
+/* ============================================================
+   9. Dərs cədvəli  —  hər dərsin öz saatı, həftə avtomatik növbələnir
+   ============================================================ */
+function viewCedvel() {
+  const cw = currentWeekType();
+  const wk = shownWeek();
+  const tk = todayKey();
+  const nextMon = weekName(cw === "ust" ? "alt" : "ust");
+  const total = DAYS.reduce((a, [dk]) => a + weekBlock(wk)[dk].length, 0);
+  const sem = activeSem();
+
+  const columns = DAYS.map(([dk, label]) => {
+    const list = dayLessons(wk, dk);
+    const isToday = dk === tk && wk === cw;
+    return `<section class="col">
+      <div class="col-h ${isToday ? "today" : ""}">
+        <span>${esc(label)}</span>${isToday ? `<span class="tag acc">bugün</span>` : ""}
+        <span class="n">${list.length}</span>
+      </div>
+      <div class="col-b">
+        ${list.length === 0 ? `<p class="col-empty">dərs yoxdur</p>` : list.map(({ e, i }) => {
+          const ci = sem.courses.findIndex((c) => c.name === e.subject);
+          const lv = ci >= 0 ? compute(sem.courses[ci]).level : "ok";
+          return `<button class="ls lv-${lv}" type="button" data-edit="${wk}:${dk}:${i}">
+            <span class="tm">${esc(e.time) || "saat yazılmayıb"}</span>
+            <b>${esc(e.subject)}</b>
+            ${e.room || e.teacher ? `<span class="mt">${esc(e.room)}${e.room && e.teacher ? " · " : ""}${esc(e.teacher)}</span>` : ""}
+          </button>`;
+        }).join("")}
+      </div>
+      <div class="col-f">
+        <button class="addbtn" type="button" data-add="${wk}:${dk}">+ Dərs əlavə et</button>
+      </div>
+    </section>`;
+  }).join("");
+
+  return {
+    toolbar: `<span class="vtitle">Dərs cədvəli</span>`
+      + `<span class="seg">
+           <button type="button" data-vweek="alt" aria-pressed="${wk === "alt"}">Alt həftə${cw === "alt" ? " ·" : ""}</button>
+           <button type="button" data-vweek="ust" aria-pressed="${wk === "ust"}">Üst həftə${cw === "ust" ? " ·" : ""}</button>
+         </span>`
+      + `<button class="btn" type="button" data-copyweek="1">${wk === "alt" ? "Üst həftədən köçür" : "Alt həftədən köçür"}</button>`
+      + `<button class="btn" type="button" data-flipweek="1" title="Universitetdə bu həftə digəri olmalıdırsa, növbəni bir həftə çevirir">Növbəni çevir</button>`
+      + `<span class="vhint tb-sp">${total} dərs</span>`,
+    body: `<section class="panel">
+      <div class="ph">${esc(weekName(wk))}${wk === cw ? " — bu həftə" : " — baxış"}
+        <span class="ph-r">bazar ertəsindən: ${esc(nextMon)}</span>
+      </div>
+      <div class="board">${columns}</div>
+      <p class="hintbox">Həftə hər bazar ertəsi avtomatik dəyişir, əl ilə seçmək lazım deyil — nöqtə (·) işarəsi bu həftəni göstərir. Yuxarıdaki düymələr yalnız hansı həftəyə baxdığını dəyişir. Saatı hər dərs üçün özün yazırsan, ona görə alt qrup dərsləri də düzgün yerə düşür.</p>
+    </section>`,
+  };
+}
+
+/* ============================================================
+   10. Qiymətlər
+   ============================================================ */
+function viewQiymet() {
+  const sem = activeSem();
+  const ms = sem.courses.map(compute);
+  const gpa = semesterGpa(sem.courses);
+  const pass = ms.filter((m) => m.result === "Pass").length;
+  const fail = ms.filter((m) => m.result === "Fail").length;
+  const none = ms.filter((m) => m.result === "No Result").length;
+  const resTag = (res) => res === "Pass" ? `<span class="tag ok">Keçdi</span>`
+    : res === "Fail" ? `<span class="tag crit">Kəsildi</span>` : `<span class="tag neu">Nəticə yox</span>`;
+
+  if (sem.courses.length === 0) {
+    return { toolbar: `<span class="vtitle">Qiymətlər</span>`, body: `<section class="panel"><p class="blank">Bu semestrdə fənn yoxdur.</p></section>` };
+  }
+  const si = Math.min(selected, sem.courses.length - 1);
+  const r = sem.courses[si];
+  const m = ms[si];
+  const cd = examCountdown(r.examDate);
+  const dmy = isoToDmy(r.examDate);
+
+  return {
+    toolbar: `<span class="vtitle">Qiymətlər</span>`
+      + `<span class="vhint">Giriş balı = orta(seminar) × 2 + müstəqil iş + kollokvium + qaib balı, üstəgəl səhv balı</span>`
+      + `<span class="tb-sp"><span class="tag acc">ÜOMG ${gpa == null ? "—" : gpa.toFixed(2)}</span></span>`,
+    body: `
+      <section class="panel">
+        <div class="ph">Semestr yekunu</div>
+        <div class="kpi">
+          <div><b class="c-ok">${pass}</b><span>keçdi</span></div>
+          <div><b class="c-crit">${fail}</b><span>kəsildi</span></div>
+          <div><b>${none}</b><span>nəticə yox</span></div>
+          <div><b>${gpa == null ? "—" : gpa.toFixed(2)}</b><span>ÜOMG</span></div>
+        </div>
+        <div class="tw"><table class="t">
+          <thead><tr>
+            <th class="ix">№</th><th>Fənn</th>
+            <th class="r">Giriş</th><th class="hide-sm r">Min. imtahan</th>
+            <th class="r">İmtahan</th><th class="r">Ümumi</th><th>Nəticə</th>
+          </tr></thead>
+          <tbody>${sem.courses.map((c, i) => {
+            const mm = ms[i];
+            return `<tr class="clk" data-pick="${i}" aria-selected="${i === si}">
+              <td class="ix">${i + 1}</td>
+              <td class="nm">${esc(c.name)}</td>
+              <td class="r">${mm.O}</td>
+              <td class="hide-sm r">${dash(mm.P)}</td>
+              <td class="r">${c.q == null ? "—" : c.q}</td>
+              <td class="r">${dash(mm.R)}</td>
+              <td>${resTag(mm.result)}</td>
+            </tr>`;
+          }).join("")}</tbody>
+        </table></div>
+      </section>
+
+      <section class="panel">
+        <div class="ph">Seçilmiş fənn<span class="ph-r">${esc(r.name)}</span></div>
+        <div class="pb">
+          <p class="flabel">Seminar qiymətləri — Excel-dəki V–AC sütunları</p>
+          <div class="semrow">
+            ${r.sem.map((v, k) => `<input class="mono" inputmode="numeric" placeholder="—" value="${v == null ? "" : v}" data-g="${si}" data-field="sem" data-k="${k}" aria-label="Seminar ${k + 1}">`).join("")}
+          </div>
+          <p class="flabel" style="margin-top:18px">Bal komponentləri</p>
+          <div class="form">
+            <div class="fld"><label>Müstəqil iş</label><input inputmode="numeric" value="${r.s ?? ""}" data-g="${si}" data-field="s"></div>
+            <div class="fld"><label>Kollokvium</label><input inputmode="numeric" value="${r.t ?? ""}" data-g="${si}" data-field="t"></div>
+            <div class="fld"><label>Qaib balı</label><input inputmode="numeric" value="${r.u ?? ""}" data-g="${si}" data-field="u"></div>
+            <div class="fld"><label>Səhv balı</label><input inputmode="numeric" value="${r.ad ?? ""}" data-g="${si}" data-field="ad"></div>
+          </div>
+
+          <p class="flabel" style="margin-top:18px">İmtahan — bal, otaq və tarix</p>
+          <div class="form">
+            <div class="fld"><label>İmtahan balı</label><input inputmode="numeric" value="${r.q ?? ""}" data-g="${si}" data-field="q"></div>
+            <div class="fld txt"><label>İmtahan otağı</label><input value="${esc(r.examRoom)}" placeholder="məs. 426" data-g="${si}" data-field="examRoom"></div>
+            <div class="fld txt" style="grid-column:1/-1">
+              <label>İmtahan tarixi və saatı — ${cd.label}</label>
+              <div class="form" style="margin-top:3px">
+                <div class="fld txt"><input value="${esc(dmy.d)}" placeholder="gg.aa.iiii" inputmode="numeric" data-g="${si}" data-field="examDateD"></div>
+                <div class="fld txt"><input value="${esc(dmy.t)}" placeholder="SS:DD" inputmode="numeric" data-g="${si}" data-field="examDateT"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="kpi" style="border-top:1px solid var(--line)">
+          <div><b>${m.O}</b><span>giriş balı</span></div>
+          <div><b>${dash(m.P)}</b><span>lazım olan min. imtahan</span></div>
+          <div><b>${dash(m.R)}</b><span>ümumi bal</span></div>
+          <div><b class="${m.failedByAbsence ? "c-crit" : "c-ok"}" style="font-size:14px">${m.failedByAbsence ? "Qaib limiti aşılıb" : "İmtahana buraxılır"}</b><span>buraxılış</span></div>
+        </div>
+      </section>`,
+  };
+}
+
+/* ============================================================
+   11. Fənn kataloqu
+   ============================================================ */
+function viewFenn() {
+  const q = findQuery.trim().toLowerCase();
+  const hits = CATALOG.filter((c) => !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q));
+  return {
+    toolbar: `<span class="vtitle">Fənn kataloqu</span>`
+      + `<input class="find" id="find" type="search" placeholder="Fənn adı və ya kodu…" value="${esc(findQuery)}" aria-label="Fənn axtar">`
+      + `<span class="vhint tb-sp">${hits.length} / ${CATALOG.length}</span>`,
+    body: `<section class="panel">
+      <div class="ph">Nəticələr<span class="ph-r">saat dəyəri 2200 ÷ 60</span></div>
+      ${hits.length === 0 ? `<p class="blank">Uyğun fənn tapılmadı.</p>` : `<div class="tw"><table class="t">
+        <thead><tr>
+          <th>Kod</th><th>Fənn</th><th class="r">Kr</th>
+          <th class="r">Qaib limiti</th><th class="hide-sm r">Dərs</th>
+          <th class="r">25% ödəniş</th><th class="hide-sm r">Alt qrup</th>
+        </tr></thead>
+        <tbody>${hits.map((c) => {
+          const G = qaibLimit(c.credits);
+          return `<tr>
+            <td class="code">${esc(c.code)}</td>
+            <td class="nm">${esc(c.name)}${c.teacher ? `<small>${esc(c.teacher)}</small>` : ""}</td>
+            <td class="r">${c.credits}</td>
+            <td class="r">${G == null ? "—" : G + " saat"}</td>
+            <td class="hide-sm r">${G == null ? "—" : G / 2}</td>
+            <td class="r">${money(HOUR_RATE * c.credits * 0.25)}</td>
+            <td class="hide-sm r">${money(HOUR_RATE * c.credits)}</td>
+          </tr>`;
+        }).join("")}</tbody>
+      </table></div>`}
+    </section>`,
+  };
+}
+
+/* ============================================================
+   12. Profil
+   ============================================================ */
+function viewProfil() {
+  const p = state.profile;
+  return {
+    toolbar: `<span class="vtitle">Profil və semestrlər</span>`,
+    body: `
+      <div class="two">
+        <section class="panel">
+          <div class="ph">Tələbə məlumatları</div>
+          <dl class="kv">${Object.entries(p).map(([k, v]) =>
+            `<div><dt>${esc(k)}</dt><dd><button type="button" data-prof="${esc(k)}">${esc(v) || "—"}</button></dd></div>`).join("")}
+          </dl>
+          <p class="hintbox">Teams şifrəsi və Telegram açarı bu proqrama köçürülməyib — şifrəni veb səhifədə saxlamaq təhlükəlidir.</p>
+        </section>
+
+        <div>
+          <section class="panel">
+            <div class="ph">Semestrlər<span class="ph-r"><button class="btn" type="button" data-addsem="1">Semestr əlavə et</button></span></div>
+            <div class="tw"><table class="t">
+              <thead><tr><th>Semestr</th><th class="r">Fənn</th><th class="r">ÜOMG</th><th></th><th></th></tr></thead>
+              <tbody>${Object.keys(state.semesters).map((k) => {
+                const g = semesterGpa(state.semesters[k].courses);
+                return `<tr><td class="nm">${esc(k)}</td>
+                  <td class="r">${state.semesters[k].courses.length}</td>
+                  <td class="r">${g == null ? "—" : g.toFixed(2)}</td>
+                  <td class="r">${k === state.active ? `<span class="tag acc">Aktiv</span>` : `<button class="btn" type="button" data-setsem="${esc(k)}">Keç</button>`}</td>
+                  <td class="r"><button class="btn" type="button" data-report="${esc(k)}">Hesabat</button></td></tr>`;
+              }).join("")}</tbody>
+            </table></div>
+            <p class="hintbox">Semestr bitəndə yenisini əlavə et və ona keç — köhnəsi siyahıda arxiv kimi qalır, qiymətləri və qaibləri heç yerə getmir.</p>
+          </section>
+
+        </div>
+      </div>`,
+  };
+}
+
+function viewAyarlar() {
+  return {
+    toolbar: `<span class="vtitle">Ayarlar</span>`,
+    body: `
+      <div class="stack">
+          <section class="panel">
+            <div class="ph">iPhone-a əlavə etmək</div>
+            <ol class="steps">
+              <li>Bu səhifəni <b>Safari</b>-də aç — Chrome-da bu addım yoxdur.</li>
+              <li>Ekranın aşağısındaki <b>Paylaş</b> işarəsinə bas (yuxarı oxlu kvadrat).</li>
+              <li>Siyahını yuxarı dart və <b>“Ana ekrana əlavə et”</b> / <b>Add to Home Screen</b> seç.</li>
+              <li>Sağ yuxarıdaki <b>Əlavə et</b> düyməsini bas.</li>
+            </ol>
+            <p class="hintbox">Bundan sonra ikon ana ekranda qalır, brauzer sətri olmadan tam ekranda açılır.</p>
+          </section>
+
+          ${CLOUD_MODE ? `<section class="panel">
+            <div class="ph">Sinxron<span class="ph-r">${cloudCfg() ? "qurulub" : "qurulmayıb"}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${cloudCfg()
+                ? "Bu cihaz sinxron bazasına bağlıdır. <b>Saxla</b> basanda məlumat buluda yazılır, tətbiqi açanda oradan oxunur."
+                : "Hələ bağlanmayıb — məlumat yalnız bu cihazda qalır. Bağlamaq üçün baza ünvanı və açar lazımdır."}</p>
+              <div class="row">
+                <button class="btn" type="button" data-synccfg="1">${cloudCfg() ? "Ayarı dəyiş" : "Sinxronu qur"}</button>
+                ${cloudCfg() ? `<button class="btn" type="button" data-syncnow="1">İndi yenilə</button>
+                 <button class="btn" type="button" data-syncpush="1">Buluda göndər</button>` : ""}
+              </div>
+            </div>
+          </section>` : ""}
+
+          <section class="panel">
+            <div class="ph">Bildirişlər<span class="ph-r">${((state.calHooked ? "təqvim" : "") +
+              (state.calHooked && pushOn ? " + " : "") + (pushOn ? "proqram" : "")) || "qoşulmayıb"}</span></div>
+            <div class="pb">
+              ${state.calHooked ? `
+              <p class="dlg-msg" style="margin-bottom:11px"><b>Təqvim qoşulub.</b> Hər dərsdən
+                <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> bildiriş gəlir.
+                Cədvəli dəyişəndə telefonun təqvimi özü yenilənir — əlavə heç nə etmək lazım deyil.</p>
+              <div class="row">
+                <button class="btn" type="button" data-calhook="1">Yenidən qoş</button>
+                <button class="btn" type="button" data-caldiag="1">Bildiriş gəlmirsə</button>
+              </div>` : `
+              <p class="dlg-msg" style="margin-bottom:11px">Bir dəfə qoşursan — sonra hər dərsdən
+                <b>5 dəqiqə əvvəl</b>, hər imtahandan <b>2 və 1 gün əvvəl</b> telefonun özü bildiriş
+                göndərir. Tətbiq qapalı olsa da, internet olmasa da işləyir.</p>
+              <div class="row">
+                <button class="btn primary" type="button" data-calhook="1">Bildirişləri qoş</button>
+              </div>`}
+              <div class="splitline"></div>
+              <p class="dlg-msg"><b>Proqramın öz bildirişləri</b> — Qaib Jurnalı adı və ikonu ilə
+                gəlir: hər səhər <b>saat 9-da günün dərs cədvəli</b>, imtahanlara
+                <b>2 və 1 gün qalmış</b> xəbərdarlıq.${pushOn ? "" :
+                " Dərsə 5 dəqiqə qalmış bildiriş bundan getmir — o, təqvimdən gəlir, çünki dəqiq vaxt lazımdır."}</p>
+              <div class="row" style="margin-top:10px">
+                ${pushOn
+                  ? `<button class="btn" type="button" data-pushtest="1">Görünüşü yoxla</button>
+                     <button class="btn" type="button" data-pushoff="1">Söndür</button>`
+                  : `<button class="btn primary" type="button" data-pushon="1">Proqram bildirişlərini aç</button>`}
+              </div>
+              ${!pushOn && pushWhy ? `<p class="dlg-msg" style="margin-top:8px;opacity:.72">${esc(pushWhy)}</p>` : ""}
+
+              <details class="more">
+                <summary>Başqa yollar</summary>
+                <div class="row" style="margin-top:9px">
+                  <button class="btn" type="button" data-ics="1">Fayl kimi endir</button>
+                  <button class="btn" type="button" data-testics="1">Sınaq bildirişi</button>
+                </div>
+              </details>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Məlumat köçürmə</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Kompüterdəki pəncərə ilə telefondaki nüsxə ayrı məlumat saxlayır. Bu iki düymə ilə məlumatı birindən digərinə köçür.</p>
+              <div class="row">
+                <button class="btn" type="button" data-export="1">Məlumatı çıxar</button>
+                <button class="btn" type="button" data-import="1">Məlumatı yüklə</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Yazı</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Hansı yazı gözünə rahat gəlirsə onu seç —
+                dəyişiklik dərhal görünür.</p>
+              <span class="seg">
+                <button type="button" data-font="sistem" aria-pressed="${fontNow() === "sistem"}">Sistem</button>
+                <button type="button" data-font="inter" aria-pressed="${fontNow() === "inter"}">Inter</button>
+                <button type="button" data-font="plex" aria-pressed="${fontNow() === "plex"}">Plex</button>
+              </span>
+              <p class="dlg-msg" style="margin:14px 0 9px">Yazı ölçüsü</p>
+              <span class="seg">
+                <button type="button" data-fs="m" aria-pressed="${fsNow() === "m"}">Normal</button>
+                <button type="button" data-fs="l" aria-pressed="${fsNow() === "l"}">Böyük</button>
+                <button type="button" data-fs="xl" aria-pressed="${fsNow() === "xl"}">Ən böyük</button>
+              </span>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Görünüş</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">İşıqlı və tünd görünüş arasında seç.
+                <b>Sistem</b> seçilsə, telefonun/kompüterin öz rejiminə uyğunlaşır.</p>
+              <span class="seg">
+                <button type="button" data-theme="auto" aria-pressed="${(state.theme || "auto") === "auto"}">Sistem</button>
+                <button type="button" data-theme="light" aria-pressed="${state.theme === "light"}">İşıqlı</button>
+                <button type="button" data-theme="dark" aria-pressed="${state.theme === "dark"}">Tünd</button>
+              </span>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Versiya<span class="ph-r">${esc(APP_BUILD)}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${updateReady
+                ? "<b>Yeni versiya hazırdır.</b> Yenilə düyməsi köhnə nüsxəni yaddaşdan silib ən sonuncunu yükləyir."
+                : "Proqram ən son versiyadadır. Yeni nüsxə çıxanda özü xəbər verəcək."}</p>
+              <div class="row">
+                <button class="btn" type="button" data-checkupd="1">Yenilikləri yoxla</button>
+                ${updateReady ? `<button class="btn primary" type="button" data-update="1">Yenilə</button>` : ""}
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Qoruma kodu<span class="ph-r">${guardOn() ? "aktiv" : "yoxdur"}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${guardOn()
+                ? "Məlumatı silən və üzərinə yazan əməliyyatlar kod tələb edir: <b>Excel vəziyyətinə qaytar</b> və <b>Məlumatı yüklə</b>."
+                : "Kod təyin etsən, məlumatı silən əməliyyatlar (<b>Excel vəziyyətinə qaytar</b>, <b>Məlumatı yüklə</b>) kod soruşacaq. Səhvən toxunub hər şeyi itirməkdən qoruyur."}</p>
+              <div class="row">
+                <button class="btn" type="button" data-setguard="1">${guardOn() ? "Kodu dəyiş" : "Kod təyin et"}</button>
+                ${guardOn() ? `<button class="btn danger" type="button" data-delguard="1">Kodu sil</button>` : ""}
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="ph">Bərpa</div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">Bütün qaib, qiymət və cədvəl dəyişikliklərini silib Excel faylındakı ilk vəziyyətə qaytarır.</p>
+              <button class="btn danger" type="button" data-reset="1">Excel vəziyyətinə qaytar</button>
+            </div>
+          </section>
+      </div>`,
+  };
+}
+
+/* ---- Semestr hesabatı (çap / PDF üçün) ---- */
+let reportSem = null;
+
+function reportRows(key) {
+  const sem = state.semesters[key] || { courses: [] };
+  return sem.courses.map((r) => ({ r, m: compute(r) }));
+}
+
+function viewReport() {
+  const key = reportSem && state.semesters[reportSem] ? reportSem : state.active;
+  const rows = reportRows(key);
+  const gpa = semesterGpa((state.semesters[key] || { courses: [] }).courses);
+  const pass = rows.filter((x) => x.m.result === "Pass").length;
+  const fail = rows.filter((x) => x.m.result === "Fail").length;
+  const none = rows.filter((x) => x.m.result === "No Result").length;
+  const usedH = rows.reduce((a, x) => a + x.m.F, 0);
+  const credits = rows.reduce((a, x) => a + (x.m.credits || 0), 0);
+  const p = state.profile;
+  const today = new Date();
+  const dstr = String(today.getDate()).padStart(2, "0") + "." +
+    String(today.getMonth() + 1).padStart(2, "0") + "." + today.getFullYear();
+  const resAz = (res) => res === "Pass" ? "Keçdi" : res === "Fail" ? "Kəsildi" : "Nəticə yox";
+
+  return {
+    toolbar: `<span class="vtitle">Semestr hesabatı</span>`
+      + `<span class="vhint">${esc(key)}</span>`
+      + `<span class="tb-sp"></span>`
+      + `<button class="btn" type="button" data-print="1">Çap / PDF</button>`
+      + `<button class="btn" type="button" data-reportfile="${esc(key)}">HTML faylı endir</button>`
+      + `<button class="btn" type="button" data-go="profil">Bağla</button>`,
+    body: `<section class="panel report">
+      <div class="rep-head">
+        <h1>Semestr hesabatı</h1>
+        <p class="rep-sub">${esc(key)} · hazırlandı ${dstr}</p>
+        <dl class="rep-id">
+          ${[["Tələbə", p["Ad, Soyad, Ata adı"]], ["Tələbə kodu", p["Tələbə kodu"]],
+             ["Qrup", p["Qrup kodu"]], ["İxtisas", p["İxtisas"]]]
+            .filter(([, val]) => val).map(([k2, val]) =>
+              `<div><dt>${esc(k2)}</dt><dd>${esc(val)}</dd></div>`).join("")}
+        </dl>
+      </div>
+
+      <div class="kpi">
+        <div><b>${rows.length}</b><span>fənn</span></div>
+        <div><b>${credits}</b><span>kredit</span></div>
+        <div><b>${gpa == null ? "—" : gpa.toFixed(2)}</b><span>ÜOMG</span></div>
+        <div><b>${usedH}</b><span>qaib, saat</span></div>
+        <div><b>${pass}</b><span>keçdi</span></div>
+        <div><b>${fail}</b><span>kəsildi</span></div>
+        <div><b>${none}</b><span>nəticə yox</span></div>
+      </div>
+
+      <div class="tw"><table class="t">
+        <thead><tr>
+          <th class="ix">№</th><th>Fənn</th><th>Kod</th><th class="r">Kr</th>
+          <th class="r">Qaib</th><th class="r">Limit</th>
+          <th class="r">Giriş</th><th class="r">İmtahan</th><th class="r">Ümumi</th><th>Nəticə</th>
+        </tr></thead>
+        <tbody>${rows.map(({ r, m }, i) => `<tr>
+          <td class="ix">${i + 1}</td>
+          <td class="nm">${esc(r.name)}${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
+          <td class="code">${esc(m.code)}</td>
+          <td class="r">${dash(m.credits)}</td>
+          <td class="r">${m.F}</td>
+          <td class="r">${dash(m.G)}</td>
+          <td class="r">${m.O}</td>
+          <td class="r">${r.q == null ? "—" : r.q}</td>
+          <td class="r">${dash(m.R)}</td>
+          <td>${resAz(m.result)}${m.failedByAbsence ? " (qaib)" : ""}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>
+
+      <p class="rep-foot">Giriş balı = orta(seminar) × 2 + müstəqil iş + kollokvium + qaib balı, üstəgəl səhv balı.
+        Qaib limiti kredit sayına görə: 3 kredit → 3 saat, 4 → 9, 5 → 12, 6 → 15.
+        Ümumi bal 51-dən az, yaxud imtahan balı 17-dən az olduqda fənn kəsilmiş sayılır.</p>
+    </section>`,
+  };
+}
+
+function reportFile(key) {
+  const host = document.createElement("div");
+  const saved = reportSem;
+  reportSem = key;
+  const out = viewReport();
+  reportSem = saved;
+  host.innerHTML = out.body;
+  const css = `body{font-family:"Segoe UI",system-ui,sans-serif;font-size:12px;color:#111;background:#fff;margin:24px}
+h1{font-size:20px;margin:0 0 4px}.rep-sub{color:#666;margin:0 0 14px;font-size:12px}
+dl.rep-id{display:flex;flex-wrap:wrap;gap:6px 26px;margin:0 0 18px;padding:0}
+dl.rep-id div{display:flex;gap:8px}dl.rep-id dt{color:#666}dl.rep-id dd{margin:0;font-weight:600}
+.kpi{display:flex;flex-wrap:wrap;border:1px solid #ddd;margin:0 0 16px}
+.kpi>div{flex:1 1 90px;padding:8px 10px;border-right:1px solid #eee}
+.kpi b{display:block;font-size:17px}.kpi span{color:#666;font-size:11px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{text-align:left;background:#f3f4f6;border-bottom:1px solid #bbb;padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#555}
+td{padding:6px 8px;border-bottom:1px solid #eee}
+td.r,th.r{text-align:right}.nm small{display:block;color:#777;font-size:10px}
+.code{color:#777;font-family:ui-monospace,Consolas,monospace}
+.rep-foot{color:#666;font-size:10.5px;margin-top:16px;line-height:1.6}`;
+  return '<!doctype html>\n<html lang="az"><head><meta charset="utf-8">'
+    + '<title>Hesabat — ' + key + '</title><style>' + css + '</style></head><body>'
+    + host.innerHTML.replace(/class="tw"/g, "").replace(/class="t"/g, "")
+    + '</body></html>\n';
+}
+
+const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, qiymet: viewQiymet, fenn: viewFenn, profil: viewProfil, ayarlar: viewAyarlar, report: viewReport };
+
+/* ============================================================
+   13. Çəkiliş
+   ============================================================ */
+function paintStatus() {
+  const el = document.getElementById("statusbar");
+  if (!el) return;
+  const sem = activeSem();
+  const ms = sem.courses.map(compute);
+  const usedH = ms.reduce((a, m) => a + m.F, 0);
+  const risk = ms.filter((m) => m.level !== "ok").length;
+  const at = SYNC.at ? SYNC.at.toTimeString().slice(0, 5) : null;
+  el.innerHTML = `<span>${esc(state.active)}</span><s>|</s>`
+    + `<span>${sem.courses.length} fənn</span><s>|</s>`
+    + `<span>${usedH} saat qaib</span><s>|</s>`
+    + `<span>${risk} risk</span>`
+    + `<span class="sb-r">`
+    + (updateReady ? `<button class="flagbtn" type="button" data-update="1">yeni versiya var — yenilə</button>` : "")
+    + (dirty ? `<span class="flag">saxlanılmamış dəyişiklik</span>` : "")
+    + (remotePending ? `<span class="flag">başqa cihazda yenilik var</span>` : "")
+    + `<span class="sb-keys">1–7 bölmə · / axtarış · Ctrl+S saxla</span>`
+    + `<span>${esc(SYNC.t)}${at ? " " + at : ""}</span></span>`;
+}
+
+function paintSaveBar() {
+  const bs = document.getElementById("btnSave");
+  const bd = document.getElementById("btnDiscard");
+  if (!bs || !bd) return;
+  bs.disabled = !dirty;
+  bs.textContent = dirty ? "Saxla" : "Saxlanıldı";
+  bd.hidden = !dirty;
+  bd.textContent = remotePending ? "Digərini götür" : "Geri qaytar";
+}
+
+function render() {
+  const sel = document.getElementById("semPick");
+  const keys = Object.keys(state.semesters);
+  sel.innerHTML = keys.map((k) => `<option value="${esc(k)}" ${k === state.active ? "selected" : ""}>${esc(k)}</option>`).join("");
+  document.getElementById("docname").textContent = state.active;
+
+  // sürüşmə mövqeyini saxla — qaib artıranda səhifə yuxarı/sola atmasın
+  const mainEl = document.getElementById("view");
+  const keepTop = mainEl ? mainEl.scrollTop : 0;
+  const keepLeft = [...document.querySelectorAll(".tw")].map((el) => el.scrollLeft);
+
+  const active = document.activeElement;
+  const keep = active && (active.id === "find" || (active.dataset && active.dataset.g != null))
+    ? { g: active.dataset ? active.dataset.g : null, field: active.dataset ? active.dataset.field : null, k: active.dataset ? active.dataset.k : null, id: active.id, pos: active.selectionStart }
+    : null;
+
+  const out = (RENDERERS[current] || viewOverview)();
+  const viewChanged = lastView !== current;
+  lastView = current;
+  document.getElementById("toolbar").innerHTML = out.toolbar;
+  const host = document.getElementById("view");
+  host.innerHTML = out.body;
+  if (viewChanged) {
+    host.classList.remove("enter");
+    void host.offsetWidth;          // animasiyanı yenidən başlat
+    host.classList.add("enter");
+    clearTimeout(enterTimer);
+    // sinfi geri götür ki, sonrakı kiçik yeniləmələrdə (qaib +/-) sətirlər sönüb-yanmasın
+    enterTimer = setTimeout(() => host.classList.remove("enter"), 450);
+  }
+  applyTheme();
+  buildNav();
+  paintStatus();
+  paintSaveBar();
+
+  if (mainEl) mainEl.scrollTop = keepTop;
+  document.querySelectorAll(".tw").forEach((el, i) => {
+    if (keepLeft[i] != null) el.scrollLeft = keepLeft[i];
+  });
+
+  if (keep) {
+    const q = keep.id === "find" ? "#find"
+      : `[data-g="${keep.g}"][data-field="${keep.field}"]${keep.k != null ? `[data-k="${keep.k}"]` : ""}`;
+    const el = document.querySelector(q);
+    if (el) { el.focus(); try { el.setSelectionRange(keep.pos, keep.pos); } catch (e) {} }
+  }
+}
+
+/* ============================================================
+   14. Dialoq
+   ============================================================ */
+function openDialog(title, meta, bodyHtml, onSave, saveLabel, onDelete) {
+  const host = document.getElementById("modal");
+  host.hidden = false;
+  host.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="dlg-t"><strong>${esc(title)}</strong>${meta ? `<em>${esc(meta)}</em>` : ""}</div>
+    <div class="dlg-b">${bodyHtml}</div>
+    <div class="dlg-f">
+      ${onDelete ? `<button class="btn danger del" type="button" data-dlg="delete">Sil</button>` : ""}
+      <button class="btn" type="button" data-dlg="cancel">Ləğv et</button>
+      <button class="btn primary" type="button" data-dlg="save">${esc(saveLabel || "Yadda saxla")}</button>
+    </div>
+  </div>`;
+  host._onSave = onSave;
+  host._onDelete = onDelete;
+  const first = host.querySelector("input,select,textarea");
+  if (first) { first.focus(); try { first.select(); } catch (e) {} }
+}
+function closeDialog() {
+  const host = document.getElementById("modal");
+  host.hidden = true;
+  host.innerHTML = "";
+  host._onSave = null;
+  host._onDelete = null;
+}
+
+/* səhv kod — dialoq bağlandıqdan sonra göstərilir, yoxsa dərhal itir */
+function badCode() {
+  setTimeout(() => openDialog("Kod səhvdir", "",
+    `<p class="dlg-msg">Daxil etdiyin kod uyğun gəlmir. Əməliyyat icra olunmadı.</p>`,
+    null, "Oldu"), 0);
+}
+
+/* bir dərs xanasının sahələri */
+function lessonFields(e) {
+  const names = activeSem().courses.map((c) => c.name);
+  const extra = e.subject && names.indexOf(e.subject) < 0;
+  return `<div class="fld txt"><label>Saat — necə istəyirsən elə yaz</label>
+      <input data-fld="time" value="${esc(e.time)}" placeholder="09:00 – 10:20"></div>
+    <div class="fld" style="margin-top:10px"><label>Fənn</label><select data-fld="subject">
+      <option value="">— seç —</option>
+      ${names.map((n) => `<option value="${esc(n)}" ${n === e.subject ? "selected" : ""}>${esc(n)}</option>`).join("")}
+      ${extra ? `<option value="${esc(e.subject)}" selected>${esc(e.subject)}</option>` : ""}
+    </select></div>
+    <div class="form" style="margin-top:10px">
+      <div class="fld txt"><label>Otaq</label><input data-fld="room" value="${esc(e.room)}"></div>
+      <div class="fld txt"><label>Müəllim</label><input data-fld="teacher" value="${esc(e.teacher)}"></div>
+    </div>`;
+}
+
+/* ============================================================
+   15. Hadisələr
+   ============================================================ */
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs]");
+  if (!t) return;
+  const host = document.getElementById("modal");
+
+  if (t.dataset.dlg) {
+    if (t.dataset.dlg === "delete" && host._onDelete) host._onDelete();
+    else if (t.dataset.dlg === "save" && host._onSave) {
+      const vals = {};
+      host.querySelectorAll("[data-fld]").forEach((el) => { vals[el.dataset.fld] = el.value; });
+      host._onSave(vals);
+    }
+    return closeDialog();
+  }
+
+  if (t.dataset.save != null) return commit();
+  if (t.dataset.discard != null) return discard();
+  if (t.dataset.go) return go(t.dataset.go);
+
+  if (t.dataset.absent != null) {
+    const i = +t.dataset.absent, d = +t.dataset.delta;
+    return mutate((s) => {
+      const r = s.semesters[s.active].courses[i];
+      r.absent = Math.max(0, numOr(r.absent) + d);
+    });
+  }
+
+  if (t.dataset.vweek) { viewWeek = t.dataset.vweek; return render(); }
+
+  if (t.dataset.flipweek) {
+    viewWeek = null;
+    return mutate((s) => { s.weekAnchor.type = s.weekAnchor.type === "ust" ? "alt" : "ust"; });
+  }
+
+  if (t.dataset.copyweek) {
+    const to = shownWeek();
+    const from = to === "alt" ? "ust" : "alt";
+    return mutate((s) => { s.schedules[s.active][to] = structuredClone(s.schedules[s.active][from]); });
+  }
+
+  if (t.dataset.add) {
+    const parts = t.dataset.add.split(":");
+    const wk = parts[0], dk = parts[1];
+    const label = DAYS.find(([k]) => k === dk)[1];
+    return openDialog(`${label} — yeni dərs`, weekName(wk),
+      lessonFields({ time: "", subject: "", room: "", teacher: "" }),
+      (v) => {
+        if (!String(v.subject || "").trim()) return;
+        mutate((s) => {
+          s.schedules[s.active][wk][dk].push({
+            time: String(v.time || "").trim(),
+            subject: v.subject,
+            room: String(v.room || "").trim(),
+            teacher: String(v.teacher || "").trim() || cat(v.subject).teacher || "",
+          });
+        });
+      }, "Əlavə et");
+  }
+
+  if (t.dataset.edit) {
+    const parts = t.dataset.edit.split(":");
+    const wk = parts[0], dk = parts[1], i = +parts[2];
+    const e0 = weekBlock(wk)[dk][i];
+    const label = DAYS.find(([k]) => k === dk)[1];
+    return openDialog(`${label} — dərsi dəyiş`, weekName(wk), lessonFields(e0),
+      (v) => mutate((s) => {
+        const cell = s.schedules[s.active][wk][dk][i];
+        cell.time = String(v.time || "").trim();
+        cell.subject = v.subject || "";
+        cell.room = String(v.room || "").trim();
+        cell.teacher = String(v.teacher || "").trim() || (v.subject ? cat(v.subject).teacher : "") || "";
+      }),
+      "Yadda saxla",
+      () => mutate((s) => { s.schedules[s.active][wk][dk].splice(i, 1); }));
+  }
+
+  /* ---- fənn əlavə et ---- */
+  if (t.dataset.addcourse) {
+    const have = activeSem().courses.map((c) => c.name);
+    const free = CATALOG.filter((c) => have.indexOf(c.name) < 0);
+    return openDialog("Fənn əlavə et", state.active,
+      `<div class="fld"><label>Kataloqdan seç</label><select data-fld="name">
+         <option value="">— seç —</option>
+         ${free.map((c) => `<option value="${esc(c.name)}">${esc(c.name)} · ${c.credits} kredit</option>`).join("")}
+       </select></div>
+       <div class="fld txt" style="margin-top:10px"><label>və ya adı özün yaz</label>
+         <input data-fld="custom" placeholder="kataloqda olmayan fənn"></div>`,
+      (val) => {
+        const name = String(val.custom || "").trim() || String(val.name || "").trim();
+        if (!name) return;
+        mutate((s) => {
+          const list = s.semesters[s.active].courses;
+          if (list.some((c) => c.name === name)) return;
+          list.push(row(name, 0));
+        });
+      }, "Əlavə et");
+  }
+
+  /* ---- fənnə toxunanda: dəqiq qaib / sil ---- */
+  if (t.dataset.course != null) {
+    const i = +t.dataset.course;
+    const r = activeSem().courses[i];
+    const m = compute(r);
+    return openDialog(r.name, m.G == null ? "limit təyin olunmayıb" : "limit " + m.G + " saat",
+      `<div class="fld"><label>İşlənmiş qaib (saat)</label>
+         <input class="mono" inputmode="numeric" data-fld="v" value="${m.F}"></div>
+       <p class="dlg-msg" style="margin-top:11px">Fənni silsən, onun qaibi və qiymətləri də silinir.</p>`,
+      (val) => mutate((s) => { s.semesters[s.active].courses[i].absent = Math.max(0, numOr(val.v)); }),
+      "Yadda saxla",
+      () => mutate((s) => {
+        s.semesters[s.active].courses.splice(i, 1);
+        selected = 0;
+      }));
+  }
+
+  /* ---- semestr əlavə et ---- */
+  if (t.dataset.addsem) {
+    const keys = Object.keys(state.semesters);
+    return openDialog("Yeni semestr", keys.length + " semestr var",
+      `<div class="fld txt"><label>Semestrin adı</label>
+         <input data-fld="name" placeholder="Kurs 2 • Semestr 2"></div>
+       <div class="fld" style="margin-top:10px"><label>Fənnləri haradan götürsün</label>
+         <select data-fld="from">
+           <option value="">boş başla</option>
+           ${keys.map((k) => `<option value="${esc(k)}">${esc(k)} — fənn adlarını köçür</option>`).join("")}
+         </select></div>
+       <p class="dlg-msg" style="margin-top:11px">Köçürəndə yalnız fənn adları gəlir; qaib və qiymətlər sıfırdan başlayır.</p>`,
+      (val) => {
+        const name = String(val.name || "").trim();
+        if (!name || state.semesters[name]) return;
+        const from = String(val.from || "");
+        mutate((s) => {
+          const src = s.semesters[from];
+          s.semesters[name] = {
+            courses: src ? src.courses.map((c) => row(c.name, 0)) : [],
+          };
+          s.schedules[name] = { alt: emptyWeek(), ust: emptyWeek() };
+          s.active = name;
+          resetSelection();
+        });
+      }, "Yarat");
+  }
+
+  /* ---- hesabat ---- */
+  if (t.dataset.report) { reportSem = t.dataset.report; current = "report"; render(); window.scrollTo({ top: 0 }); return; }
+  if (t.dataset.print) { window.print(); return; }
+  if (t.dataset.reportfile) {
+    const key = t.dataset.reportfile;
+    saveFile("hesabat-" + key.replace(/[^\w\u0400-\u04ff-]+/g, "-") + ".html", reportFile(key), "text/html;charset=utf-8");
+    return;
+  }
+
+  if (t.dataset.pick != null) { selected = +t.dataset.pick; return render(); }
+
+  if (t.dataset.setsem) {
+    const k = t.dataset.setsem;
+    resetSelection();
+    return mutate((s) => { s.active = k; });
+  }
+
+  if (t.dataset.prof) {
+    const key = t.dataset.prof;
+    return openDialog(key, "Profil",
+      `<div class="fld txt"><label>${esc(key)}</label><input data-fld="v" value="${esc(state.profile[key] || "")}"></div>`,
+      (v) => mutate((s) => { s.profile[key] = v.v; }));
+  }
+
+  if (t.dataset.synccfg) {
+    const c = cloudCfg() || { url: "", key: "" };
+    return openDialog("Sinxron ayarı", "Firebase Realtime Database",
+      `<div class="fld txt" style="margin-bottom:10px"><label>Baza ünvanı — Database URL</label>
+         <input data-fld="url" value="${esc(c.url)}" placeholder="https://qaib-xxxx-default-rtdb.firebaseio.com"></div>
+       <div class="fld txt"><label>Açar</label>
+         <input data-fld="key" value="${esc(c.key)}" placeholder="açarı yerləşdir"></div>
+       <p class="dlg-msg" style="margin-top:12px">Hər iki cihazda <b>eyni</b> ünvan və <b>eyni</b> açar yazılmalıdır.
+         Bu iki dəyər yalnız bu cihazda saxlanılır, açıq səhifədə görünmür.</p>`,
+      (val) => {
+        const cfg = { url: String(val.url || "").trim(), key: String(val.key || "").trim() };
+        if (!cfg.url || !cfg.key) return;
+        cloudCfgSave(cfg);
+        backend = makeCloudBackend(cfg);
+        setSync("busy", "Yoxlanılır");
+        backend.pull()
+          .then((payload) => {
+            if (!payloadState(payload)) {
+              commit();          // bulud boşdur: bu cihazdaki məlumatı ilk nüsxə kimi göndər
+            } else {
+              onRemote(payload);
+              render();
+            }
+          })
+          .catch((err) => { setSync("local", "Alınmadı — " + ((err && err.message) || "xəta")); render(); });
+      }, "Yoxla və saxla");
+  }
+
+  if (t.dataset.syncnow) { cloudRefresh(); return; }
+
+  /* buluda məcburi göndəriş — saxlanılmamış dəyişiklik olmasa da işləyir */
+  if (t.dataset.syncpush) { commit(); return; }
+
+  if (t.dataset.ics) {
+    const out = buildIcs(16, 5);
+    return openDialog("Təqvim faylı", out.lessons + " dərs · " + out.exams + " imtahan",
+      `<p class="dlg-msg">Fayl 16 həftəlik dərsləri (alt/üst həftə üçün 2 həftədən bir təkrar) və
+         yazılmış imtahanları əhatə edir.${out.skipped
+           ? ` <b>${out.skipped} dərsin saatı yazılmayıb</b> — onlar faylda yoxdur.` : ""}</p>
+       <p class="dlg-msg" style="margin-top:11px">${isStandalone()
+         ? "<b>Paylaş</b> düyməsinə bas → siyahıdan <b>Təqvim</b>-i seç → <b>Əlavə et</b>."
+         : "Endirdikdən sonra fayla toxun → <b>Təqvimə əlavə et</b>."}
+         Dərs cədvəlini dəyişəndə faylı yenidən yarat.</p>`,
+      () => { saveFile("qaib-cedvel.ics", out.text, "text/calendar;charset=utf-8"); },
+      isStandalone() ? "Paylaş" : "Faylı endir");
+  }
+
+  if (t.dataset.export) {
+    return openDialog("Məlumatın çıxarışı", "JSON",
+      `<p class="dlg-msg" style="margin-bottom:10px">Hamısını seç və kopyala, sonra digər cihazda <b>Məlumatı yüklə</b> ilə yerləşdir.</p>
+       <textarea class="ta" id="expta" readonly>${esc(JSON.stringify(state))}</textarea>`,
+      () => {
+        const ta = document.getElementById("expta");
+        if (ta) { ta.select(); try { document.execCommand("copy"); } catch (err) {} }
+      }, "Kopyala");
+  }
+
+  if (t.dataset.import) {
+    return openDialog("Məlumatı yüklə", "JSON",
+      `<p class="dlg-msg" style="margin-bottom:10px">Digər cihazdan kopyaladığın mətni bura yerləşdir. Hazırkı məlumat üzərinə yazılacaq — sonra <b>Saxla</b> düyməsini bas.</p>
+       <textarea class="ta" data-fld="json" placeholder="{ ... }"></textarea>`
+       + (guardOn() ? `<div class="fld" style="margin-top:12px"><label>Qoruma kodu</label>
+            <input type="password" inputmode="numeric" data-fld="code" autocomplete="off"></div>` : ""),
+      (v) => {
+        if (guardOn() && !guardOk(v.code)) { badCode(); return; }
+        let parsed = null;
+        try { parsed = JSON.parse(v.json); } catch (err) { parsed = null; }
+        if (!parsed || !parsed.semesters) {
+          setTimeout(() => openDialog("Mətn oxunmadı", "",
+            `<p class="dlg-msg">Yerləşdirilən mətn tam JSON deyil. Çıxarışı əvvəldən sonadək, heç nə kəsmədən kopyala.</p>`,
+            null, "Oldu"), 0);
+          return;
+        }
+        resetSelection();
+        mutate((s) => { Object.assign(s, migrate(parsed)); });
+      }, "Yüklə");
+  }
+
+  /* ---- proqram bildirişləri ---- */
+  if (t.dataset.pushon) {
+    return openDialog("Proqram bildirişləri", "bir dəfəlik icazə",
+      `<p class="dlg-msg">Təsdiqləyəndə telefon <b>«Bildirişlərə icazə verilsin?»</b> soruşacaq —
+         <b>İcazə ver</b>-i seç.</p>
+       <p class="dlg-msg" style="margin-top:11px">Bundan sonra hər səhər saat 9-da günün dərsləri,
+         imtahanlara 2 və 1 gün qalmış isə xəbərdarlıq <b>Qaib Jurnalı</b> adı və ikonu ilə gələcək.</p>
+       ${isiOS() && !isStandalone() ? `<p class="dlg-msg" style="margin-top:11px"><b>Qeyd:</b>
+         iPhone-da bu yalnız əsas ekrana əlavə edilmiş proqramda işləyir. Safari-dən açmısansa,
+         əvvəlcə əsas ekrandaki ikondan aç.</p>` : ""}`,
+      () => {
+        pushEnable().then(() => {
+          render();
+          setTimeout(() => openDialog("Açıldı", "",
+            `<p class="dlg-msg">Proqram bildirişləri qoşuldu.
+               <b>Görünüşü yoxla</b> ilə necə göründüyünü indi görə bilərsən.</p>`,
+            null, "Oldu"), 0);
+        }).catch((err) => {
+          pushRefresh().then(render);
+          setTimeout(() => openDialog("Alınmadı", "",
+            `<p class="dlg-msg">${esc(err.message || String(err))}</p>`, null, "Bağla"), 0);
+        });
+      }, "İcazə ver");
+  }
+  if (t.dataset.pushoff) {
+    return openDialog("Söndürülsün?", "",
+      `<p class="dlg-msg">Proqram bildirişləri dayanacaq.
+         Təqvimdən gələn dərs bildirişlərinə təsir etmir.</p>`,
+      () => { pushDisable().then(render); }, "Söndür");
+  }
+  if (t.dataset.pushtest) {
+    pushTestLocal().catch((err) => openDialog("Alınmadı", "",
+      `<p class="dlg-msg">${esc(err.message || String(err))}</p>`, null, "Bağla"));
+    return;
+  }
+
+  /* ---- təqvimi qoş ---- */
+  if (t.dataset.calhook) {
+    if (!CAL_FEED) {
+      return openDialog("Əlçatan deyil", "yalnız onlayn nüsxədə",
+        `<p class="dlg-msg">Bu düymə saytdan açılan nüsxədə işləyir
+           (<b>${esc(CAL_HOST)}</b>). Kompüterdəki fayl nüsxəsində
+           <b>Fayl kimi endir</b> yolundan istifadə et.</p>`, null, "Bağla");
+    }
+    return openDialog("Bildirişləri qoş", isiOS() ? "iPhone" : "bu cihaz",
+      `<p class="dlg-msg">Aşağıdakı düymə telefonun <b>Təqvim</b> tətbiqini açacaq və
+         <b>Abunə ol</b> soruşacaq. Təsdiqlə — vəssalam.</p>
+       <p class="dlg-msg" style="margin-top:11px">Bundan sonra cədvəli burada dəyişsən,
+         təqvim özü yenilənir. Bir daha fayl endirmək lazım olmayacaq.</p>
+       <p class="dlg-msg" style="margin-top:11px"><b>Diqqət:</b> açılan pəncərədə
+         <b>«Xəbərdarlıqları sil»</b> sönülü qalsın — yoxsa bildirişlər gəlməz.</p>
+       <div class="row" style="margin-top:13px">
+         <a class="btn primary" href="${esc(CAL_FEED)}">Təqvimi aç və abunə ol</a>
+       </div>
+       <p class="dlg-msg" style="margin-top:11px;opacity:.75">Alınmasa, Safari-də bu ünvanı
+         əlinlə aç: <b>${esc(CAL_HOST + "/" + CAL_FILE)}</b></p>`,
+      () => { mutate((s) => { s.calHooked = true; }); }, "Qoşuldu");
+  }
+
+  /* ---- bildiriş gəlmirsə ---- */
+  if (t.dataset.caldiag) {
+    return openDialog("Bildiriş gəlmirsə", "üç yeri yoxla",
+      `<p class="dlg-msg"><b>1.</b> Təqvimdə hər hansı dərsə toxun →
+         <b>Xəbərdarlıq</b> sətrində «5 dəqiqə əvvəl» yazmalıdır.
+         «Yoxdur» yazırsa: <b>Parametrlər → Təqvim → Hesablar →
+         Abunə olunmuş təqvimlər</b> → «Xəbərdarlıqları sil» <b>sönülü</b> olsun.</p>
+       <p class="dlg-msg" style="margin-top:11px"><b>2.</b> <b>Parametrlər → Bildirişlər →
+         Təqvim</b> → «Bildirişlərə icazə ver» açıq, <b>«Planlı yekun»</b> isə sönülü olsun
+         (yekun açıq olsa bildiriş gec gəlir).</p>
+       <p class="dlg-msg" style="margin-top:11px"><b>3.</b> Dərs saatı <b>Yuxu</b> ya
+         <b>Narahat etmə</b> rejiminə düşürsə, bildiriş səssiz gəlir.
+         <b>Parametrlər → Fokus</b>-da Təqvimə icazə ver.</p>`,
+      null, "Bağla");
+  }
+
+  /* ---- yazı növü və ölçüsü ---- */
+  if (t.dataset.font) {
+    const f = t.dataset.font;
+    return mutate((s) => { s.font = f; });
+  }
+  if (t.dataset.fs) {
+    const z = t.dataset.fs;
+    return mutate((s) => { s.fontSize = z; });
+  }
+
+  /* ---- görünüş ---- */
+  if (t.dataset.theme) {
+    const th = t.dataset.theme;
+    return mutate((s) => { s.theme = th; });
+  }
+
+  /* ---- sınaq bildirişi ---- */
+  if (t.dataset.testics) {
+    const hhmm = (d) => String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+    const start = new Date(Date.now() + 10 * 60000);
+    const a1 = new Date(start.getTime() - 5 * 60000);
+    const a2 = new Date(start.getTime() - 2 * 60000);
+    return openDialog("Sınaq bildirişi", hhmm(start) + "-də başlayır",
+      `<p class="dlg-msg">Təqvimə <b>${hhmm(start)}</b>-də başlayan sınaq hadisəsi əlavə edir.
+         İki xəbərdarlıq qurulur:</p>
+       <p class="dlg-msg" style="margin-top:9px">
+         • <b>${hhmm(a1)}</b> — 5 dəqiqə qalmış <i>(dərs xəbərdarlığı ilə eyni)</i><br>
+         • <b>${hhmm(a2)}</b> — 2 dəqiqə qalmış</p>
+       <p class="dlg-msg" style="margin-top:11px">${isStandalone()
+         ? "<b>Paylaş</b> düyməsinə bas → açılan siyahıdan <b>Təqvim</b>-i seç → <b>Əlavə et</b>."
+         : "Faylı endir → üstünə toxun → <b>Təqvimə əlavə et</b>."}
+         Sonra Təqvim tətbiqini açıb hadisənin yerində olduğunu yoxla.</p>`,
+      () => { saveFile("qaib-sinaq.ics", testIcs(start), "text/calendar;charset=utf-8"); },
+      isStandalone() ? "Paylaş" : "Faylı endir");
+  }
+
+  /* ---- versiya ---- */
+  if (t.dataset.update) { applyUpdate(); return; }
+  if (t.dataset.checkupd) {
+    checkUpdate(true).then((varmi) => {
+      render();
+      if (!varmi) {
+        openDialog("Ən son versiyadır", APP_BUILD,
+          `<p class="dlg-msg">Yeni nüsxə yoxdur. Buna baxmayaraq köhnə göründüyünü düşünürsənsə,
+             <b>Yenilə</b> ilə yaddaşı təmizləyə bilərsən.</p>
+           <div class="row" style="margin-top:12px"><button class="btn" type="button" data-update="1">Yaddaşı təmizlə və yenilə</button></div>`,
+          null, "Bağla");
+      }
+    });
+    return;
+  }
+
+  /* ---- kodu təyin et / dəyiş ---- */
+  if (t.dataset.setguard) {
+    return openDialog(guardOn() ? "Kodu dəyiş" : "Kod təyin et", "rəqəm və ya mətn",
+      (guardOn() ? `<div class="fld" style="margin-bottom:10px"><label>Hazırkı kod</label>
+           <input type="password" inputmode="numeric" data-fld="old" autocomplete="off"></div>` : "")
+      + `<div class="fld"><label>Yeni kod</label>
+           <input type="password" inputmode="numeric" data-fld="yeni" autocomplete="off"></div>
+         <p class="dlg-msg" style="margin-top:11px">Kod bütün cihazlarında eyni olacaq.
+           Unutsan, sıfırlamaq üçün mənə yaz.</p>`,
+      (val) => {
+        if (guardOn() && !guardOk(val.old)) { badCode(); return; }
+        const yeni = String(val.yeni || "").trim();
+        if (!yeni) return;
+        mutate((s) => { s.guard = { hash: guardFingerprint(yeni) }; });
+      }, "Təsdiqlə");
+  }
+
+  if (t.dataset.delguard) {
+    return openDialog("Kodu sil", "qoruma söndürüləcək",
+      `<div class="fld"><label>Hazırkı kod</label>
+         <input type="password" inputmode="numeric" data-fld="old" autocomplete="off"></div>`,
+      (val) => {
+        if (!guardOk(val.old)) { badCode(); return; }
+        mutate((s) => { delete s.guard; });
+      }, "Sil");
+  }
+
+  if (t.dataset.reset) {
+    return openDialog("Excel vəziyyətinə qaytarılsın?", "sonra Saxla lazımdır",
+      `<p class="dlg-msg">Bütün qaib, qiymət və cədvəl dəyişiklikləri silinəcək və fayl ilk oxunduğu vəziyyətə qayıdacaq.</p>`
+      + (guardOn() ? `<div class="fld" style="margin-top:12px"><label>Qoruma kodu</label>
+           <input type="password" inputmode="numeric" data-fld="code" autocomplete="off"></div>` : ""),
+      (val) => {
+        if (guardOn() && !guardOk(val.code)) { badCode(); return; }
+        resetSelection();
+        mutate((s) => {
+          const guard = s.guard;
+          Object.assign(s, structuredClone(BASELINE));
+          if (guard) s.guard = guard;      // kod sıfırlamadan sonra da qalır
+        });
+      },
+      "Bəli, qaytar");
+  }
+});
+
+document.getElementById("modal").addEventListener("click", (e) => {
+  if (e.target.id === "modal") closeDialog();
+});
+
+document.getElementById("semPick").addEventListener("change", (e) => {
+  resetSelection();
+  mutate((s) => { s.active = e.target.value; });
+});
+
+document.addEventListener("input", (e) => {
+  const el = e.target;
+  if (el.id === "find") { findQuery = el.value; return render(); }
+  if (!el.dataset || el.dataset.g == null) return;
+  const i = +el.dataset.g, field = el.dataset.field;
+
+  /* tarix/saat iki ayrı sahədir — hər ikisi tam yazılana qədər render
+     etmirik, yoxsa yarımçıq mətn hər hərfdə öz-özünə silinər */
+  if (field === "examDateD" || field === "examDateT") {
+    const g = el.dataset.g;
+    const dEl = document.querySelector(`[data-g="${g}"][data-field="examDateD"]`);
+    const tEl = document.querySelector(`[data-g="${g}"][data-field="examDateT"]`);
+    if (!dEl || !tEl) return;
+    const dRaw = dEl.value.trim(), tRaw = tEl.value.trim();
+    if (!dRaw && !tRaw) { mutate((s) => { s.semesters[s.active].courses[i].examDate = ""; }); return; }
+    const iso = dmyToIso(dRaw, tRaw);
+    if (iso) mutate((s) => { s.semesters[s.active].courses[i].examDate = iso; });
+    return;
+  }
+
+  const raw = el.value.trim();
+  const asNum = raw === "" ? null : Number(raw.replace(",", "."));
+  mutate((s) => {
+    const r = s.semesters[s.active].courses[i];
+    if (field === "sem") r.sem[+el.dataset.k] = Number.isNaN(asNum) ? null : asNum;
+    else if (field === "examRoom") r[field] = raw;
+    else r[field] = Number.isNaN(asNum) ? null : asNum;
+  });
+});
+
+document.addEventListener("keydown", (e) => {
+  const modal = document.getElementById("modal");
+  if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "S")) {
+    e.preventDefault();
+    if (dirty) commit();
+    return;
+  }
+  if (e.key === "Escape" && !modal.hidden) return closeDialog();
+  if (!modal.hidden) return;
+  const tag = (e.target.tagName || "").toLowerCase();
+  if (tag === "input" || tag === "select" || tag === "textarea") return;
+  if (e.key === "/") { e.preventDefault(); go("fenn"); const f = document.getElementById("find"); if (f) f.focus(); return; }
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= VIEWS.length) { e.preventDefault(); go(VIEWS[n - 1][0]); }
+});
+
+/* ============================================================
+   17. Təqvim ixracı (.ics) — iPhone bildirişləri bunun üzərindən gəlir
+   ============================================================ */
+const ICS_EOL = String.fromCharCode(13, 10);   // CRLF
+const pad2 = (n) => String(n).padStart(2, "0");
+const icsStamp = (d) =>
+  d.getFullYear() + pad2(d.getMonth() + 1) + pad2(d.getDate()) +
+  "T" + pad2(d.getHours()) + pad2(d.getMinutes()) + "00";
+/* DTSTAMP UTC olmalıdır — əvvəl yerli saata "Z" əlavə olunurdu, bu səhv idi */
+const icsStampUTC = (d) =>
+  d.getUTCFullYear() + pad2(d.getUTCMonth() + 1) + pad2(d.getUTCDate()) +
+  "T" + pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + "00Z";
+
+/* "09:00 – 10:20" → {s:540, e:620};  tək saat yazılıbsa 80 dəqiqə sayılır */
+function parseRange(t) {
+  const m = String(t || "").match(/(\d{1,2})[:.](\d{2})(?:\s*[–\-—]\s*(\d{1,2})[:.](\d{2}))?/);
+  if (!m) return null;
+  const s = Number(m[1]) * 60 + Number(m[2]);
+  let e = m[3] != null ? Number(m[3]) * 60 + Number(m[4]) : s + 80;
+  if (e <= s) e = s + 80;
+  return { s, e };
+}
+const icsEsc = (s) => String(s)
+  .replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+/* RFC 5545 sətir qatlanması — bayt əsaslı, çoxbaytlı hərfi ortadan kəsmir */
+function icsFold(line) {
+  const enc = new TextEncoder();
+  if (enc.encode(line).length <= 73) return line;
+  const out = [];
+  let cur = "", bytes = 0;
+  for (const ch of line) {
+    const b = enc.encode(ch).length;
+    if (bytes + b > 73) { out.push(cur); cur = " "; bytes = 1; }
+    cur += ch;
+    bytes += b;
+  }
+  out.push(cur);
+  return out.join(ICS_EOL);
+}
+
+/* Bu günün dərsləri bir sətirdə — sınaq bildirişi üçün */
+function todayLessonLine() {
+  try {
+    const d = new Date();
+    const dk = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"][d.getDay()];
+    if (dk === "sun" || dk === "sat") return "";
+    const wk = currentWeekType();
+    const sch = (state.schedules || {})[state.active] || {};
+    const list = ((sch[wk] || {})[dk] || []).filter((x) => (x.subject || "").trim());
+    if (!list.length) return "";
+    return list.map((x) => ((x.time || "").split(/[–\-—]/)[0].trim() + " " + x.subject).trim())
+      .join(" · ");
+  } catch (e) { return ""; }
+}
+
+function buildIcs(weeks, minutesBefore) {
+  weeks = weeks || 16;
+  const mb = minutesBefore == null ? 5 : minutesBefore;
+  const L = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
+    "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "X-WR-CALNAME:Qaib Jurnalı", "X-WR-TIMEZONE:Asia/Baku",
+    "REFRESH-INTERVAL;VALUE=DURATION:PT4H", "X-PUBLISHED-TTL:PT4H",
+  ];
+  const now = new Date();
+  const stamp = icsStampUTC(now);
+  const monThis = mondayOf(now);
+  const cw = currentWeekType();
+  let lessons = 0, exams = 0, skipped = 0;
+
+  for (const wk of ["alt", "ust"]) {
+    const base = new Date(monThis);
+    if (wk !== cw) base.setDate(base.getDate() + 7);   // növbəti həftə o tipdədir
+    DAYS.forEach(([dk], di) => {
+      for (const e of weekBlock(wk)[dk]) {
+        if (!e.subject) continue;
+        const tr = parseRange(e.time);
+        if (!tr) { skipped++; continue; }
+        const start = new Date(base);
+        start.setDate(start.getDate() + di);
+        start.setHours(Math.floor(tr.s / 60), tr.s % 60, 0, 0);
+        const end = new Date(start);
+        end.setHours(Math.floor(tr.e / 60), tr.e % 60, 0, 0);
+        const until = new Date(start);
+        until.setDate(until.getDate() + weeks * 7);
+        lessons++;
+        L.push("BEGIN:VEVENT");
+        L.push("UID:qaib-" + wk + "-" + dk + "-" + lessons + "-" + start.getTime() + "@qaib");
+        L.push("DTSTAMP:" + stamp);
+        L.push("DTSTART:" + icsStamp(start));
+        L.push("DTEND:" + icsStamp(end));
+        L.push("RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + icsStamp(until));
+        L.push(icsFold("SUMMARY:" + icsEsc(e.subject)));
+        if (e.room) L.push(icsFold("LOCATION:" + icsEsc(e.room)));
+        const desc = [e.teacher, weekName(wk)].filter(Boolean).join(" · ");
+        if (desc) L.push(icsFold("DESCRIPTION:" + icsEsc(desc)));
+        L.push("BEGIN:VALARM", "TRIGGER:-PT" + mb + "M", "ACTION:DISPLAY",
+               icsFold("DESCRIPTION:" + icsEsc(e.subject + " — " + mb + " dəqiqə qaldı")), "END:VALARM");
+        L.push("END:VEVENT");
+      }
+    });
+  }
+
+  for (const key of Object.keys(state.semesters)) {
+    for (const r of state.semesters[key].courses) {
+      if (!r.examDate) continue;
+      const st = new Date(r.examDate);
+      if (Number.isNaN(st.getTime())) continue;
+      const en = new Date(st.getTime() + 2 * 3600000);
+      exams++;
+      L.push("BEGIN:VEVENT");
+      L.push("UID:qaib-imtahan-" + exams + "-" + st.getTime() + "@qaib");
+      L.push("DTSTAMP:" + stamp);
+      L.push("DTSTART:" + icsStamp(st));
+      L.push("DTEND:" + icsStamp(en));
+      L.push(icsFold("SUMMARY:İmtahan — " + icsEsc(r.name)));
+      if (r.examRoom) L.push(icsFold("LOCATION:" + icsEsc(r.examRoom)));
+      L.push(icsFold("DESCRIPTION:" + icsEsc(key)));
+      L.push("BEGIN:VALARM", "TRIGGER:-P2D", "ACTION:DISPLAY",
+             icsFold("DESCRIPTION:" + icsEsc(r.name + " imtahanına 2 gün qaldı")), "END:VALARM");
+      L.push("BEGIN:VALARM", "TRIGGER:-P1D", "ACTION:DISPLAY",
+             icsFold("DESCRIPTION:" + icsEsc(r.name + " imtahanına 1 gün qaldı")), "END:VALARM");
+      L.push("END:VEVENT");
+    }
+  }
+
+  L.push("END:VCALENDAR");
+  return { text: L.join("\r\n") + "\r\n", lessons, exams, skipped };
+}
+
+/* Sınaq hadisəsi: 3 dəqiqə sonra başlayır, 1 dəqiqə əvvəl xəbərdarlıq */
+function testIcs(startAt) {
+  const start = startAt instanceof Date ? startAt : new Date(Date.now() + 10 * 60000);
+  const end = new Date(start.getTime() + 10 * 60000);
+  const L = [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Qaib Jurnali//AZ//",
+    "CALSCALE:GREGORIAN", "METHOD:PUBLISH", "X-WR-CALNAME:Qaib Jurnalı",
+    "BEGIN:VEVENT",
+    "UID:qaib-sinaq-" + Date.now() + "@qaib",
+    "DTSTAMP:" + icsStampUTC(new Date()),
+    "DTSTART:" + icsStamp(start),
+    "DTEND:" + icsStamp(end),
+    "SUMMARY:Qaib Jurnalı — sınaq bildirişi",
+    "LOCATION:sınaq",
+    "DESCRIPTION:Dərs bildirişlərinin necə gəldiyini yoxlamaq üçün yaradılıb. Silə bilərsən.",
+    "BEGIN:VALARM", "TRIGGER:-PT5M", "ACTION:DISPLAY",
+    "DESCRIPTION:Sınaq bildirişi — 5 dəqiqə qaldı (dərs xəbərdarlığı ilə eyni)",
+    "END:VALARM",
+    "BEGIN:VALARM", "TRIGGER:-PT2M", "ACTION:DISPLAY",
+    "DESCRIPTION:Sınaq bildirişi — 2 dəqiqə qaldı",
+    "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR",
+  ];
+  return L.join(ICS_EOL) + ICS_EOL;
+}
+
+/* iOS-da ana ekran tətbiqləri fayl endirə bilmir — orada paylaşma vərəqi işləyir.
+   Ona görə sıra belədir: paylaşma → platformanın endirməsi → klassik endirmə. */
+const isStandalone = () =>
+  (window.navigator.standalone === true) ||
+  (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+
+const isiOS = () =>
+  /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+  (/Mac/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+
+function saveFile(name, text, mime) {
+  const type = (mime || "text/plain;charset=utf-8").split(";")[0];
+
+  // 1) iPhone/iPad: endirmə etibarsızdır — paylaşma vərəqi açılır.
+  //    Jest itməsin deyə heç bir await-dən əvvəl çağırılır.
+  //    Masaüstündə isə adi endirmə daha rahatdır, ona görə yalnız iOS-da.
+  if (isiOS()) {
+    try {
+      if (navigator.share && navigator.canShare && window.File) {
+        const file = new File([text], name, { type });
+        if (navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: name }).catch(() => {});
+          return true;
+        }
+      }
+    } catch (e) { /* aşağıdaki yollara keç */ }
+    // paylaşma alınmadısa, faylı yeni səhifədə aç — Safari oradan Təqvimə ötürə bilir
+    try {
+      const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
+      return true;
+    } catch (e) { /* aşağı davam */ }
+  }
+
+  // 2) Klassik endirmə (masaüstü brauzerlər, Safari-nin adi rejimi)
+  let ok = false;
+  try {
+    const blob = new Blob([text], { type: mime || "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 8000);
+    ok = true;
+  } catch (e) { ok = false; }
+
+  // 3) Claude pəncərəsində platformanın öz endirməsi
+  if (!ok && window.claude && window.claude.use) {
+    window.claude.use("downloads").then((dl) => {
+      if (dl && dl.save) dl.save({ filename: name, data: text }).catch(() => {});
+    }).catch(() => {});
+  }
+  return ok;
+}
+
+
+/* ============================================================
+   18. Başlat
+   ============================================================ */
+render();
+initStore();
+
+/* Oflayn is ucun: sened sorgulari sebekadan, ikonlar kesden */
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+
+/* açılış ekranı — məzmun hazır olan kimi yumşaq itir */
+(function () {
+  const sp = document.getElementById("splash");
+  if (!sp) return;
+  const bitir = () => {
+    sp.classList.add("gone");
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 400);
+  };
+  const az = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(bitir, az ? 0 : 620);
+})();
+
+/* açılışdan sonra arxa planda yenilik yoxla */
+setTimeout(() => checkUpdate(true), 1500);
+setTimeout(() => { pushRefresh().then(render); }, 900);
+</script>
+
+</body>
+</html>

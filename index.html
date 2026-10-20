@@ -8,7 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Qaib">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="theme-color" content="#2347e0">
+<meta name="theme-color" content="#f6f6f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f0f11" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="icon" href="icon-192.png">
@@ -20,829 +21,828 @@
 </head>
 <body>
 <style>
+/* ======================================================================
+   Qaib Jurnalı — görünüş
+   ====================================================================== */
 :root{
-  --ground:#eef1f4;
-  --panel:#ffffff;
-  --panel-2:#f3f5f8;
-  --panel-3:#e9edf1;
-  --ink:#1a1f26;
-  --ink-2:#33404d;
-  --muted:#59656f;
-  --line:#dfe4e9;
-  --line-2:#c8d0d8;
-  --accent:#2b5f9e;
+  --bg:#f6f6f8;
+  --side:#efeff2;
+  --surface:#ffffff;
+  --raised:#ffffff;
+  --input:rgba(118,118,128,.08);
+  --fill:rgba(118,118,128,.12);
+  --fill-2:rgba(118,118,128,.07);
+  --fill-3:rgba(118,118,128,.2);
+  --ink:#1d1d1f;
+  --ink-2:#3c3c43;
+  --muted:#6e6e73;
+  --faint:#8e8e93;
+  --line:rgba(60,60,67,.11);
+  --line-2:rgba(60,60,67,.2);
+  --accent:#0066cc;
+  --accent-hover:#0058b0;
   --accent-ink:#ffffff;
-  --sel:#e5eef8;
-  --ok:#17663c;
-  --warn:#845300;
-  --crit:#9c1d16;
-  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+  --accent-soft:rgba(0,102,204,.1);
+  --ok:#1d8a3a;
+  --warn:#c25400;
+  --crit:#d70015;
+  --shadow:0 1px 2px rgba(0,0,0,.04), 0 1px 1px rgba(0,0,0,.02);
+  --shadow-seg:0 1px 3px rgba(0,0,0,.12), 0 0 0 .5px rgba(0,0,0,.05);
+  --shadow-pop:0 12px 48px rgba(0,0,0,.18), 0 0 0 .5px rgba(0,0,0,.06);
+  --scrim:rgba(0,0,0,.3);
+  --chrome:rgba(246,246,248,.82);
+
+  --f-ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI Variable Text","Segoe UI",
+         Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"SF Mono","Cascadia Mono",Consolas,monospace;
+  --r:14px;
+  --pad:16px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --ground:#0c1014;
-    --panel:#141a21;
-    --panel-2:#1a212a;
-    --panel-3:#212a34;
-    --ink:#e2e8ee;
-    --ink-2:#b4c0cc;
-    --muted:#96a2ae;
-    --line:#222b35;
-    --line-2:#303b46;
-    --accent:#6fa8dc;
-    --accent-ink:#0c1014;
-    --sel:#1a2634;
-    --ok:#4fbf84;
-    --warn:#d79a3c;
-    --crit:#ec6b61;
+    --bg:#0f0f11;
+    --side:#161618;
+    --surface:#1c1c1e;
+    --raised:#636366;
+    --input:rgba(118,118,128,.18);
+    --fill:rgba(118,118,128,.24);
+    --fill-2:rgba(118,118,128,.13);
+    --fill-3:rgba(118,118,128,.34);
+    --ink:#f5f5f7;
+    --ink-2:#d1d1d6;
+    --muted:#98989f;
+    --faint:#7c7c83;
+    --line:rgba(255,255,255,.08);
+    --line-2:rgba(255,255,255,.15);
+    --accent:#0a84ff;
+    --accent-hover:#3395ff;
+    --accent-ink:#ffffff;
+    --accent-soft:rgba(10,132,255,.17);
+    --ok:#30d158;
+    --warn:#ff9f0a;
+    --crit:#ff453a;
+    --shadow:none;
+    --shadow-seg:0 1px 2px rgba(0,0,0,.3);
+    --shadow-pop:0 20px 60px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
+    --scrim:rgba(0,0,0,.55);
+    --chrome:rgba(15,15,17,.82);
+    color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --ground:#0c1014;
-  --panel:#141a21;
-  --panel-2:#1a212a;
-  --panel-3:#212a34;
-  --ink:#e2e8ee;
-  --ink-2:#b4c0cc;
-  --muted:#96a2ae;
-  --line:#222b35;
-  --line-2:#303b46;
-  --accent:#6fa8dc;
-  --accent-ink:#0c1014;
-  --sel:#1a2634;
-  --ok:#4fbf84;
-  --warn:#d79a3c;
-  --crit:#ec6b61;
+  --bg:#0f0f11;
+  --side:#161618;
+  --surface:#1c1c1e;
+  --raised:#636366;
+  --input:rgba(118,118,128,.18);
+  --fill:rgba(118,118,128,.24);
+  --fill-2:rgba(118,118,128,.13);
+  --fill-3:rgba(118,118,128,.34);
+  --ink:#f5f5f7;
+  --ink-2:#d1d1d6;
+  --muted:#98989f;
+  --faint:#7c7c83;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.15);
+  --accent:#0a84ff;
+  --accent-hover:#3395ff;
+  --accent-ink:#ffffff;
+  --accent-soft:rgba(10,132,255,.17);
+  --ok:#30d158;
+  --warn:#ff9f0a;
+  --crit:#ff453a;
+  --shadow:none;
+  --shadow-seg:0 1px 2px rgba(0,0,0,.3);
+  --shadow-pop:0 20px 60px rgba(0,0,0,.6), 0 0 0 .5px rgba(255,255,255,.1);
+  --scrim:rgba(0,0,0,.55);
+  --chrome:rgba(15,15,17,.82);
+  color-scheme:dark;
 }
+:root[data-theme="light"]{color-scheme:light}
+
+/* yazı seçimi */
+:root[data-font="inter"]{--f-ui:"Inter",system-ui,"Segoe UI",sans-serif}
+:root[data-font="plex"]{--f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif}
 
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 html{
   -webkit-text-size-adjust:100%;
   touch-action:pan-x pan-y;      /* iki barmaqla yaxınlaşdırma və cüt toxunuş söndürülür */
-  overscroll-behavior:none;      /* kənarda rezin sıçrayış olmasın */
+  overscroll-behavior:none;
 }
 body{
-  margin:0; background:var(--ground); color:var(--ink);
-  font-family:var(--f-ui); font-size:14px; line-height:1.55;
-  -webkit-font-smoothing:antialiased;
-  overscroll-behavior:none;
-  -webkit-tap-highlight-color:transparent;
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--f-ui); font-size:15px; line-height:1.45; letter-spacing:-.006em;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  overscroll-behavior:none; -webkit-tap-highlight-color:transparent;
+  font-feature-settings:"cv11","ss01";
 }
-button,input,select{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--accent); outline-offset:1px}
-@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
-.mono{font-family:var(--f-mono); font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+b,strong{font-weight:600}
+.mono{font-variant-numeric:tabular-nums}
 
-/* ====================  pəncərə  ==================== */
-.win{height:100vh; height:100dvh; display:flex; flex-direction:column; overflow:hidden}
-.mid{flex:1; min-height:0; display:flex; min-width:0; overflow:hidden}
+/* ====================  çərçivə  ==================== */
+.win{height:100vh; height:100dvh; display:flex; overflow:hidden}
+.side{display:none}
 .content{flex:1; min-width:0; min-height:0; display:flex; flex-direction:column}
+.scroll{
+  flex:1; min-height:0; overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
+}
+.page{width:100%; max-width:1180px; margin:0 auto}
 
+.logo{width:26px; height:26px; flex:none; color:var(--accent); display:block}
+
+/* ---- yuxarı sətir ---- */
 .titlebar{
-  position:relative; z-index:30; min-height:42px; flex:none; flex-wrap:wrap;
-  display:flex; align-items:center; gap:9px; padding:0 10px;
-  background:var(--panel); border-bottom:1px solid var(--line-2);
+  position:relative; z-index:30; flex:none;
+  display:flex; align-items:center; gap:10px;
+  min-height:52px; padding:env(safe-area-inset-top) var(--pad) 0;
+  background:var(--chrome);
+  -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:.5px solid var(--line-2);
 }
-.mark{display:flex; gap:1.5px; align-items:flex-end; height:13px; flex:none}
-.mark i{display:block; width:3px; background:var(--accent)}
-.mark i:nth-child(1){height:6px}
-.mark i:nth-child(2){height:10px}
-.mark i:nth-child(3){height:13px; background:var(--warn)}
-.mark i:nth-child(4){height:8px}
-.appname{font-size:13.5px; font-weight:600; letter-spacing:-.005em; white-space:nowrap}
-.vdiv{width:1px; height:15px; background:var(--line-2); flex:none}
-.docname{
-  font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden;
-  text-overflow:ellipsis; min-width:0;
-}
-.tb-right{margin-left:auto; display:flex; align-items:center; gap:9px; flex:none}
+.docname{display:none}
+.tb-right{margin-left:auto; display:flex; align-items:center; gap:8px; flex:none}
 
 .sel{
-  appearance:none; background:var(--panel-2); border:1px solid var(--line-2);
-  border-radius:4px; padding:5px 22px 5px 9px; font-size:12.5px;
-  background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
-  background-position:calc(100% - 12px) 51%, calc(100% - 8px) 51%;
-  background-size:4px 4px, 4px 4px; background-repeat:no-repeat;
-  max-width:46vw; text-overflow:ellipsis;
+  appearance:none; -webkit-appearance:none; min-width:0;
+  background:transparent; border:0; border-radius:8px;
+  padding:6px 24px 6px 6px; margin-left:-6px;
+  font-size:16px; font-weight:600; letter-spacing:-.015em; color:var(--ink);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 6px center; background-size:12px;
+  max-width:52vw; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; cursor:pointer;
 }
-.led{display:flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); white-space:nowrap}
-.led::before{content:""; width:6px; height:6px; border-radius:50%; background:var(--muted); flex:none}
+.sel:hover{background-color:var(--fill-2)}
+.sel option{color:var(--ink); background:var(--surface)}
+
+.led{display:inline-flex; align-items:center; gap:6px; font-size:13px; color:var(--muted); white-space:nowrap}
+.led::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--faint); flex:none}
 .led[data-s="ok"]::before{background:var(--ok)}
 .led[data-s="local"]::before{background:var(--warn)}
-.led[data-s="busy"]::before{background:var(--accent)}
+.led[data-s="busy"]::before{background:var(--accent); animation:qj-pulse 1.2s ease-in-out infinite}
 
-/* ====================  yan panel / tablar  ==================== */
-.sidebar{display:none}
+/* ---- bildiriş zolağı ---- */
+.notice:empty{display:none}
+.notice{flex:none; padding:10px var(--pad) 0}
+.note{
+  display:flex; align-items:center; gap:10px; max-width:1180px; margin:0 auto;
+  padding:10px 10px 10px 14px; border-radius:12px;
+  background:var(--accent-soft); color:var(--ink); font-size:14px;
+}
+.note + .note{margin-top:8px}
+.note > span{flex:1; min-width:0}
+.note.warn{background:color-mix(in srgb, var(--warn) 14%, transparent)}
+
+/* ---- naviqasiya ---- */
 .navitem{
-  display:flex; align-items:center; gap:9px; width:100%; text-align:left;
-  background:none; border:0; border-radius:4px; padding:6px 9px; cursor:pointer;
-  color:var(--ink-2); font-size:13.5px;
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  background:none; border:0; border-radius:8px; padding:0 10px; height:34px;
+  color:var(--ink-2); font-size:14px; font-weight:450;
 }
-.navitem:hover{background:var(--panel-2)}
-.navitem[aria-current="true"]{background:var(--sel); color:var(--accent); font-weight:600}
-.navitem svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.navitem .cnt{margin-left:auto; font-family:var(--f-mono); font-size:11px; color:var(--muted)}
-.navitem[aria-current="true"] .cnt{color:var(--accent)}
-.navgroup{
-  font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--muted);
-  padding:13px 9px 5px; font-weight:600;
-}
+.navitem svg{width:18px; height:18px; flex:none; stroke:currentColor; stroke-width:1.75; fill:none; stroke-linecap:round; stroke-linejoin:round; color:var(--muted)}
+.navitem .cnt{margin-left:auto; font-size:12.5px; color:var(--faint); font-variant-numeric:tabular-nums}
+.navitem[aria-current="true"]{background:var(--fill); color:var(--ink); font-weight:600}
+.navitem[aria-current="true"] svg{color:var(--accent)}
+.navgroup{font-size:12px; font-weight:600; color:var(--faint); padding:16px 10px 6px; margin:0; letter-spacing:0}
 
-.bottom{flex:none; z-index:30; background:var(--panel); border-top:1px solid var(--line-2)}
-.tabbar{display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr); padding-bottom:env(safe-area-inset-bottom)}
+/* alt tab zolağı (telefon) */
+.tabbar{
+  flex:none; z-index:30; display:grid; grid-auto-flow:column; grid-auto-columns:minmax(0,1fr);
+  padding:6px 4px calc(4px + env(safe-area-inset-bottom));
+  background:var(--chrome);
+  -webkit-backdrop-filter:saturate(180%) blur(20px); backdrop-filter:saturate(180%) blur(20px);
+  border-top:.5px solid var(--line-2);
+}
 .tabbar .navitem{
-  flex-direction:column; gap:3px; border-radius:0; padding:6px 1px 7px;
-  font-size:11px; color:var(--muted); align-items:center; white-space:nowrap;
+  flex-direction:column; justify-content:center; gap:3px; height:auto; padding:3px 0 2px;
+  font-size:10.5px; font-weight:500; letter-spacing:0; color:var(--faint); border-radius:0; background:none;
 }
-.tabbar .navitem[aria-current="true"]{background:none; box-shadow:inset 0 2px 0 var(--accent)}
-.tabbar .navitem svg{width:18px;height:18px}
+.tabbar .navitem svg{width:25px; height:25px; stroke-width:1.6; color:inherit}
 .tabbar .navitem .cnt{display:none}
-.tabbar .navitem > span{min-width:0; max-width:100%; overflow:hidden; text-overflow:ellipsis}
+.tabbar .navitem > span{max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.tabbar .navitem[aria-current="true"]{color:var(--accent); background:none; font-weight:600}
+.tabbar .navitem[aria-current="true"] svg{color:inherit}
+.navitem svg .dot{fill:currentColor; stroke:none}
 
-/* ====================  alət sətri  ==================== */
+/* ====================  səhifə başlığı  ==================== */
 .toolbar{
-  flex:none; display:flex; align-items:center; gap:8px; flex-wrap:wrap;
-  padding:9px 16px; background:var(--panel-2); border-bottom:1px solid var(--line);
-  min-height:44px;
+  display:flex; flex-wrap:wrap; align-items:center; gap:10px 8px;
+  padding:22px var(--pad) 18px;
 }
-.vtitle{font-size:13.5px; font-weight:600; letter-spacing:-.005em; margin-right:4px}
-.vhint{font-size:12.5px; color:var(--muted); line-height:1.4}
+.vtitle{
+  flex:1 0 100%; margin:0; font-size:30px; font-weight:700;
+  letter-spacing:-.028em; line-height:1.12;
+}
+.vhint{flex:1 0 100%; margin-top:-6px; font-size:14px; color:var(--muted); line-height:1.45}
+.vhint.tb-sp{flex:0 0 auto; margin:0 0 0 auto; font-variant-numeric:tabular-nums}
 .tb-sp{margin-left:auto}
+.toolbar > .vhint:not(.tb-sp){order:-1}
+.toolbar > .vtitle{order:-2}
 
+/* ====================  düymələr  ==================== */
 .btn{
-  background:var(--panel); border:1px solid var(--line-2); border-radius:4px;
-  padding:5px 12px; font-size:13px; cursor:pointer; white-space:nowrap;
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  height:32px; padding:0 13px; border:0; border-radius:8px;
+  background:var(--fill); color:var(--ink);
+  font-size:14px; font-weight:500; white-space:nowrap; text-decoration:none;
 }
-.btn[disabled]{opacity:.45; cursor:default}
-.btn[disabled]:hover{border-color:var(--line-2); color:inherit}
-.btn:hover{border-color:var(--accent); color:var(--accent)}
-.btn.primary{background:var(--accent); border-color:var(--accent); color:var(--accent-ink)}
-.btn.primary:hover{filter:brightness(1.1); color:var(--accent-ink)}
-.btn.danger:hover{border-color:var(--crit); color:var(--crit)}
-.seg{display:inline-flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden}
-.seg button{background:var(--panel); border:0; border-right:1px solid var(--line-2); padding:5px 12px; font-size:13px; color:var(--muted); cursor:pointer}
-.seg button:last-child{border-right:0}
-.seg button[aria-pressed="true"]{background:var(--sel); color:var(--accent); font-weight:600}
+.btn:hover{background:var(--fill-3)}
+.btn.primary{background:var(--accent); color:var(--accent-ink)}
+.btn.primary:hover{background:var(--accent-hover)}
+.btn.danger{color:var(--crit)}
+.btn.danger:hover{background:color-mix(in srgb, var(--crit) 14%, transparent)}
+.btn[disabled]{opacity:.4; cursor:default}
+.btn[disabled]:hover{background:var(--fill)}
+.btn.sm{height:28px; padding:0 11px; font-size:13px}
+a.btn{text-decoration:none}
+
+/* yadda saxla: saxlanıbsa sakit mətn kimi görünür */
+.titlebar .btn.primary[disabled]{
+  background:transparent; color:var(--faint); opacity:1; padding:0 4px; font-weight:500;
+}
+.titlebar .btn.primary[disabled]::before{
+  content:""; width:14px; height:14px; flex:none;
+  background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-7' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+.titlebar .btn.primary:not([disabled]){padding:0 16px; border-radius:999px; font-weight:600}
+.titlebar .btn:not(.primary){border-radius:999px}
+
+.row{display:flex; flex-wrap:wrap; gap:8px}
+
+/* seqment düyməsi */
+.seg{display:inline-flex; padding:2px; gap:2px; background:var(--fill); border-radius:9px; max-width:100%}
+.seg button{
+  border:0; background:none; height:28px; padding:0 14px; border-radius:7px;
+  font-size:13.5px; font-weight:500; color:var(--ink); white-space:nowrap;
+}
+.seg button:hover{background:var(--fill-2)}
+.seg button[aria-pressed="true"]{background:var(--raised); box-shadow:var(--shadow-seg); font-weight:600}
+
+/* axtarış */
 .find{
-  background:var(--panel); border:1px solid var(--line-2); border-radius:4px;
-  padding:5px 10px; font-size:13px; width:min(280px,52vw);
+  height:36px; width:min(320px,100%); padding:0 12px 0 34px;
+  background:var(--fill) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='7' cy='7' r='4.6' fill='none' stroke='%238e8e93' stroke-width='1.6'/%3E%3Cpath d='M10.5 10.5l3 3' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") 11px center/15px no-repeat;
+  border:1px solid transparent; border-radius:10px; font-size:15px;
 }
-.find:focus{border-color:var(--accent); outline:none}
+.find:focus{outline:none; background-color:var(--surface); border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-soft)}
+.find::-webkit-search-cancel-button{opacity:.5}
 
 /* ====================  məzmun  ==================== */
-main{
-  flex:1; min-width:0; min-height:0; padding:14px 14px 18px;
-  overflow-y:auto; overflow-x:hidden; -webkit-overflow-scrolling:touch; overscroll-behavior:contain;
-}
-.panel{background:var(--panel); border:1px solid var(--line); border-radius:5px; overflow:hidden}
-main > * + *{margin-top:14px}
-.two > * + *{margin-top:14px}
-.two > div > .panel + .panel{margin-top:14px}
-.ph{
-  display:flex; align-items:center; gap:8px; padding:7px 11px;
-  background:var(--panel-2); border-bottom:1px solid var(--line);
-  font-size:11.5px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
-}
-.ph .ph-r{margin-left:auto; font-weight:400; text-transform:none; letter-spacing:0; font-size:12px}
-.pb{padding:11px}
+#view{padding:0 var(--pad) 32px}
+#view > * + *{margin-top:16px}
+.two > * + *{margin-top:16px}
+.two > div > .panel + .panel{margin-top:16px}
 
-/* KPI zolağı — hairline bölünmüş, kart yox */
-.kpi{display:flex; flex-wrap:wrap}
-.kpi > div{
-  flex:1 1 90px; padding:9px 11px 10px; border-right:1px solid var(--line);
-  border-bottom:1px solid var(--line);
+.panel{
+  background:var(--surface); border-radius:var(--r);
+  box-shadow:var(--shadow), 0 0 0 .5px var(--line); overflow:hidden;
 }
-.kpi > div:last-child{border-right:0}
-.kpi b{display:block; font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:20px; font-weight:500; letter-spacing:-.02em; line-height:1.15}
-.kpi span{display:block; font-size:11.5px; color:var(--muted); margin-top:2px}
+.ph{
+  display:flex; align-items:center; gap:8px; min-height:48px;
+  padding:14px var(--pad) 8px;
+  font-size:16px; font-weight:600; letter-spacing:-.012em; color:var(--ink);
+}
+.ph .ph-r{margin-left:auto; font-size:13.5px; font-weight:400; color:var(--muted); letter-spacing:0; text-align:right}
+.pb{padding:4px var(--pad) var(--pad)}
+
+/* göstəricilər */
+.kpi{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); padding:2px 0 6px}
+.kpi > div{padding:6px var(--pad) 12px; min-width:0}
+.kpi b{
+  display:block; font-size:28px; font-weight:650; letter-spacing:-.03em; line-height:1.1;
+  font-variant-numeric:tabular-nums; color:var(--ink);
+}
+.kpi span{display:block; font-size:13px; color:var(--muted); margin-top:3px}
 .kpi b.c-ok{color:var(--ok)} .kpi b.c-warn{color:var(--warn)} .kpi b.c-crit{color:var(--crit)}
 
 /* ====================  cədvəllər  ==================== */
-.tw{overflow-x:auto}
-table.t{width:100%; border-collapse:collapse; font-size:13.5px}
+.tw{overflow-x:auto; -webkit-overflow-scrolling:touch}
+table.t{width:100%; border-collapse:collapse; font-size:14.5px; font-variant-numeric:tabular-nums}
 table.t th{
-  text-align:left; padding:7px 10px; font-size:11px; font-weight:600;
-  text-transform:uppercase; letter-spacing:.05em; color:var(--muted);
-  background:var(--panel-2); border-bottom:1px solid var(--line-2); white-space:nowrap;
+  text-align:left; padding:8px 10px; font-size:12.5px; font-weight:500; color:var(--muted);
+  border-bottom:.5px solid var(--line-2); white-space:nowrap;
 }
-table.t td{padding:0 10px; height:39px; border-bottom:1px solid var(--line); vertical-align:middle}
+table.t td{padding:10px; height:50px; border-bottom:.5px solid var(--line); vertical-align:middle}
+table.t th:first-child, table.t td:first-child{padding-left:var(--pad)}
+table.t th:last-child, table.t td:last-child{padding-right:var(--pad)}
 table.t tbody tr:last-child td{border-bottom:0}
-table.t tbody tr:hover{background:var(--panel-2)}
-table.t tbody tr[aria-selected="true"]{background:var(--sel)}
-table.t .r{text-align:right; font-family:var(--f-mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+table.t tbody tr[aria-selected="true"]{background:var(--accent-soft)}
+table.t .r{text-align:right; white-space:nowrap}
 table.t .c{text-align:center}
-table.t .nm{font-weight:500; min-width:160px}
-table.t .nm small{display:block; font-weight:400; font-size:12px; color:var(--muted); margin-top:-2px}
-table.t .ix{width:32px; color:var(--muted); font-family:var(--f-mono); font-size:12px; text-align:right}
+table.t .nm{font-weight:500; min-width:170px; line-height:1.3}
+table.t .nm small{display:block; font-weight:400; font-size:12.5px; color:var(--muted); margin-top:2px}
+table.t .ix{width:30px; color:var(--faint); font-size:13px; text-align:right}
 table.t tr.clk{cursor:pointer}
-table.t td.stripe{border-left:2px solid transparent; padding-left:8px}
-table.t tr.lv-warn td.stripe{border-left-color:var(--warn)}
-table.t tr.lv-crit td.stripe{border-left-color:var(--crit)}
-.code{font-family:var(--f-mono); font-size:12px; color:var(--muted); white-space:nowrap}
-
-/* vəziyyət nişanı — doldurulmuş "pill" yox, çərçivəli etiket */
-.tag{
-  display:inline-block; font-family:var(--f-mono); font-size:10.5px; font-weight:500;
-  letter-spacing:.04em; text-transform:uppercase; padding:2px 6px; border-radius:3px;
-  border:1px solid currentColor; white-space:nowrap;
+table.t td.stripe::before{
+  content:""; display:inline-block; width:6px; height:6px; border-radius:50%;
+  margin-right:7px; vertical-align:2px; background:transparent;
 }
+table.t tr.lv-warn td.stripe::before{background:var(--warn)}
+table.t tr.lv-crit td.stripe::before{background:var(--crit)}
+.code{font-size:13px; color:var(--muted); white-space:nowrap}
+
+@media (hover:hover){
+  table.t tbody tr:hover{background:var(--fill-2)}
+  table.t tbody tr[aria-selected="true"]:hover{background:var(--accent-soft)}
+}
+
+/* vəziyyət nişanı */
+.tag{
+  display:inline-flex; align-items:center; gap:6px; height:24px; padding:0 10px 0 9px;
+  border-radius:999px; font-size:12.5px; font-weight:550; white-space:nowrap; letter-spacing:0;
+  background:color-mix(in srgb, currentColor 12%, transparent);
+}
+.tag::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor; flex:none}
 .tag.ok{color:var(--ok)} .tag.warn{color:var(--warn)} .tag.crit{color:var(--crit)}
 .tag.neu{color:var(--muted)} .tag.acc{color:var(--accent)}
 
-/* sətir içi nazik qaib zolağı */
-.bar{display:flex; gap:1px; height:7px; min-width:68px; align-items:stretch}
-.bar i{flex:1 0 2px; background:var(--line-2); border-radius:1px}
-.bar i.on{background:var(--accent)}
-.bar.lv-warn i.on{background:var(--warn)}
-.bar.lv-crit i.on{background:var(--crit)}
-.bar i.gap{margin-right:3px}
+/* qaib göstəricisi */
+.meter{display:block; position:relative; width:100%; min-width:90px; height:6px; border-radius:99px; background:var(--fill); overflow:hidden}
+.meter i{display:block; height:100%; border-radius:inherit; background:var(--accent); transition:width .3s cubic-bezier(.2,.8,.2,1)}
+.meter.lv-warn i{background:var(--warn)}
+.meter.lv-crit i{background:var(--crit)}
 
-/* ədəd artırıcı — real proqramlardakı spinner */
-.spin{display:inline-flex; border:1px solid var(--line-2); border-radius:4px; overflow:hidden; background:var(--panel)}
+/* ədəd artırıcı */
+.spin{display:inline-flex; align-items:center; padding:2px; border-radius:10px; background:var(--fill)}
 .spin button{
-  width:24px; height:24px; border:0; background:none; cursor:pointer;
-  font-family:var(--f-mono); font-size:13px; color:var(--ink-2); padding:0;
+  width:32px; height:28px; border:0; padding:0; background:none; border-radius:8px;
+  font-size:18px; line-height:1; color:var(--ink);
 }
-.spin button:hover{background:var(--sel); color:var(--accent)}
-.spin button:first-child{border-right:1px solid var(--line)}
-.spin button:last-child{border-left:1px solid var(--line)}
-.spin .v{
-  min-width:30px; text-align:center; font-family:var(--f-mono); font-variant-numeric:tabular-nums;
-  font-size:12.5px; display:grid; place-items:center; background:var(--panel-2);
-}
+.spin button:hover{background:var(--raised); box-shadow:var(--shadow-seg)}
+.spin .v{min-width:26px; text-align:center; font-weight:600; font-size:14.5px; font-variant-numeric:tabular-nums}
 
-/* ====================  dərs cədvəli: gün sütunları  ==================== */
-.board{display:grid; gap:11px; grid-template-columns:1fr; padding:12px}
-.col{border:1px solid var(--line); border-radius:5px; overflow:hidden; display:flex; flex-direction:column}
+.linkbtn{
+  background:none; border:0; padding:0; font:inherit; color:inherit; text-align:left;
+}
+.linkbtn:hover{color:var(--accent)}
+
+/* ====================  dərs cədvəli  ==================== */
+.board{display:grid; gap:20px; grid-template-columns:1fr; padding:6px var(--pad) var(--pad)}
+.col{display:flex; flex-direction:column; gap:8px; min-width:0}
 .col-h{
-  display:flex; align-items:center; gap:7px; padding:7px 10px;
-  background:var(--panel-2); border-bottom:1px solid var(--line);
-  font-size:12.5px; font-weight:600;
+  display:flex; align-items:center; gap:8px; padding:0 2px;
+  font-size:14px; font-weight:600; color:var(--ink);
 }
 .col-h.today{color:var(--accent)}
-.col-h .n{margin-left:auto; font-family:var(--f-mono); font-size:11.5px; color:var(--muted); font-weight:400}
-.col-b{display:flex; flex-direction:column; gap:1px; background:var(--line); flex:1}
+.col-h .tag{height:20px; font-size:11.5px; padding:0 8px 0 7px}
+.col-h .n{margin-left:auto; font-size:13px; color:var(--faint); font-weight:400; font-variant-numeric:tabular-nums}
+.col-b{display:flex; flex-direction:column; gap:6px}
 .ls{
-  display:block; width:100%; text-align:left; background:var(--panel); border:0;
-  border-left:2px solid transparent; padding:9px 10px; cursor:pointer; color:inherit;
+  display:block; width:100%; text-align:left; border:0; color:inherit;
+  background:var(--fill-2); border-radius:11px; padding:10px 12px 11px;
 }
-.ls:hover{background:var(--sel)}
-.ls .tm{
-  display:block; font-family:var(--f-mono); font-size:12px; font-weight:500;
-  color:var(--accent); letter-spacing:-.01em;
-}
-.ls b{display:block; font-size:13px; font-weight:500; margin-top:3px; line-height:1.35}
-.ls .mt{display:block; font-family:var(--f-mono); font-size:11px; color:var(--muted); margin-top:4px}
-.ls.lv-warn{border-left-color:var(--warn)}
-.ls.lv-crit{border-left-color:var(--crit)}
-.col-empty{padding:16px 10px; background:var(--panel); color:var(--muted); font-size:12.5px; text-align:center}
-.col-f{padding:7px; background:var(--panel); border-top:1px solid var(--line)}
+.ls:hover{background:var(--fill)}
+.col-h.today ~ .col-b .ls{background:var(--accent-soft)}
+.ls .tm{display:flex; align-items:center; gap:6px; font-size:12.5px; font-weight:500; color:var(--muted); font-variant-numeric:tabular-nums}
+.ls.lv-warn .tm::after, .ls.lv-crit .tm::after{content:""; width:6px; height:6px; border-radius:50%; margin-left:auto}
+.ls.lv-warn .tm::after{background:var(--warn)}
+.ls.lv-crit .tm::after{background:var(--crit)}
+.ls b{display:block; font-size:14.5px; font-weight:550; margin-top:3px; line-height:1.3}
+.ls .mt{display:block; font-size:12.5px; color:var(--muted); margin-top:4px}
+.col-empty{margin:0; padding:12px; border-radius:11px; color:var(--faint); font-size:13px; text-align:center; background:var(--fill-2)}
+.col-f{display:block}
 .addbtn{
-  width:100%; border:1px dashed var(--line-2); background:none; border-radius:4px;
-  padding:7px; font-size:12.5px; color:var(--muted); cursor:pointer;
+  width:100%; height:36px; border:1px dashed var(--line-2); background:none; border-radius:11px;
+  font-size:13.5px; font-weight:500; color:var(--muted);
 }
-.addbtn:hover{border-color:var(--accent); color:var(--accent); border-style:solid}
+.addbtn:hover{color:var(--accent); border-color:var(--accent); border-style:solid; background:var(--accent-soft)}
 
 /* ====================  sahələr  ==================== */
-.form{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:9px}
-.fld label{display:block; font-size:11px; letter-spacing:.02em; color:var(--muted); margin-bottom:4px}
+.form{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:12px}
+.fld label{display:block; font-size:13px; font-weight:500; color:var(--muted); margin-bottom:6px}
 .fld input, .fld select, .semrow input{
-  width:100%; background:var(--panel); color:var(--ink);
-  border:1px solid var(--line-2); border-radius:4px;
-  padding:6px 9px; font-family:var(--f-mono); font-variant-numeric:tabular-nums; font-size:13.5px;
+  width:100%; height:42px; padding:0 12px;
+  background:var(--input); color:var(--ink);
+  border:1px solid transparent; border-radius:10px;
+  font-size:15px; font-variant-numeric:tabular-nums;
 }
-.fld.txt input{font-family:var(--f-ui)}
-.fld input:focus, .fld select:focus, .semrow input:focus{border-color:var(--accent); outline:none}
-.semrow input::placeholder{color:var(--muted); opacity:1}
-.semrow{display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:5px}
-.semrow input{text-align:center; padding:7px 2px; font-size:14px; font-weight:500}
+.fld select{
+  appearance:none; -webkit-appearance:none; padding-right:32px;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat; background-position:right 12px center; background-size:12px;
+}
+.fld input::placeholder, .semrow input::placeholder, .find::placeholder, .ta::placeholder{color:var(--faint); opacity:1}
+.fld input:focus, .fld select:focus, .semrow input:focus, .ta:focus{
+  outline:none; background-color:var(--surface); border-color:var(--accent);
+  box-shadow:0 0 0 3px var(--accent-soft);
+}
+.semrow{display:grid; grid-template-columns:repeat(8,minmax(0,1fr)); gap:8px}
+.semrow input{text-align:center; padding:0 2px; height:46px; font-size:16px; font-weight:600}
 @media (max-width:560px){ .semrow{grid-template-columns:repeat(4,minmax(0,1fr))} }
+.ta{
+  display:block; width:100%; min-height:170px; resize:vertical;
+  padding:10px 12px; border:1px solid transparent; border-radius:10px;
+  background:var(--input); color:var(--ink);
+  font-family:var(--f-mono); font-size:12px; line-height:1.5;
+}
 
 dl.kv{margin:0}
-dl.kv > div{display:flex; justify-content:space-between; gap:14px; padding:7px 11px; border-bottom:1px solid var(--line); align-items:baseline}
-dl.kv > div:last-child{border-bottom:0}
-dl.kv dt{font-size:12.5px; color:var(--muted); flex:none}
-dl.kv dd{margin:0; font-size:13.5px; text-align:right; word-break:break-word}
-dl.kv dd button{background:none; border:0; padding:0; font:inherit; color:var(--ink); cursor:pointer; text-align:right; border-bottom:1px dashed var(--line-2)}
-dl.kv dd button:hover{color:var(--accent); border-bottom-color:var(--accent)}
+dl.kv > div{
+  display:flex; justify-content:space-between; align-items:center; gap:16px;
+  min-height:48px; padding:8px var(--pad); border-top:.5px solid var(--line);
+}
+dl.kv dt{font-size:14.5px; color:var(--ink); flex:none; max-width:48%}
+dl.kv dd{margin:0; min-width:0; text-align:right; word-break:break-word}
+dl.kv dd button{
+  display:inline-flex; align-items:center; gap:6px; background:none; border:0; padding:0;
+  font-size:14.5px; color:var(--muted); text-align:right;
+}
+dl.kv dd button::after{
+  content:""; width:7px; height:7px; flex:none; margin-left:2px;
+  border-right:1.6px solid var(--faint); border-top:1.6px solid var(--faint); transform:rotate(45deg);
+}
+dl.kv dd button:hover{color:var(--accent)}
 
-.flabel{font-size:11.5px; color:var(--muted); margin:0 0 8px}
-ol.steps{margin:0; padding:12px 14px 14px 34px; display:flex; flex-direction:column; gap:8px}
-ol.steps li{font-size:13px; line-height:1.55}
-ol.steps li::marker{color:var(--accent); font-family:var(--f-mono); font-size:12px}
+.flabel{font-size:14px; font-weight:600; color:var(--ink); margin:0 0 10px}
+ol.steps{list-style:none; counter-reset:st; margin:0; padding:4px var(--pad) var(--pad); display:flex; flex-direction:column; gap:12px}
+ol.steps li{counter-increment:st; position:relative; padding-left:36px; font-size:14.5px; line-height:1.5; min-height:24px}
+ol.steps li::before{
+  content:counter(st); position:absolute; left:0; top:-1px; width:24px; height:24px; border-radius:50%;
+  display:grid; place-items:center; background:var(--accent-soft); color:var(--accent);
+  font-size:12.5px; font-weight:650;
+}
 .flag{color:var(--warn); font-weight:500}
-.dlg-f .del{margin-right:auto}
-.hintbox{font-size:12.5px; line-height:1.6; color:var(--muted); padding:9px 11px; border-top:1px solid var(--line); background:var(--panel-2)}
-.blank{padding:24px 12px; text-align:center; color:var(--muted); font-size:13px}
+.hintbox{margin:0; font-size:13px; line-height:1.5; color:var(--muted); padding:12px var(--pad) 14px; border-top:.5px solid var(--line)}
+.blank{margin:0; padding:36px var(--pad); text-align:center; color:var(--muted); font-size:14.5px}
+.dlg-msg{font-size:14.5px; color:var(--ink-2); margin:0; line-height:1.5}
 
-/* ====================  status sətri  ==================== */
-.statusbar{
-  display:flex; align-items:center; gap:10px; min-height:26px; padding:3px 11px;
-  background:var(--panel-2); border-top:1px solid var(--line);
-  font-family:var(--f-mono); font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden;
+.more{margin-top:16px; border-top:.5px solid var(--line); padding-top:12px}
+.more summary{
+  cursor:pointer; font-size:14px; font-weight:500; color:var(--accent);
+  list-style:none; display:inline-flex; align-items:center; gap:6px;
 }
-.statusbar .sb-r{margin-left:auto; display:flex; gap:10px; align-items:center; min-width:0; overflow:hidden}
-.statusbar s{text-decoration:none; opacity:.4}
-.sb-keys{display:none}
+.more summary::-webkit-details-marker{display:none}
+.more summary::after{
+  content:""; width:6px; height:6px; border-right:1.6px solid currentColor; border-bottom:1.6px solid currentColor;
+  transform:rotate(45deg) translateY(-2px); transition:transform .2s ease;
+}
+.more[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.splitline{height:.5px; background:var(--line-2); margin:18px 0 16px}
+.stack{max-width:720px}
+.stack > .panel + .panel{margin-top:16px}
 
-/* ====================  dialoq  ==================== */
-.modal{position:fixed; inset:0; z-index:60; display:grid; align-items:end; justify-items:stretch}
+/* ====================  dialoq / vərəq  ==================== */
+.modal{position:fixed; inset:0; z-index:60; display:flex; align-items:flex-end; justify-content:center}
 .modal[hidden]{display:none}
-.modal::before{content:""; position:absolute; inset:0; background:rgba(8,12,18,.45)}
+.modal::before{content:""; position:absolute; inset:0; background:var(--scrim)}
 .dlg{
-  position:relative; background:var(--panel); border:1px solid var(--line-2);
-  border-radius:8px 8px 0 0; max-height:88vh; display:flex; flex-direction:column;
+  position:relative; width:100%; max-height:92vh; max-height:92dvh;
+  display:flex; flex-direction:column;
+  background:var(--surface); border-radius:16px 16px 0 0; box-shadow:var(--shadow-pop);
 }
-.dlg-t{
-  display:flex; align-items:center; gap:8px; padding:9px 12px; flex:none;
-  background:var(--panel-2); border-bottom:1px solid var(--line); border-radius:7px 7px 0 0;
+.dlg::before{
+  content:""; position:absolute; top:7px; left:50%; width:38px; height:5px; margin-left:-19px;
+  border-radius:3px; background:var(--fill-3);
 }
-.dlg-t strong{font-size:13.5px; font-weight:600}
-.dlg-t em{font-style:normal; font-size:11.5px; color:var(--muted); margin-left:auto; font-family:var(--f-mono)}
-.dlg-b{padding:13px 12px; overflow:auto}
+.dlg-t{display:flex; flex-direction:column; gap:2px; padding:24px 20px 6px; flex:none}
+.dlg-t strong{font-size:19px; font-weight:700; letter-spacing:-.02em; line-height:1.25}
+.dlg-t em{font-style:normal; font-size:14px; color:var(--muted)}
+.dlg-b{padding:14px 20px 8px; overflow:auto}
 .dlg-f{
-  display:flex; justify-content:flex-end; gap:7px; padding:10px 12px; flex:none;
-  border-top:1px solid var(--line); background:var(--panel-2);
-  padding-bottom:calc(10px + env(safe-area-inset-bottom));
+  display:flex; gap:8px; padding:14px 20px calc(14px + env(safe-area-inset-bottom)); flex:none;
 }
-.dlg-msg{font-size:13px; color:var(--ink-2); margin:0; line-height:1.6}
+.dlg-f .btn{flex:1 1 0; height:46px; border-radius:12px; font-size:15.5px}
 
-/* ====================  geniş ekran  ==================== */
-@media (min-width:920px){
-  .sidebar{
-    display:block; width:206px; flex:none; background:var(--panel);
-    border-right:1px solid var(--line); padding:6px 7px 14px;
-    overflow-y:auto; overscroll-behavior:contain;
-  }
-  .tabbar{display:none}
-  .bottom{border-top:1px solid var(--line-2)}
-  main{padding:16px 18px 24px}
-  .sb-keys{display:inline}
-  .docname{font-size:12px}
-  .modal{place-items:center}
-  .dlg{width:min(520px,92vw); border-radius:8px}
-  .dlg-t{border-radius:7px 7px 0 0}
-  .dlg-f{padding-bottom:10px}
-  .board{grid-template-columns:repeat(5,minmax(0,1fr))}
-  .two{display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start}
-  .two > * + *{margin-top:0}
+.dlg .row .btn{height:40px}
+
+.menu-list{padding:8px 12px 4px}
+.menu-list .navitem{height:52px; font-size:16px; padding:0 12px; border-radius:12px; gap:14px}
+.menu-list .navitem svg{width:22px; height:22px; color:var(--accent)}
+.menu-list .navitem .cnt{font-size:14px}
+
+/* ====================  açılış ekranı  ==================== */
+.splash{
+  position:fixed; inset:0; z-index:200; display:flex; align-items:center; justify-content:center;
+  background:var(--bg); transition:opacity .45s ease .08s, visibility .55s;
+}
+.splash.gone{opacity:0; visibility:hidden; pointer-events:none}
+.splash-in{
+  display:flex; flex-direction:column; align-items:center;
+  transition:transform .55s cubic-bezier(.4,0,.2,1), opacity .35s ease;
+}
+.splash.gone .splash-in{transform:scale(1.12); opacity:0}
+.splash-logo{
+  width:88px; height:88px; overflow:visible;
+  filter:drop-shadow(0 14px 30px color-mix(in srgb, var(--accent) 38%, transparent));
+  animation:sp-bump .5s .95s cubic-bezier(.3,.7,.3,1) both;
+}
+.sp-bg{fill:var(--accent); transform-box:fill-box; transform-origin:center; animation:sp-bg .65s cubic-bezier(.2,.9,.25,1.12) both}
+.sp-c{
+  fill:#fff; transform-box:fill-box; transform-origin:center; opacity:0;
+  animation:sp-cell .42s cubic-bezier(.2,.9,.3,1.35) both; animation-delay:calc(.28s + var(--i) * .06s);
+}
+.sp-c.dim{--o:.38}
+.splash-name{margin-top:22px; font-size:22px; font-weight:700; letter-spacing:-.025em; color:var(--ink); animation:sp-up .55s .62s cubic-bezier(.2,.8,.2,1) both}
+.splash-sub{margin-top:4px; font-size:14px; color:var(--muted); animation:sp-up .55s .74s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sp-bg{from{transform:scale(.35) rotate(-14deg); opacity:0} to{transform:none; opacity:1}}
+@keyframes sp-cell{from{transform:scale(0); opacity:0} to{transform:scale(1); opacity:var(--o,1)}}
+@keyframes sp-up{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
+@keyframes sp-bump{0%,100%{transform:none} 45%{transform:scale(1.06)}}
+.win.reveal{animation:win-in .6s cubic-bezier(.2,.8,.2,1) both}
+@keyframes win-in{from{opacity:0; transform:scale(.985)} to{opacity:1; transform:none}}
+
+/* ====================  kiçik bildiriş  ==================== */
+.toast{
+  position:fixed; left:0; right:0; margin:0 auto; width:fit-content; z-index:80;
+  bottom:calc(86px + env(safe-area-inset-bottom));
+  display:flex; align-items:center; gap:10px; max-width:calc(100vw - 32px);
+  padding:6px 6px 6px 16px; min-height:44px; border-radius:14px;
+  background:#1d1d1f; color:#fff; font-size:14px; font-weight:500;
+  box-shadow:0 12px 32px rgba(0,0,0,.24);
+  opacity:0; transform:translateY(14px) scale(.98); pointer-events:none;
+  transition:opacity .2s ease, transform .3s cubic-bezier(.2,.8,.2,1);
+}
+.toast.plain{padding-right:16px}
+.toast.show{opacity:1; transform:none; pointer-events:auto}
+.toast span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.toast button{flex:none; border:0; background:rgba(255,255,255,.1); color:#6cb6ff; font-weight:600; font-size:14px; height:32px; padding:0 12px; border-radius:9px}
+.toast button:hover{background:rgba(255,255,255,.18)}
+:root[data-theme="dark"] .toast{background:#3a3a3c}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .toast{background:#3a3a3c} }
+
+/* ====================  icmal  ==================== */
+.hero{padding:18px var(--pad); background:color-mix(in srgb, var(--accent) 7%, var(--surface))}
+.hero-top{display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:var(--accent)}
+.hero-k{display:inline-flex; align-items:center; gap:7px}
+.hero.live .hero-k::before{
+  content:""; width:8px; height:8px; border-radius:50%; background:var(--ok);
+  box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 50%, transparent); animation:live 1.8s ease-out infinite;
+}
+.hero.live .hero-top{color:var(--ok)}
+.hero-when{margin-left:auto; color:var(--muted); font-weight:500}
+.hero-time{margin-top:12px; font-size:14px; color:var(--muted); font-variant-numeric:tabular-nums}
+.hero-subj{margin-top:2px; font-size:22px; font-weight:700; letter-spacing:-.022em; line-height:1.22}
+.hero-meta{margin-top:4px; font-size:14px; color:var(--muted)}
+.hero .meter{margin-top:14px; background:color-mix(in srgb, var(--ok) 16%, transparent)}
+.hero .meter i{background:var(--ok)}
+.hero-foot{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-top:16px}
+.hero-q{font-size:14px; color:var(--muted)}
+.hero-q b{color:var(--ink); font-variant-numeric:tabular-nums}
+.hero-foot .btn{margin-left:auto; background:var(--surface); box-shadow:0 0 0 .5px var(--line-2)}
+.hero-foot .btn:hover{background:var(--fill)}
+@keyframes live{0%{box-shadow:0 0 0 0 color-mix(in srgb, var(--ok) 55%, transparent)} 100%{box-shadow:0 0 0 9px transparent}}
+
+.qlist{padding-bottom:4px}
+.qrow{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:7px 12px; align-items:center;
+  width:100%; text-align:left; background:none; border:0; border-top:.5px solid var(--line);
+  padding:11px var(--pad) 12px; color:inherit;
+}
+.qrow:hover{background:var(--fill-2)}
+.qn{font-size:14.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.qv{font-size:13.5px; color:var(--muted); font-variant-numeric:tabular-nums}
+.qrow .meter{grid-column:1/-1}
+
+/* yan panelin altı: istifadəçi */
+.side-foot{margin-top:auto; padding-top:12px}
+.me{display:flex; align-items:center; gap:10px; width:100%; padding:8px 10px; border:0; background:none; border-radius:10px; text-align:left; color:inherit}
+.me:hover, .me[aria-current="true"]{background:var(--fill)}
+.av{
+  width:32px; height:32px; border-radius:50%; flex:none; display:grid; place-items:center;
+  background:linear-gradient(140deg, #5ac8fa, var(--accent)); color:#fff; font-size:12.5px; font-weight:700; letter-spacing:.02em;
+}
+.av svg{width:18px; height:18px; fill:none; stroke:#fff; stroke-width:1.8; stroke-linecap:round}
+.me-t{min-width:0; display:flex; flex-direction:column; line-height:1.3}
+.me-t b{font-size:13.5px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.me-t span{font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+/* boş vəziyyət */
+.blank::before{
+  content:""; display:block; width:44px; height:44px; margin:0 auto 12px; border-radius:13px;
+  background:var(--fill-2) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e93' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3.5 13.5l2.6-7.1A2 2 0 0 1 8 5h8a2 2 0 0 1 1.9 1.4l2.6 7.1V18a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18z'/%3E%3Cpath d='M3.5 13.5H8l1.2 2h5.6l1.2-2h4.5'/%3E%3C/svg%3E") center/24px no-repeat;
+}
+
+/* ====================  hərəkət  ==================== */
+@keyframes qj-fade{from{opacity:0} to{opacity:1}}
+@keyframes qj-up{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+@keyframes qj-sheet{from{transform:translateY(100%)} to{transform:none}}
+@keyframes qj-pop{from{opacity:0; transform:scale(.86)} to{opacity:1; transform:none}}
+@keyframes qj-pulse{0%,100%{opacity:1} 50%{opacity:.35}}
+
+.enter > *{animation:qj-up .28s cubic-bezier(.2,.7,.2,1) both}
+.enter > *:nth-child(2){animation-delay:.04s}
+.enter > *:nth-child(3){animation-delay:.08s}
+.enter > *:nth-child(4){animation-delay:.12s}
+.modal::before{animation:qj-fade .2s ease both}
+.dlg{animation:qj-sheet .32s cubic-bezier(.2,.85,.25,1) both}
+
+.btn, .navitem, .seg button, .spin button, .addbtn, .linkbtn, .ls, .sel, .find,
+.fld input, .fld select, .semrow input, dl.kv dd button{
+  transition:background-color .15s ease, border-color .15s ease, color .15s ease,
+             box-shadow .15s ease, transform .12s ease, opacity .15s ease;
+}
+table.t tbody tr{transition:background-color .12s ease}
+.btn:active, .spin button:active, .addbtn:active, .seg button:active{transform:scale(.96)}
+.ls:active{transform:scale(.985)}
+.tabbar .navitem:active svg{transform:scale(.9)}
+.tabbar .navitem svg{transition:transform .12s ease}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important; transition:none!important}
+}
+
+/* ====================  ölçülər  ==================== */
+@media (min-width:760px){
+  :root{--pad:20px}
+  .only-sm{display:none}
+  .kpi{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .modal{align-items:center; padding:24px}
+  .dlg{width:min(480px,100%); border-radius:18px; animation:qj-pop .22s cubic-bezier(.2,.8,.3,1) both}
+  .dlg::before{display:none}
+  .dlg-t{padding-top:22px}
+  .dlg-f{justify-content:flex-end; padding:16px 20px 18px}
+  .dlg-f .btn{flex:0 0 auto; height:36px; border-radius:9px; font-size:14px; padding:0 16px}
+  .dlg-f .del{margin-right:auto}
+  .menu-list .navitem{height:44px; font-size:15px}
 }
 @media (max-width:759px){
   .hide-sm{display:none}
-  .vdiv, .docname{display:none}
-  .titlebar{gap:7px; padding:0 9px}
   .led{font-size:0; gap:0}
   .led::before{width:8px; height:8px}
-  .board{padding:10px}
+  .btn{height:36px}
+  .titlebar .btn{height:32px}
+  .toolbar .btn{flex:0 0 auto}
+  table.t .nm{min-width:140px}
+
+  /* telefonda qaib və qiymət cədvəlləri sətir-kart kimi */
+  table.qt, table.qt tbody, table.gt, table.gt tbody{display:block}
+  table.qt thead, table.gt thead{display:none}
+  table.qt tr, table.gt tr{
+    display:grid; grid-template-columns:max-content max-content minmax(0,1fr) max-content;
+    gap:8px 12px; align-items:center;
+    padding:12px var(--pad) 13px; border-bottom:.5px solid var(--line);
+  }
+  table.qt tbody tr:last-child, table.gt tbody tr:last-child{border-bottom:0}
+  table.qt td, table.gt td{display:none; padding:0 !important; height:auto; border:0}
+  table.qt td.nm, table.gt td.nm{display:block; grid-column:1/4; grid-row:1; min-width:0}
+
+  table.qt td:nth-child(12){display:block; grid-column:4; grid-row:1; align-self:start}
+  table.qt td:nth-child(11){display:block; grid-column:1; grid-row:2}
+  table.qt td:nth-child(7){display:block; grid-column:2; grid-row:2; text-align:left; font-size:14px}
+  table.qt td:nth-child(7)::after{content:" saat"; color:var(--muted)}
+  table.qt td:nth-child(9){display:block; grid-column:3/5; grid-row:2; text-align:left; font-size:13px; color:var(--muted)}
+  table.qt td:nth-child(9)::after{content:" dərs qalır"}
+  table.qt td:nth-child(10){display:block; grid-column:1/5; grid-row:3}
+
+  table.gt td:nth-child(7){display:block; grid-column:4; grid-row:1/3}
+  table.gt td:nth-child(3), table.gt td:nth-child(5), table.gt td:nth-child(6){
+    display:block; grid-row:2; text-align:left; font-size:14px; font-weight:600;
+  }
+  table.gt td:nth-child(3){grid-column:1}
+  table.gt td:nth-child(5){grid-column:2}
+  table.gt td:nth-child(6){grid-column:3}
+  table.gt td:nth-child(3)::before{content:"Giriş "}
+  table.gt td:nth-child(5)::before{content:"İmtahan "}
+  table.gt td:nth-child(6)::before{content:"Ümumi "}
+  table.gt td::before{font-weight:400; color:var(--muted); font-size:13px}
+  /* iOS 16px-dən kiçik xanaya toxunanda ekranı özbaşına yaxınlaşdırır */
+  .fld input, .fld select, .semrow input, .find, .sel, input, select{font-size:16px}
+  .ta{font-size:13px}
+}
+@media (min-width:920px){
+  body{font-size:14px}
+  .toast{bottom:28px}
+  .side{
+    display:flex; flex-direction:column; width:240px; flex:none;
+    background:var(--side); border-right:.5px solid var(--line-2);
+    padding:14px 10px 16px; overflow-y:auto; overscroll-behavior:contain;
+  }
+  .side-brand{display:flex; align-items:center; gap:10px; padding:4px 10px 10px; font-size:15px; font-weight:650; letter-spacing:-.015em}
+  .side-brand .logo{width:28px; height:28px}
+  .brand-m{display:none}
+  .tabbar{display:none}
+  .titlebar{min-height:56px; background:var(--bg); -webkit-backdrop-filter:none; backdrop-filter:none; border-bottom-color:var(--line)}
+  .toolbar{padding:30px 32px 20px}
+  #view{padding:0 32px 48px}
+  .notice{padding:12px 32px 0}
+  .vtitle{font-size:28px}
+  .board{grid-template-columns:repeat(5,minmax(0,1fr)); gap:12px}
+  .board .col{gap:8px}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start}
+  .two > * + *{margin-top:0}
+  .two.hero-row{align-items:stretch}
+  .navitem{font-size:14px}
+  table.t{font-size:14px}
+  .kpi b{font-size:30px}
 }
 
 /* ====================  hesabat  ==================== */
-.linkbtn{
-  background:none; border:0; padding:0; font:inherit; color:inherit; cursor:pointer;
-  text-align:left; border-bottom:1px dashed var(--line-2);
-}
-.linkbtn:hover{color:var(--accent); border-bottom-color:var(--accent)}
-.report .rep-head{padding:16px 16px 4px}
-.report h1{font-family:var(--f-ui); font-size:19px; font-weight:600; letter-spacing:-.01em; margin:0 0 3px}
-.report .rep-sub{color:var(--muted); font-size:12.5px; margin:0 0 14px}
-dl.rep-id{display:flex; flex-wrap:wrap; gap:6px 26px; margin:0 0 14px}
+.report .rep-head{padding:24px var(--pad) 6px}
+.report h1{font-size:24px; font-weight:700; letter-spacing:-.025em; margin:0 0 4px}
+.report .rep-sub{color:var(--muted); font-size:14px; margin:0 0 16px}
+dl.rep-id{display:flex; flex-wrap:wrap; gap:8px 28px; margin:0 0 10px}
 dl.rep-id > div{display:flex; gap:8px; align-items:baseline}
-dl.rep-id dt{color:var(--muted); font-size:12px}
-dl.rep-id dd{margin:0; font-size:13px; font-weight:600}
-.report .rep-foot{
-  color:var(--muted); font-size:12px; line-height:1.65;
-  padding:12px 16px 16px; border-top:1px solid var(--line); margin:0;
-}
+dl.rep-id dt{color:var(--muted); font-size:13.5px}
+dl.rep-id dd{margin:0; font-size:14px; font-weight:600}
+.report .kpi{border-top:.5px solid var(--line); border-bottom:.5px solid var(--line); padding-top:10px}
+.report .rep-foot{color:var(--muted); font-size:13px; line-height:1.6; padding:14px var(--pad) 18px; border-top:.5px solid var(--line); margin:0}
 
 /* ====================  çap  ==================== */
 @media print{
-  .titlebar, .sidebar, .bottom, .toolbar, .tabbar, .statusbar{display:none !important}
-  .win{height:auto; overflow:visible; display:block}
-  .mid, .content{display:block; overflow:visible}
-  main{overflow:visible; padding:0; display:block}
+  .titlebar, .side, .tabbar, .toolbar, .notice, .splash{display:none !important}
+  .win, .content, .scroll{display:block; height:auto; overflow:visible}
+  #view{padding:0}
   body{background:#fff; color:#000; font-size:11pt}
-  .panel{border:1px solid #bbb; border-radius:0; box-shadow:none}
-  .ph{background:#f2f2f2; color:#333}
-  .kpi > div{border-color:#ddd}
-  table.t th{background:#f2f2f2; color:#333}
-  table.t td{border-color:#eee}
-  .report .rep-head, .report .rep-foot{color:#000}
+  .panel{box-shadow:none; border:1px solid #ccc; border-radius:0}
+  .kpi b{color:#000 !important}
   .tw{overflow:visible}
   tr{break-inside:avoid}
 }
 
 /* ====================  tətbiq hissi  ==================== */
-/* idarəetmə elementlərində mətn seçilməsin, uzun basanda menyu çıxmasın */
-.titlebar, .toolbar, .statusbar, .sidebar, .tabbar,
+.titlebar, .toolbar, .side, .tabbar, .notice,
 .navitem, .btn, .seg button, .spin button, .addbtn, .linkbtn,
-.ph, .kpi, .tag, .col-h, .ls, .cell, table.t thead th{
+.ph, .kpi, .tag, .col-h, .ls, table.t thead th{
   -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
 }
-/* oxunan və yazılan yerlərdə seçmə qalır */
 input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
   -webkit-user-select:text; user-select:text; -webkit-touch-callout:default;
 }
 
-@media (max-width:759px){
-  /* iOS 16px-dən kiçik xanaya toxunanda ekranı özbaşına yaxınlaşdırır — qarşısını alır */
-  .fld input, .fld select, .semrow input, .find, .ta, .sel,
-  input, select, textarea{ font-size:16px }
-  .semrow input{ padding:7px 1px }
-  .ta{ font-size:13px }        /* JSON mətni: yaxınlaşma yalnız fokusda olur, burada lazım deyil */
-}
-
-/* ====================  açılış ekranı  ==================== */
-.splash{
-  position:fixed; inset:0; z-index:200; display:flex;
-  flex-direction:column; align-items:center; justify-content:center; gap:16px;
-  background:var(--ground);
-  transition:opacity .3s ease, visibility .3s;
-}
-.splash.gone{opacity:0; visibility:hidden; pointer-events:none}
-.splash-mark{display:flex; gap:5px; align-items:flex-end; height:52px}
-.splash-mark i{
-  display:block; width:9px; border-radius:2px; background:var(--accent);
-  transform-origin:bottom; animation:qj-rise .5s cubic-bezier(.22,.9,.3,1) both;
-}
-.splash-mark i:nth-child(1){height:24px; animation-delay:.00s}
-.splash-mark i:nth-child(2){height:38px; animation-delay:.06s}
-.splash-mark i:nth-child(3){height:52px; background:var(--warn); animation-delay:.12s}
-.splash-mark i:nth-child(4){height:31px; animation-delay:.18s}
-.splash-name{
-  font-size:14px; font-weight:600; letter-spacing:.14em; text-transform:uppercase;
-  color:var(--muted); animation:qj-fade .45s .2s ease both;
-}
-@keyframes qj-rise{from{transform:scaleY(.05); opacity:0} to{transform:scaleY(1); opacity:1}}
-
-/* ====================  hərəkət  ==================== */
-@keyframes qj-fade{from{opacity:0} to{opacity:1}}
-@keyframes qj-fade-up{from{opacity:0; transform:translateY(7px)} to{opacity:1; transform:none}}
-@keyframes qj-dlg-in{from{opacity:0; transform:translateY(16px) scale(.985)} to{opacity:1; transform:none}}
-
-/* bölmə dəyişəndə məzmun pillə-pillə görünür (hər toxunuşda yox) */
-main.enter > *{animation:qj-fade-up .24s cubic-bezier(.22,.61,.36,1) both}
-main.enter > *:nth-child(2){animation-delay:.05s}
-main.enter > *:nth-child(3){animation-delay:.1s}
-main.enter > *:nth-child(4){animation-delay:.14s}
-
-.modal::before{animation:qj-fade .18s ease both}
-.dlg{animation:qj-dlg-in .22s cubic-bezier(.22,.61,.36,1) both}
-
-.btn, .navitem, .seg button, .spin button, .addbtn, .linkbtn,
-.ls, .cell, .sel, .find, .fld input, .fld select, .semrow input{
-  transition:background-color .14s ease, border-color .14s ease,
-             color .14s ease, box-shadow .14s ease, transform .1s ease;
-}
-table.t tbody tr{transition:background-color .13s ease}
-.btn:active, .spin button:active, .addbtn:active, .seg button:active{transform:scale(.97)}
-.ls:active, .cell:active{transform:scale(.995)}
-.bar i{transition:background-color .2s ease}
-.kpi b{transition:color .18s ease}
-.led::before{transition:background-color .25s ease}
-.tabbar .navitem[aria-current="true"]{transition:box-shadow .18s ease}
-
-@media (prefers-reduced-motion: reduce){
-  .splash{transition:none}
-  main.enter > *{animation:none}
-}
-
-.flagbtn{
-  background:none; border:0; padding:0 2px; cursor:pointer;
-  font-family:var(--f-mono); font-size:11px; color:var(--accent);
-  font-weight:600; text-decoration:underline; text-underline-offset:2px;
-}
-.flagbtn:hover{filter:brightness(1.2)}
-
-/* ======================================================================
-   MÜASİRLƏŞDİRMƏ — rənglər dərinləşdirildi, səthlər bir-birindən ayrıldı
-   (sonda gəldiyi üçün yuxarıdaki dəyərləri əvəz edir)
-   ====================================================================== */
-:root{
-  --ground:#e7ecf4;
-  --panel:#ffffff;
-  --panel-2:#f1f5fb;
-  --panel-3:#e3eaf4;
-  --ink:#111724;
-  --ink-2:#2e3a4e;
-  --muted:#596782;
-  --line:#dae1ed;
-  --line-2:#bfcadb;
-  --accent:#2f54eb;
-  --accent-ink:#ffffff;
-  --sel:#e6ecfe;
-  --ok:#0b7a4b;
-  --warn:#a65a00;
-  --crit:#c01a3d;
-  --shadow-1:0 1px 2px rgba(17,23,36,.05), 0 1px 3px rgba(17,23,36,.06);
-  --shadow-2:0 6px 18px -8px rgba(17,23,36,.22);
-  --shadow-3:0 18px 44px -16px rgba(17,23,36,.34);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ground:#070a10;
-    --panel:#121a24;
-    --panel-2:#18212e;
-    --panel-3:#202b3a;
-    --ink:#e6ecf6;
-    --ink-2:#b7c5d7;
-    --muted:#8c9cb4;
-    --line:#1e2835;
-    --line-2:#2c3a4c;
-    --accent:#89a5ff;
-    --accent-ink:#080c14;
-    --sel:#17223a;
-    --ok:#34d399;
-    --warn:#f0b24a;
-    --crit:#fb7185;
-    --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
-    --shadow-2:0 6px 18px -8px rgba(0,0,0,.7);
-    --shadow-3:0 18px 44px -16px rgba(0,0,0,.8);
-  }
-}
-:root[data-theme="dark"]{
-  --ground:#070a10;
-  --panel:#121a24;
-  --panel-2:#18212e;
-  --panel-3:#202b3a;
-  --ink:#e6ecf6;
-  --ink-2:#b7c5d7;
-  --muted:#8c9cb4;
-  --line:#1e2835;
-  --line-2:#2c3a4c;
-  --accent:#89a5ff;
-  --accent-ink:#080c14;
-  --sel:#17223a;
-  --ok:#34d399;
-  --warn:#f0b24a;
-  --crit:#fb7185;
-  --shadow-1:0 1px 2px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.4);
-  --shadow-2:0 6px 18px -8px rgba(0,0,0,.7);
-  --shadow-3:0 18px 44px -16px rgba(0,0,0,.8);
-}
-
-/* ---- səthlər: düz deyil, bir-birindən ayrılmış ---- */
-.panel{border-radius:10px; box-shadow:var(--shadow-1); border-color:var(--line)}
-.titlebar{box-shadow:0 1px 0 var(--line-2), 0 6px 16px -14px rgba(0,0,0,.6)}
-.toolbar{background:var(--panel-2)}
-.ph{background:var(--panel-2); color:var(--ink-2); letter-spacing:.04em}
-.bottom{box-shadow:0 -6px 16px -14px rgba(0,0,0,.6)}
-
-/* ---- aksent: daha doymuş, lazım olan yerdə görünür ---- */
-.mark i{border-radius:1.5px}
-.navitem[aria-current="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
-.tabbar .navitem[aria-current="true"]{box-shadow:inset 0 2.5px 0 var(--accent)}
-.btn:hover{background:var(--sel); border-color:var(--accent); color:var(--accent)}
-.btn.primary{box-shadow:var(--shadow-1)}
-.btn.primary:hover{background:var(--accent); filter:brightness(1.12)}
-.seg button[aria-pressed="true"]{background:var(--accent); color:var(--accent-ink)}
-.spin{box-shadow:var(--shadow-1)}
-.spin .v{background:var(--panel-3)}
-.find:focus, .fld input:focus, .fld select:focus, .semrow input:focus, .ta:focus{
-  border-color:var(--accent);
-  box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
-}
-
-/* ---- nişanlar: boş çərçivə yox, rəngli dolğu ---- */
-.tag{
-  border-color:color-mix(in srgb, currentColor 32%, transparent);
-  background:color-mix(in srgb, currentColor 13%, transparent);
-  font-weight:600;
-}
-
-/* ---- rəqəmlər daha oxunaqlı ---- */
-.kpi b{font-size:22px; font-weight:500; color:var(--ink)}
-.kpi > div:first-child b{color:var(--accent)}
-.kpi b.c-ok{color:var(--ok)} .kpi b.c-warn{color:var(--warn)} .kpi b.c-crit{color:var(--crit)}
-.kpi > div{background:var(--panel)}
-
-/* ---- qaib zolağı: qalın, yumşaq, dolğun ---- */
-.bar{height:9px}
-.bar i{background:var(--panel-3); border-radius:2.5px}
-.bar i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 88%, #fff) 0%, var(--accent) 100%)}
-.bar.lv-warn i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--warn) 88%, #fff) 0%, var(--warn) 100%)}
-.bar.lv-crit i.on{background:linear-gradient(180deg, color-mix(in srgb, var(--crit) 88%, #fff) 0%, var(--crit) 100%)}
-
-/* ---- cədvəl: başlıq daha aydın, sətirlər daha canlı ---- */
-table.t th{background:var(--panel-3); color:var(--ink-2); border-bottom-color:var(--line-2)}
-table.t tbody tr:hover{background:var(--panel-2)}
-table.t tbody tr[aria-selected="true"]{background:var(--sel); box-shadow:inset 2px 0 0 var(--accent)}
-table.t td.stripe{border-left-width:3px}
-
-/* ---- cədvəl sütunları və dialoq ---- */
-.col{border-radius:8px; box-shadow:var(--shadow-1)}
-.col-h{background:var(--panel-2)}
-.ls .tm{color:var(--accent); font-weight:600}
-.addbtn:hover{background:var(--sel)}
-.dlg{border-radius:14px; box-shadow:var(--shadow-3); border-color:var(--line-2)}
-.dlg-t{background:var(--panel-2); border-radius:13px 13px 0 0}
-.modal::before{background:rgba(6,10,18,.58); backdrop-filter:blur(2px)}
-
-/* ---- yan panel və status ---- */
-.sidebar{background:var(--panel)}
-.statusbar{background:var(--panel-2); color:var(--muted)}
-.splash-mark i{border-radius:3px}
-
-@media (min-width:920px){
-  .dlg{border-radius:14px}
-  .dlg-t{border-radius:13px 13px 0 0}
-}
-
-/* ======================================================================
-   DAHA QABARIQ GÖRÜNÜŞ — başlıq sətri aksent rəngini daşıyır
-   ====================================================================== */
-:root{
-  --ground:#e3e9f3;
-  --panel-2:#eef3fb;
-  --panel-3:#dde6f3;
-  --ink:#0d1320;
-  --line:#d4dceb;
-  --line-2:#b4c2d8;
-  --accent:#2347e0;
-  --sel:#e2e9ff;
-  --ok:#09713f;
-  --warn:#9c5200;
-  --crit:#bb1239;
-  --titlebar-bg:var(--accent);
-  --titlebar-ink:#ffffff;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --ground:#05080d;
-    --panel:#111924;
-    --panel-2:#17202d;
-    --panel-3:#1f2b3b;
-    --accent:#7e9dff;
-    --sel:#16213a;
-    --ok:#3ddc9a;
-    --warn:#f5b84f;
-    --crit:#ff7f95;
-    --titlebar-bg:var(--panel);
-    --titlebar-ink:var(--ink);
-  }
-}
-:root[data-theme="dark"]{
-  --ground:#05080d;
-  --panel:#111924;
-  --panel-2:#17202d;
-  --panel-3:#1f2b3b;
-  --accent:#7e9dff;
-  --sel:#16213a;
-  --ok:#3ddc9a;
-  --warn:#f5b84f;
-  --crit:#ff7f95;
-  --titlebar-bg:var(--panel);
-  --titlebar-ink:var(--ink);
-}
-
-/* ---- başlıq sətri ---- */
-.titlebar{
-  background:var(--titlebar-bg); color:var(--titlebar-ink);
-  border-bottom:0; box-shadow:0 2px 10px -4px rgba(10,20,60,.45);
-}
-.titlebar .appname{color:currentColor}
-.titlebar .docname{color:color-mix(in srgb, currentColor 72%, transparent)}
-.titlebar .vdiv{background:color-mix(in srgb, currentColor 32%, transparent)}
-.titlebar .mark i{background:currentColor}
-.titlebar .mark i:nth-child(3){background:#ffc96b}
-.titlebar .led{color:color-mix(in srgb, currentColor 78%, transparent)}
-.titlebar .sel{
-  background:color-mix(in srgb, currentColor 14%, transparent);
-  border-color:color-mix(in srgb, currentColor 30%, transparent);
-  color:currentColor;
-  background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),
-                   linear-gradient(135deg,currentColor 50%,transparent 50%);
-  background-position:calc(100% - 12px) 51%, calc(100% - 8px) 51%;
-  background-size:4px 4px, 4px 4px; background-repeat:no-repeat;
-}
-.titlebar .sel option{color:var(--ink); background:var(--panel)}
-.titlebar .btn{
-  background:color-mix(in srgb, currentColor 13%, transparent);
-  border-color:color-mix(in srgb, currentColor 30%, transparent);
-  color:currentColor;
-}
-.titlebar .btn:hover{background:color-mix(in srgb, currentColor 24%, transparent); color:currentColor}
-/* SƏHV İDİ: background:currentColor + color eyni qaydada → fon və yazı eyni rəng olurdu.
-   İndi hər ikisi açıq şəkildə öz nişanəsindən gəlir. */
-.titlebar .btn.primary{
-  background:var(--titlebar-ink);
-  border-color:var(--titlebar-ink);
-  color:var(--titlebar-bg);
-  font-weight:600;
-}
-.titlebar .btn.primary:hover{
-  background:var(--titlebar-ink); border-color:var(--titlebar-ink);
-  color:var(--titlebar-bg); filter:none; opacity:.9;
-}
-/* saxlanmış vəziyyətdə sönük olsun, amma həmişə oxunsun —
-   color-mix yox, sadə opacity: hər brauzerdə eyni nəticə verir */
-.titlebar .btn.primary[disabled]{
-  background:var(--titlebar-ink);
-  border-color:var(--titlebar-ink);
-  color:var(--titlebar-bg);
-  opacity:.58;
-}
-.titlebar .btn[disabled]{opacity:.62}
-/* tünd rejimdə başlıq panel rəngindədir — alt xətt lazımdır */
-:root[data-theme="dark"] .titlebar{border-bottom:1px solid var(--line-2)}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .titlebar{border-bottom:1px solid var(--line-2)}
-}
-
-/* ---- açılış ekranı başlıqla uyğun ---- */
-.splash{background:var(--titlebar-bg)}
-.splash-mark i{background:var(--titlebar-ink)}
-.splash-mark i:nth-child(3){background:#ffc96b}
-.splash-name{color:color-mix(in srgb, var(--titlebar-ink) 76%, transparent)}
-
-/* ---- daha canlı detallar ---- */
-.ph{background:color-mix(in srgb, var(--accent) 6%, var(--panel-2))}
-.navitem[aria-current="true"]{background:var(--sel); color:var(--accent)}
-.tag{background:color-mix(in srgb, currentColor 16%, transparent)}
-.kpi > div:first-child b{color:var(--accent)}
-.seg button[aria-pressed="true"]{background:var(--accent); color:#fff}
-table.t th{background:color-mix(in srgb, var(--accent) 7%, var(--panel-3))}
-
-/* ---- ikinci dərəcəli seçimlər ---- */
-.more{margin-top:12px; border-top:1px solid var(--line); padding-top:10px}
-.more summary{
-  cursor:pointer; font-size:13px; color:var(--muted);
-  list-style:none; display:inline-flex; align-items:center; gap:6px;
-}
-.more summary::-webkit-details-marker{display:none}
-.more summary::before{content:"A"; font-size:15px; transition:transform .18s ease}
-.more[open] summary::before{transform:rotate(90deg)}
-.more summary:hover{color:var(--accent)}
-a.btn{text-decoration:none; display:inline-flex; align-items:center; justify-content:center}
-
-.splitline{height:1px; background:var(--line); margin:14px 0 12px}
-
-/* ======================================================================
-   YAZI SECIMI — nov ve olcu
-   ====================================================================== */
-:root[data-font="sistem"]{
-  --f-ui:-apple-system,BlinkMacSystemFont,"Segoe UI Variable Text","Segoe UI",
-         system-ui,"Helvetica Neue",Arial,sans-serif;
-  --f-mono:ui-monospace,"SF Mono","Segoe UI Mono","Cascadia Mono",Consolas,monospace;
-}
-:root[data-font="inter"]{
-  --f-ui:"Inter",system-ui,"Segoe UI",sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
-}
-:root[data-font="plex"]{
-  --f-ui:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
-  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
-}
-
-/* olcu: yalniz mezmun ve dialoq boyuyur, baslq setri ve tab zolagi olduqu kimi qalir */
-:root[data-fs="l"] main{zoom:1.10}
-:root[data-fs="l"] .dlg{zoom:1.10}
-:root[data-fs="xl"] main{zoom:1.22}
-:root[data-fs="xl"] .dlg{zoom:1.22}
-
-/* ayarlar bolmesi — tek sutun, hedden genis olmasin */
-.stack{max-width:780px}
-.stack > .panel + .panel{margin-top:14px}
+/* yazı ölçüsü: yalnız məzmun və dialoq böyüyür */
+:root[data-fs="l"] #view, :root[data-fs="l"] .toolbar, :root[data-fs="l"] .dlg{zoom:1.1}
+:root[data-fs="xl"] #view, :root[data-fs="xl"] .toolbar, :root[data-fs="xl"] .dlg{zoom:1.22}
 </style>
 
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="qj-logo" viewBox="0 0 32 32">
+    <rect width="32" height="32" rx="8" fill="currentColor"/>
+    <g fill="#fff">
+      <rect x="7" y="7" width="5" height="5" rx="1.4"/>
+      <rect x="13.5" y="7" width="5" height="5" rx="1.4"/>
+      <rect x="20" y="7" width="5" height="5" rx="1.4"/>
+      <rect x="7" y="13.5" width="5" height="5" rx="1.4"/>
+      <rect x="13.5" y="13.5" width="5" height="5" rx="1.4" opacity=".38"/>
+      <rect x="20" y="13.5" width="5" height="5" rx="1.4" opacity=".38"/>
+      <rect x="7" y="20" width="5" height="5" rx="1.4"/>
+      <rect x="13.5" y="20" width="5" height="5" rx="1.4"/>
+      <rect x="20" y="20" width="5" height="5" rx="1.4" opacity=".38"/>
+    </g>
+  </symbol>
+</svg>
+
 <div class="win">
-  <header class="titlebar">
-    <span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-    <span class="appname">Qaib Jurnalı</span>
-    <span class="vdiv" aria-hidden="true"></span>
-    <span class="docname" id="docname"></span>
-    <span class="tb-right">
-      <button class="btn" id="btnDiscard" type="button" data-discard="1" hidden>Geri qaytar</button>
-      <button class="btn primary" id="btnSave" type="button" data-save="1" disabled>Saxlanıldı</button>
-      <select class="sel" id="semPick" aria-label="Semestr"></select>
-      <span class="led" id="sync" data-s="busy">Yüklənir</span>
-    </span>
-  </header>
-
-  <div class="mid">
+  <aside class="side">
+    <div class="side-brand"><svg class="logo" aria-hidden="true"><use href="#qj-logo"/></svg><span>Qaib Jurnalı</span></div>
     <nav class="sidebar" id="sidebar" aria-label="Bölmələr"></nav>
-    <div class="content">
-      <div class="toolbar" id="toolbar"></div>
-      <main id="view" tabindex="-1"></main>
-    </div>
-  </div>
+    <div class="side-foot" id="sidefoot"></div>
+  </aside>
 
-  <div class="bottom">
-    <footer class="statusbar" id="statusbar"></footer>
+  <div class="content">
+    <header class="titlebar">
+      <svg class="logo brand-m" aria-hidden="true"><use href="#qj-logo"/></svg>
+      <select class="sel" id="semPick" aria-label="Semestr"></select>
+      <span class="docname" id="docname"></span>
+      <span class="tb-right">
+        <span class="led" id="sync" data-s="busy">Yüklənir</span>
+        <button class="btn" id="btnDiscard" type="button" data-discard="1" hidden>Geri qaytar</button>
+        <button class="btn primary" id="btnSave" type="button" data-save="1" disabled>Saxlanıldı</button>
+      </span>
+    </header>
+
+    <div class="notice" id="statusbar"></div>
+
+    <div class="scroll" id="scroller">
+      <div class="toolbar page" id="toolbar"></div>
+      <main class="page" id="view" tabindex="-1"></main>
+    </div>
+
     <nav class="tabbar" id="tabbar" aria-label="Bölmələr"></nav>
   </div>
 </div>
 
 <div class="modal" id="modal" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <div class="splash" id="splash" aria-hidden="true">
-  <span class="splash-mark"><i></i><i></i><i></i><i></i></span>
-  <span class="splash-name">Qaib Jurnalı</span>
+  <div class="splash-in">
+    <svg class="splash-logo" viewBox="0 0 32 32">
+      <rect class="sp-bg" width="32" height="32" rx="8"/>
+      <rect class="sp-c" style="--i:0" x="7" y="7" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c" style="--i:1" x="13.5" y="7" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c" style="--i:2" x="20" y="7" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c" style="--i:1" x="7" y="13.5" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c dim" style="--i:2" x="13.5" y="13.5" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c dim" style="--i:3" x="20" y="13.5" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c" style="--i:2" x="7" y="20" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c" style="--i:3" x="13.5" y="20" width="5" height="5" rx="1.4"/>
+      <rect class="sp-c dim" style="--i:4" x="20" y="20" width="5" height="5" rx="1.4"/>
+    </svg>
+    <span class="splash-name">Qaib Jurnalı</span>
+    <span class="splash-sub">Davamiyyət · cədvəl · qiymətlər</span>
+  </div>
 </div>
 
 <script>
 "use strict";
-var APP_BUILD = "20261012-2131";
+var APP_BUILD = "20261021-1400";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -871,7 +871,7 @@ var ICON_HREF = "icon-180.png";
   add("meta", { name: "mobile-web-app-capable", content: "yes" });
   add("meta", { name: "apple-mobile-web-app-title", content: "Qaib" });
   add("meta", { name: "apple-mobile-web-app-status-bar-style", content: "default" });
-  add("meta", { name: "theme-color", content: "#2347e0" });
+  add("meta", { name: "theme-color", content: "#f6f6f8" });
   add("link", { rel: "apple-touch-icon", href: ICON_HREF });
   add("link", { rel: "icon", href: ICON_HREF });
   if (location.protocol.indexOf("http") === 0) add("link", { rel: "manifest", href: "manifest.json" });
@@ -1194,15 +1194,15 @@ function mondayOf(d) {
   x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
   return x;
 }
-function currentWeekType() {
+function weekTypeAt(date) {
   const a = state.weekAnchor || BASELINE.weekAnchor;
   const base = mondayOf(new Date(a.monday + "T00:00:00"));
-  const now = mondayOf(new Date());
-  const weeks = Math.round((now - base) / 604800000);
+  const weeks = Math.round((mondayOf(date) - base) / 604800000);
   const same = ((weeks % 2) + 2) % 2 === 0;
   const other = a.type === "ust" ? "alt" : "ust";
   return same ? a.type : other;
 }
+function currentWeekType() { return weekTypeAt(new Date()); }
 const weekName = (t) => (t === "ust" ? "Üst həftə" : "Alt həftə");
 
 /* ---- Köhnə nüsxələri yeni formata gətir ---- */
@@ -1401,6 +1401,10 @@ function applyTheme() {
   else root.removeAttribute("data-theme");
   root.setAttribute("data-font", fontNow());
   root.setAttribute("data-fs", fsNow());
+  document.querySelectorAll('meta[name="theme-color"]').forEach((m) => {
+    const dark = t === "dark" || (t === "auto" && (m.getAttribute("media") || "").indexOf("dark") >= 0);
+    m.setAttribute("content", dark ? "#0f0f11" : "#f6f6f8");
+  });
 }
 
 const FONTS = ["sistem", "inter", "plex"];
@@ -1491,7 +1495,8 @@ const guardOk = (pin) => guardOn() && guardFingerprint(pin) === state.guard.hash
 /* ---- dəyişiklik: yalnız yaddaşda, diskə yazılmır ---- */
 function mutate(fn) {
   fn(state);
-  dirty = true;
+  // geri qaytarılan dəyişiklik saxlanmış nüsxə ilə üst-üstə düşürsə, saxlamağa ehtiyac yoxdur
+  dirty = JSON.stringify(state) !== savedJson;
   render();
 }
 
@@ -1501,11 +1506,16 @@ async function commit() {
   remotePending = null;
   try { localStorage.setItem(LS_KEY, savedJson); } catch (e) { /* kvota */ }
   render();
-  if (!backend) { setSync("local", CLOUD_MODE ? "Sinxron qurulmayıb" : "Yalnız bu cihazda"); return; }
+  if (!backend) {
+    setSync("local", CLOUD_MODE ? "Sinxron qurulmayıb" : "Yalnız bu cihazda");
+    toast("Bu cihazda saxlanıldı");
+    return;
+  }
   setSync("busy", "Saxlanılır");
   try {
     await backend.push({ updatedAt: Date.now(), stateJson: savedJson });
     setSync("ok", "Saxlanıldı");
+    toast("Yadda saxlanıldı");
   } catch (err) {
     setSync("local", "Saxlanmadı — " + ((err && err.message) || "xəta"));
   }
@@ -1520,6 +1530,7 @@ function discard() {
   dirty = false;
   if (typeof resetSelection === "function") resetSelection();
   render();
+  toast("Dəyişikliklər ləğv edildi");
 }
 
 /* ---- uzaqdan gələn nüsxə ---- */
@@ -1667,13 +1678,14 @@ window.addEventListener("beforeunload", (e) => {
    5. Naviqasiya
    ============================================================ */
 const ICONS = {
-  overview: '<svg viewBox="0 0 20 20"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>',
-  qaib: '<svg viewBox="0 0 20 20"><path d="M3 16.5V9M7.7 16.5V4M12.3 16.5v-5M17 16.5V8"/><path d="M2 18h16"/></svg>',
-  cedvel: '<svg viewBox="0 0 20 20"><rect x="2.5" y="3.5" width="15" height="14" rx="1"/><path d="M2.5 7.5h15M7.5 7.5v10M12.5 7.5v10"/></svg>',
-  qiymet: '<svg viewBox="0 0 20 20"><path d="M3 17V3h11l3 3v11z"/><path d="M6 8h8M6 11.5h8M6 15h5"/></svg>',
-  fenn: '<svg viewBox="0 0 20 20"><circle cx="9" cy="9" r="5.5"/><path d="M17 17l-3.9-3.9"/></svg>',
-  profil: '<svg viewBox="0 0 20 20"><circle cx="10" cy="7" r="3.2"/><path d="M3.8 17c1.2-3 3.5-4.5 6.2-4.5S15 14 16.2 17"/></svg>',
-  ayarlar: '<svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="2.8"/><path d="M10 1.8v2.4M10 15.8v2.4M3.2 10H5.6M14.4 10h2.4M5.2 5.2l1.7 1.7M13.1 13.1l1.7 1.7M14.8 5.2l-1.7 1.7M6.9 13.1l-1.7 1.7"/></svg>',
+  overview: '<svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="8" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.8"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.8"/><rect x="3.5" y="14.5" width="7" height="6" rx="1.8"/></svg>',
+  qaib: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8.5 3v4M15.5 3v4M10 13l4 4M14 13l-4 4"/></svg>',
+  cedvel: '<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8.5 3v4M15.5 3v4"/><circle class="dot" cx="8.2" cy="13.3" r="1.05"/><circle class="dot" cx="12" cy="13.3" r="1.05"/><circle class="dot" cx="15.8" cy="13.3" r="1.05"/><circle class="dot" cx="8.2" cy="16.9" r="1.05"/><circle class="dot" cx="12" cy="16.9" r="1.05"/></svg>',
+  qiymet: '<svg viewBox="0 0 24 24"><path d="M12 4.5 2.5 9.2 12 14l9.5-4.8z"/><path d="M6.5 11.3v4.4c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.4M21.5 9.2V14"/></svg>',
+  fenn: '<svg viewBox="0 0 24 24"><path d="M5 18.5V5.5A2 2 0 0 1 7 3.5h12v13H7a2 2 0 0 0-2 2zm0 0a2 2 0 0 0 2 2h12"/><path d="M9 7.5h6"/></svg>',
+  profil: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.8 20c1.3-3.4 4-5.2 7.2-5.2s5.9 1.8 7.2 5.2"/></svg>',
+  ayarlar: '<svg viewBox="0 0 24 24"><path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/></svg>',
+  more: '<svg viewBox="0 0 24 24"><circle class="dot" cx="5.5" cy="12" r="1.6"/><circle class="dot" cx="12" cy="12" r="1.6"/><circle class="dot" cx="18.5" cy="12" r="1.6"/></svg>',
 };
 const VIEWS = [
   ["overview", "İcmal"],
@@ -1734,14 +1746,47 @@ function buildNav() {
   document.getElementById("sidebar").innerHTML =
     `<p class="navgroup">Semestr</p>` + items.slice(0, 4).join("")
     + `<p class="navgroup">Arayış</p>` + items.slice(4).join("");
-  document.getElementById("tabbar").innerHTML = items.join("");
+  const foot = document.getElementById("sidefoot");
+  if (foot) {
+    const p = state.profile || {};
+    const full = String(p["Ad, Soyad, Ata adı"] || "").trim();
+    const parts = full.split(/\s+/).filter(Boolean);
+    const ini = parts.length ? (parts[0][0] + (parts[1] ? parts[1][0] : "")).toLocaleUpperCase("az") : "";
+    const sub = [p["Qrup kodu"], p["İxtisas"]].filter(Boolean).join(" · ") || state.active;
+    foot.innerHTML = `<button class="me" type="button" data-go="profil" aria-current="${current === "profil"}">`
+      + `<span class="av">${ini ? esc(ini) : ICONS.profil}</span>`
+      + `<span class="me-t"><b>${esc(full || "Profil")}</b><span>${esc(sub)}</span></span></button>`;
+  }
+
+  const inMore = MORE_VIEWS.indexOf(current) >= 0 || current === "report";
+  document.getElementById("tabbar").innerHTML = items.slice(0, 4).join("")
+    + `<button class="navitem" type="button" data-more="1" aria-current="${inMore}">${ICONS.more}<span>Daha çox</span></button>`;
+}
+
+const MORE_VIEWS = ["fenn", "profil", "ayarlar"];
+const MORE_LABEL = { fenn: "Fənn kataloqu", profil: "Profil və semestrlər", ayarlar: "Ayarlar" };
+
+/* telefonda "Daha çox" vərəqi */
+function openMenu() {
+  const host = document.getElementById("modal");
+  host.hidden = false;
+  host.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="Daha çox">
+    <div class="dlg-t"><strong>Daha çox</strong></div>
+    <div class="menu-list">${MORE_VIEWS.map((k) => {
+      const c = navCount(k);
+      return `<button class="navitem" type="button" data-go="${k}" aria-current="${k === current}">`
+        + ICONS[k] + `<span>${MORE_LABEL[k]}</span>` + (c === "" ? "" : `<span class="cnt">${c}</span>`) + `</button>`;
+    }).join("")}</div>
+    <div class="dlg-f"><button class="btn" type="button" data-dlg="cancel">Bağla</button></div>
+  </div>`;
+  host._onSave = null;
+  host._onDelete = null;
 }
 
 function go(k) {
   if (current === k) return;
   current = k;
   render();
-  window.scrollTo({ top: 0 });
 }
 
 /* ============================================================
@@ -1749,11 +1794,8 @@ function go(k) {
    ============================================================ */
 function barHtml(m) {
   if (m.G == null) return `<span class="code">—</span>`;
-  let s = "";
-  for (let i = 0; i < m.G; i++) {
-    s += `<i class="${i < m.F ? "on" : ""}${i % 2 === 1 && i !== m.G - 1 ? " gap" : ""}"></i>`;
-  }
-  return `<span class="bar lv-${m.level}" role="img" aria-label="${m.F} / ${m.G} saat">${s}</span>`;
+  const pct = m.G > 0 ? Math.min(100, (m.F / m.G) * 100) : 100;
+  return `<span class="meter lv-${m.level}" role="img" aria-label="${m.F} / ${m.G} saat"><i style="width:${pct.toFixed(1)}%"></i></span>`;
 }
 
 function statusTag(m) {
@@ -1774,6 +1816,68 @@ function spinHtml(i, v) {
 /* ============================================================
    7. İcmal
    ============================================================ */
+const WEEKDAYS = ["Bazar", "Bazar ertəsi", "Çərşənbə axşamı", "Çərşənbə", "Cümə axşamı", "Cümə", "Şənbə"];
+const MONTHS = ["yanvar", "fevral", "mart", "aprel", "may", "iyun", "iyul", "avqust", "sentyabr", "oktyabr", "noyabr", "dekabr"];
+
+function greeting() {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12) return "Sabahın xeyir";
+  if (h >= 12 && h < 18) return "Günortan xeyir";
+  return "Axşamın xeyir";
+}
+
+/* indi gedən və ya növbəti dərs — 2 həftə irəliyə qədər axtarır */
+function nextLesson() {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  for (let off = 0; off < 15; off++) {
+    const d = new Date(now);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + off);
+    const dk = (DAYS[d.getDay() - 1] || [])[0];
+    if (!dk) continue;
+    for (const { e } of dayLessons(weekTypeAt(d), dk)) {
+      const tr = parseRange(e.time);
+      if (!tr) continue;
+      if (off === 0 && tr.e <= nowMin) continue;
+      return { e, tr, off, d, nowMin, live: off === 0 && tr.s <= nowMin };
+    }
+  }
+  return null;
+}
+
+function heroHtml(sem) {
+  const nx = nextLesson();
+  if (!nx) return "";
+  const { e, tr, off, d, nowMin, live } = nx;
+  const p2 = (n) => String(n).padStart(2, "0");
+  const hm = (m) => p2(Math.floor(m / 60)) + ":" + p2(m % 60);
+  const dur = (m) => (m < 60 ? m + " dəq" : Math.floor(m / 60) + " saat" + (m % 60 ? " " + (m % 60) + " dəq" : ""));
+  let when;
+  if (live) when = "bitməsinə " + dur(tr.e - nowMin);
+  else if (off === 0) when = dur(tr.s - nowMin) + " sonra";
+  else if (off === 1) when = "sabah";
+  else {
+    const wd = WEEKDAYS[d.getDay()].toLocaleLowerCase("az");
+    const wkDiff = Math.round((mondayOf(d) - mondayOf(new Date())) / 604800000);
+    when = wkDiff === 0 ? wd : wkDiff === 1 ? "gələn " + wd : d.getDate() + " " + MONTHS[d.getMonth()];
+  }
+  const ci = sem.courses.findIndex((c) => c.name === e.subject);
+  const m = ci >= 0 ? compute(sem.courses[ci]) : null;
+  const pct = live ? Math.max(0, Math.min(100, Math.round(((nowMin - tr.s) / (tr.e - tr.s)) * 100))) : 0;
+  return `<section class="panel hero${live ? " live" : ""}">
+      <div class="hero-top"><span class="hero-k">${live ? "İndi gedir" : "Növbəti dərs"}</span><span class="hero-when">${esc(when)}</span></div>
+      <div class="hero-time">${hm(tr.s)} – ${hm(tr.e)}${e.room ? " · " + esc(e.room) : ""}</div>
+      <div class="hero-subj">${esc(e.subject)}</div>
+      ${e.teacher ? `<div class="hero-meta">${esc(e.teacher)}</div>` : ""}
+      ${live ? `<span class="meter" role="img" aria-label="Dərsin ${pct}%-i keçib"><i style="width:${pct}%"></i></span>` : ""}
+      ${m && m.G != null ? `<div class="hero-foot">
+        <span class="hero-q">Qaib <b>${m.F} / ${m.G}</b> saat</span>${statusTag(m)}
+        <button class="btn sm" type="button" data-absent="${ci}" data-delta="2" title="Bir dərs (2 saat) qaib yaz">+ Qaib</button>
+      </div>` : ""}
+    </section>`;
+}
+
 function viewOverview() {
   const sem = activeSem();
   const ms = sem.courses.map(compute);
@@ -1781,14 +1885,16 @@ function viewOverview() {
   const leftL = ms.reduce((a, m) => a + (m.I > 0 ? m.I : 0), 0);
   const risk = ms.filter((m) => m.level !== "ok").length;
 
+  const now = new Date();
   const cw = currentWeekType();
   const tk = todayKey();
   const shownDay = tk || "mon";
   const rows = dayLessons(cw, shownDay);
   const dayName = DAYS.find(([k]) => k === shownDay)[1];
+  const first = String((state.profile || {})["Ad, Soyad, Ata adı"] || "").trim().split(/\s+/)[0] || "";
 
   const lessons = rows.length === 0
-    ? `<p class="blank">Bu gün üçün cədvəldə dərs yoxdur.</p>`
+    ? `<p class="blank">${tk ? "Bu gün dərs yoxdur." : "Bu gün dərs günü deyil."}</p>`
     : `<div class="tw"><table class="t"><thead><tr>
          <th>Saat</th><th>Fənn</th><th class="hide-sm">Otaq</th><th class="r">Qaib</th><th></th>
        </tr></thead><tbody>${rows.map(({ e }) => {
@@ -1800,7 +1906,7 @@ function viewOverview() {
             <td class="hide-sm code">${esc(e.room) || "—"}</td>
             <td class="r">${m && m.G != null ? m.F + " / " + m.G : "—"}</td>
             <td class="r" style="width:96px">${ci >= 0
-              ? `<button class="btn" type="button" data-absent="${ci}" data-delta="2">+ 1 dərs</button>`
+              ? `<button class="btn sm" type="button" data-absent="${ci}" data-delta="2" title="Bir dərs (2 saat) qaib yaz">+ Qaib</button>`
               : `<span class="code">—</span>`}</td>
           </tr>`;
         }).join("")}</tbody></table></div>`;
@@ -1811,38 +1917,55 @@ function viewOverview() {
     .filter((x) => x.r.examDate && new Date(x.r.examDate) >= today0)
     .sort((a, b) => new Date(a.r.examDate) - new Date(b.r.examDate));
 
-  return {
-    toolbar: `<span class="vtitle">İcmal</span>`
-      + `<span class="vhint">${esc(dayName)}${tk ? "" : " · növbəti dərs günü"} · ${esc(weekName(cw))}</span>`,
-    body: `
-      <section class="panel">
-        <div class="ph">Semestr göstəriciləri<span class="ph-r">${esc(state.active)}</span></div>
+  const qrows = sem.courses.map((r, i) => ({ r, m: ms[i] }))
+    .filter((x) => x.m.G != null && x.m.G > 0)
+    .sort((a, b) => b.m.F / b.m.G - a.m.F / a.m.G);
+
+  const hero = heroHtml(sem);
+  const kpi = `<section class="panel">
+        <div class="ph">Semestr<span class="ph-r">${esc(state.active)}</span></div>
         <div class="kpi">
           <div><b>${sem.courses.length}</b><span>fənn</span></div>
-          <div><b>${usedH}</b><span>işlənmiş qaib, saat</span></div>
+          <div><b>${usedH}</b><span>qaib saatı</span></div>
           <div><b>${leftL % 1 ? leftL.toFixed(1) : leftL}</b><span>qalan dərs</span></div>
           <div><b class="${risk ? "c-warn" : "c-ok"}">${risk}</b><span>diqqət tələb edir</span></div>
         </div>
-      </section>
+      </section>`;
+
+  return {
+    toolbar: `<span class="vtitle">${greeting()}${first ? ", " + esc(first) : ""}</span>`
+      + `<span class="vhint">${WEEKDAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} · ${esc(weekName(cw))}</span>`,
+    body: `
+      ${hero ? `<div class="two hero-row">${hero}${kpi}</div>` : kpi}
 
       <div class="two">
-        <section class="panel">
-          <div class="ph">${esc(dayName)} — dərslər<span class="ph-r">${rows.length} dərs</span></div>
-          ${lessons}
-        </section>
+        <div>
+          <section class="panel">
+            <div class="ph">${tk ? "Bu günün dərsləri" : esc(dayName) + " dərsləri"}<span class="ph-r">${rows.length ? rows.length + " dərs" : ""}</span></div>
+            ${lessons}
+          </section>
+
+          <section class="panel">
+            <div class="ph">Yaxınlaşan imtahanlar<span class="ph-r">${exams.length || ""}</span></div>
+            ${exams.length === 0
+              ? `<p class="blank">İmtahan tarixi yazılmayıb.<br><b>Qiymət</b> bölməsindən əlavə et.</p>`
+              : `<div class="tw"><table class="t"><thead><tr>
+                   <th>Fənn</th><th>Tarix</th><th class="hide-sm">Otaq</th><th class="r">Qalıb</th>
+                 </tr></thead><tbody>${exams.map(({ r, cd }) => `<tr>
+                   <td class="nm">${esc(r.name)}</td>
+                   <td class="r">${fmtDate(r.examDate)}</td>
+                   <td class="hide-sm code">${esc(r.examRoom) || "—"}</td>
+                   <td class="r"><span class="tag ${TONE[cd.tone]}">${cd.label}</span></td>
+                 </tr>`).join("")}</tbody></table></div>`}
+          </section>
+        </div>
 
         <section class="panel">
-          <div class="ph">İmtahan cədvəli<span class="ph-r">${exams.length} planlaşdırılıb</span></div>
-          ${exams.length === 0
-            ? `<p class="blank">İmtahan tarixi yazılmayıb. <b>Qiymət</b> bölməsindən əlavə et.</p>`
-            : `<div class="tw"><table class="t"><thead><tr>
-                 <th>Fənn</th><th>Tarix</th><th class="hide-sm">Otaq</th><th class="r">Qalıb</th>
-               </tr></thead><tbody>${exams.map(({ r, cd }) => `<tr>
-                 <td class="nm">${esc(r.name)}</td>
-                 <td class="r">${fmtDate(r.examDate)}</td>
-                 <td class="hide-sm code">${esc(r.examRoom) || "—"}</td>
-                 <td class="r"><span class="tag ${TONE[cd.tone]}">${cd.label}</span></td>
-               </tr>`).join("")}</tbody></table></div>`}
+          <div class="ph">Qaib vəziyyəti<span class="ph-r">${usedH} saat</span></div>
+          ${qrows.length === 0 ? `<p class="blank">Fənn yoxdur.</p>` : `<div class="qlist">${qrows.map(({ r, m }) =>
+            `<button class="qrow" type="button" data-go="qaib">
+              <span class="qn">${esc(r.name)}</span><span class="qv">${m.F} / ${m.G}</span>${barHtml(m)}
+            </button>`).join("")}</div>`}
         </section>
       </div>`,
   };
@@ -1856,19 +1979,19 @@ function viewQaib() {
   return {
     toolbar: `<span class="vtitle">Qaib hesabatı</span>`
       + `<button class="btn" type="button" data-addcourse="1">Fənn əlavə et</button>`
-      + `<span class="vhint">Limit kredit sayına görə: 3→3, 4→9, 5→12, 6→15 saat</span>`,
+      + `<span class="vhint">Limit kreditə görə: 3 → 3 saat · 4 → 9 · 5 → 12 · 6 → 15</span>`,
     body: sem.courses.length === 0
       ? `<section class="panel"><p class="blank">Bu semestrdə fənn yoxdur.</p></section>`
       : `<section class="panel">
-          <div class="ph">Fənnlər<span class="ph-r">${sem.courses.length} sətir</span></div>
-          <div class="tw"><table class="t">
+          <div class="ph">Fənnlər<span class="ph-r">${sem.courses.length} fənn</span></div>
+          <div class="tw"><table class="t qt">
             <thead><tr>
               <th class="ix">№</th><th>Fənn</th>
               <th class="hide-sm">Kod</th><th class="hide-sm r">Kr</th>
               <th class="hide-sm r">Qaib</th><th class="hide-sm r">Limit</th>
               <th class="only-sm r">Qaib / limit</th>
               <th class="hide-sm r">Qalan</th><th class="r">Dərs</th>
-              <th class="hide-sm">Yüklənmə</th><th>Vəziyyət</th><th class="c">Düzəliş</th>
+              <th class="hide-sm" style="width:15%">İstifadə</th><th>Vəziyyət</th><th class="c">Saat</th>
             </tr></thead>
             <tbody>${sem.courses.map((r, i) => {
               const m = compute(r);
@@ -1888,7 +2011,7 @@ function viewQaib() {
               </tr>`;
             }).join("")}</tbody>
           </table></div>
-          <p class="hintbox">Fənn adına toxunsan, dəqiq qaib saatını yaza və ya fənni silə bilərsən. Sıra Excel faylındakı kimidir və qaib dəyişəndə yerini dəyişmir. Qalan dərs = qalan saat ÷ 2; zolaqda hər cüt blok bir dərsdir.</p>
+          <p class="hintbox">Dəqiq saatı yazmaq və ya fənni silmək üçün adına toxun. Qalan dərs = qalan saat ÷ 2.</p>
         </section>`,
   };
 }
@@ -1909,7 +2032,7 @@ function viewCedvel() {
     const isToday = dk === tk && wk === cw;
     return `<section class="col">
       <div class="col-h ${isToday ? "today" : ""}">
-        <span>${esc(label)}</span>${isToday ? `<span class="tag acc">bugün</span>` : ""}
+        <span>${esc(label)}</span>${isToday ? `<span class="tag acc">Bu gün</span>` : ""}
         <span class="n">${list.length}</span>
       </div>
       <div class="col-b">
@@ -1940,10 +2063,10 @@ function viewCedvel() {
       + `<span class="vhint tb-sp">${total} dərs</span>`,
     body: `<section class="panel">
       <div class="ph">${esc(weekName(wk))}${wk === cw ? " — bu həftə" : " — baxış"}
-        <span class="ph-r">bazar ertəsindən: ${esc(nextMon)}</span>
+        <span class="ph-r">növbəti: ${esc(nextMon)}</span>
       </div>
       <div class="board">${columns}</div>
-      <p class="hintbox">Həftə hər bazar ertəsi avtomatik dəyişir, əl ilə seçmək lazım deyil — nöqtə (·) işarəsi bu həftəni göstərir. Yuxarıdaki düymələr yalnız hansı həftəyə baxdığını dəyişir. Saatı hər dərs üçün özün yazırsan, ona görə alt qrup dərsləri də düzgün yerə düşür.</p>
+      <p class="hintbox">Həftə hər bazar ertəsi özü dəyişir. Nöqtə (·) cari həftəni göstərir.</p>
     </section>`,
   };
 }
@@ -1972,8 +2095,8 @@ function viewQiymet() {
 
   return {
     toolbar: `<span class="vtitle">Qiymətlər</span>`
-      + `<span class="vhint">Giriş balı = orta(seminar) × 2 + müstəqil iş + kollokvium + qaib balı, üstəgəl səhv balı</span>`
-      + `<span class="tb-sp"><span class="tag acc">ÜOMG ${gpa == null ? "—" : gpa.toFixed(2)}</span></span>`,
+      + `<span class="vhint">Giriş balı = seminar ortalaması × 2 + müstəqil iş + kollokvium + qaib balı</span>`
+      ,
     body: `
       <section class="panel">
         <div class="ph">Semestr yekunu</div>
@@ -1983,7 +2106,7 @@ function viewQiymet() {
           <div><b>${none}</b><span>nəticə yox</span></div>
           <div><b>${gpa == null ? "—" : gpa.toFixed(2)}</b><span>ÜOMG</span></div>
         </div>
-        <div class="tw"><table class="t">
+        <div class="tw"><table class="t gt">
           <thead><tr>
             <th class="ix">№</th><th>Fənn</th>
             <th class="r">Giriş</th><th class="hide-sm r">Min. imtahan</th>
@@ -2007,7 +2130,7 @@ function viewQiymet() {
       <section class="panel">
         <div class="ph">Seçilmiş fənn<span class="ph-r">${esc(r.name)}</span></div>
         <div class="pb">
-          <p class="flabel">Seminar qiymətləri — Excel-dəki V–AC sütunları</p>
+          <p class="flabel">Seminar qiymətləri</p>
           <div class="semrow">
             ${r.sem.map((v, k) => `<input class="mono" inputmode="numeric" placeholder="—" value="${v == null ? "" : v}" data-g="${si}" data-field="sem" data-k="${k}" aria-label="Seminar ${k + 1}">`).join("")}
           </div>
@@ -2032,11 +2155,11 @@ function viewQiymet() {
             </div>
           </div>
         </div>
-        <div class="kpi" style="border-top:1px solid var(--line)">
+        <div class="kpi" style="border-top:.5px solid var(--line); padding-top:10px">
           <div><b>${m.O}</b><span>giriş balı</span></div>
           <div><b>${dash(m.P)}</b><span>lazım olan min. imtahan</span></div>
           <div><b>${dash(m.R)}</b><span>ümumi bal</span></div>
-          <div><b class="${m.failedByAbsence ? "c-crit" : "c-ok"}" style="font-size:14px">${m.failedByAbsence ? "Qaib limiti aşılıb" : "İmtahana buraxılır"}</b><span>buraxılış</span></div>
+          <div><b class="${m.failedByAbsence ? "c-crit" : "c-ok"}" style="font-size:16px; letter-spacing:-.01em; padding-top:8px">${m.failedByAbsence ? "Qaib limiti aşılıb" : "İmtahana buraxılır"}</b><span>buraxılış</span></div>
         </div>
       </section>`,
   };
@@ -2091,7 +2214,7 @@ function viewProfil() {
           <dl class="kv">${Object.entries(p).map(([k, v]) =>
             `<div><dt>${esc(k)}</dt><dd><button type="button" data-prof="${esc(k)}">${esc(v) || "—"}</button></dd></div>`).join("")}
           </dl>
-          <p class="hintbox">Teams şifrəsi və Telegram açarı bu proqrama köçürülməyib — şifrəni veb səhifədə saxlamaq təhlükəlidir.</p>
+          <p class="hintbox">Şifrələr təhlükəsizlik üçün burada saxlanılmır.</p>
         </section>
 
         <div>
@@ -2108,7 +2231,7 @@ function viewProfil() {
                   <td class="r"><button class="btn" type="button" data-report="${esc(k)}">Hesabat</button></td></tr>`;
               }).join("")}</tbody>
             </table></div>
-            <p class="hintbox">Semestr bitəndə yenisini əlavə et və ona keç — köhnəsi siyahıda arxiv kimi qalır, qiymətləri və qaibləri heç yerə getmir.</p>
+            <p class="hintbox">Köhnə semestrlər qiymət və qaibləri ilə birlikdə arxivdə qalır.</p>
           </section>
 
         </div>
@@ -2129,7 +2252,7 @@ function viewAyarlar() {
               <li>Siyahını yuxarı dart və <b>“Ana ekrana əlavə et”</b> / <b>Add to Home Screen</b> seç.</li>
               <li>Sağ yuxarıdaki <b>Əlavə et</b> düyməsini bas.</li>
             </ol>
-            <p class="hintbox">Bundan sonra ikon ana ekranda qalır, brauzer sətri olmadan tam ekranda açılır.</p>
+            <p class="hintbox">Proqram ana ekrandan brauzer sətri olmadan, tam ekranda açılır.</p>
           </section>
 
           ${CLOUD_MODE ? `<section class="panel">
@@ -2247,8 +2370,8 @@ function viewAyarlar() {
             <div class="ph">Qoruma kodu<span class="ph-r">${guardOn() ? "aktiv" : "yoxdur"}</span></div>
             <div class="pb">
               <p class="dlg-msg" style="margin-bottom:11px">${guardOn()
-                ? "Məlumatı silən və üzərinə yazan əməliyyatlar kod tələb edir: <b>Excel vəziyyətinə qaytar</b> və <b>Məlumatı yüklə</b>."
-                : "Kod təyin etsən, məlumatı silən əməliyyatlar (<b>Excel vəziyyətinə qaytar</b>, <b>Məlumatı yüklə</b>) kod soruşacaq. Səhvən toxunub hər şeyi itirməkdən qoruyur."}</p>
+                ? "Məlumatı silən və üzərinə yazan əməliyyatlar kod tələb edir: <b>İlkin vəziyyətə qaytar</b> və <b>Məlumatı yüklə</b>."
+                : "Kod təyin etsən, məlumatı silən əməliyyatlar (<b>İlkin vəziyyətə qaytar</b>, <b>Məlumatı yüklə</b>) kod soruşacaq. Səhvən toxunub hər şeyi itirməkdən qoruyur."}</p>
               <div class="row">
                 <button class="btn" type="button" data-setguard="1">${guardOn() ? "Kodu dəyiş" : "Kod təyin et"}</button>
                 ${guardOn() ? `<button class="btn danger" type="button" data-delguard="1">Kodu sil</button>` : ""}
@@ -2259,8 +2382,8 @@ function viewAyarlar() {
           <section class="panel">
             <div class="ph">Bərpa</div>
             <div class="pb">
-              <p class="dlg-msg" style="margin-bottom:11px">Bütün qaib, qiymət və cədvəl dəyişikliklərini silib Excel faylındakı ilk vəziyyətə qaytarır.</p>
-              <button class="btn danger" type="button" data-reset="1">Excel vəziyyətinə qaytar</button>
+              <p class="dlg-msg" style="margin-bottom:11px">Bütün qaib, qiymət və cədvəl dəyişikliklərini silib ilk vəziyyətə qaytarır.</p>
+              <button class="btn danger" type="button" data-reset="1">İlkin vəziyyətə qaytar</button>
             </div>
           </section>
       </div>`,
@@ -2380,21 +2503,18 @@ const RENDERERS = { overview: viewOverview, qaib: viewQaib, cedvel: viewCedvel, 
 function paintStatus() {
   const el = document.getElementById("statusbar");
   if (!el) return;
-  const sem = activeSem();
-  const ms = sem.courses.map(compute);
-  const usedH = ms.reduce((a, m) => a + m.F, 0);
-  const risk = ms.filter((m) => m.level !== "ok").length;
-  const at = SYNC.at ? SYNC.at.toTimeString().slice(0, 5) : null;
-  el.innerHTML = `<span>${esc(state.active)}</span><s>|</s>`
-    + `<span>${sem.courses.length} fənn</span><s>|</s>`
-    + `<span>${usedH} saat qaib</span><s>|</s>`
-    + `<span>${risk} risk</span>`
-    + `<span class="sb-r">`
-    + (updateReady ? `<button class="flagbtn" type="button" data-update="1">yeni versiya var — yenilə</button>` : "")
-    + (dirty ? `<span class="flag">saxlanılmamış dəyişiklik</span>` : "")
-    + (remotePending ? `<span class="flag">başqa cihazda yenilik var</span>` : "")
-    + `<span class="sb-keys">1–7 bölmə · / axtarış · Ctrl+S saxla</span>`
-    + `<span>${esc(SYNC.t)}${at ? " " + at : ""}</span></span>`;
+  let h = "";
+  if (updateReady) {
+    h += `<div class="note"><span>Yeni versiya hazırdır.</span>`
+      + `<button class="btn primary sm" type="button" data-update="1">Yenilə</button></div>`;
+  }
+  if (remotePending) {
+    h += `<div class="note"><span>Başqa cihazda yeni dəyişiklik var — <b>Digərini götür</b> ilə yüklə.</span></div>`;
+  }
+  if (SYNC.s === "local" && /^(Saxlanmadı|Alınmadı)/.test(SYNC.t)) {
+    h += `<div class="note warn"><span>${esc(SYNC.t)}</span></div>`;
+  }
+  if (el.innerHTML !== h) el.innerHTML = h;
 }
 
 function paintSaveBar() {
@@ -2407,6 +2527,39 @@ function paintSaveBar() {
   bd.textContent = remotePending ? "Digərini götür" : "Geri qaytar";
 }
 
+/* bölmə açılanda: kartlar pillə-pillə, rəqəmlər sıfırdan sayılır */
+function playEnter() {
+  const host = document.getElementById("view");
+  host.classList.remove("enter");
+  void host.offsetWidth;          // animasiyanı yenidən başlat
+  host.classList.add("enter");
+  clearTimeout(enterTimer);
+  // sinfi geri götür ki, sonrakı kiçik yeniləmələrdə (qaib +/-) sətirlər sönüb-yanmasın
+  enterTimer = setTimeout(() => host.classList.remove("enter"), 450);
+  countUp(host);
+}
+
+function countUp(root) {
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  root.querySelectorAll(".kpi b").forEach((b) => {
+    const txt = b.textContent.trim();
+    if (!/^\d+(\.\d+)?$/.test(txt)) return;
+    const end = parseFloat(txt);
+    const dec = (txt.split(".")[1] || "").length;
+    if (end === 0) return;
+    const t0 = performance.now(), dur = 700;
+    const step = (now) => {
+      if (!b.isConnected) return;
+      const k = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - k, 3);
+      b.textContent = k < 1 ? (end * e).toFixed(dec) : txt;
+      if (k < 1) requestAnimationFrame(step);
+    };
+    b.textContent = (0).toFixed(dec);
+    requestAnimationFrame(step);
+  });
+}
+
 function render() {
   const sel = document.getElementById("semPick");
   const keys = Object.keys(state.semesters);
@@ -2414,7 +2567,7 @@ function render() {
   document.getElementById("docname").textContent = state.active;
 
   // sürüşmə mövqeyini saxla — qaib artıranda səhifə yuxarı/sola atmasın
-  const mainEl = document.getElementById("view");
+  const mainEl = document.getElementById("scroller");
   const keepTop = mainEl ? mainEl.scrollTop : 0;
   const keepLeft = [...document.querySelectorAll(".tw")].map((el) => el.scrollLeft);
 
@@ -2429,20 +2582,13 @@ function render() {
   document.getElementById("toolbar").innerHTML = out.toolbar;
   const host = document.getElementById("view");
   host.innerHTML = out.body;
-  if (viewChanged) {
-    host.classList.remove("enter");
-    void host.offsetWidth;          // animasiyanı yenidən başlat
-    host.classList.add("enter");
-    clearTimeout(enterTimer);
-    // sinfi geri götür ki, sonrakı kiçik yeniləmələrdə (qaib +/-) sətirlər sönüb-yanmasın
-    enterTimer = setTimeout(() => host.classList.remove("enter"), 450);
-  }
+  if (viewChanged) playEnter();
   applyTheme();
   buildNav();
   paintStatus();
   paintSaveBar();
 
-  if (mainEl) mainEl.scrollTop = keepTop;
+  if (mainEl) mainEl.scrollTop = viewChanged ? 0 : keepTop;
   document.querySelectorAll(".tw").forEach((el, i) => {
     if (keepLeft[i] != null) el.scrollLeft = keepLeft[i];
   });
@@ -2475,6 +2621,32 @@ function openDialog(title, meta, bodyHtml, onSave, saveLabel, onDelete) {
   const first = host.querySelector("input,select,textarea");
   if (first) { first.focus(); try { first.select(); } catch (e) {} }
 }
+let toastTimer = null;
+let undoAbs = null;        // son qaib dəyişikliyi: geri almaq üçün
+function toastOpen() {
+  const el = document.getElementById("toast");
+  return !!el && el.classList.contains("show");
+}
+function toast(msg, actLabel, act) {
+  const el = document.getElementById("toast");
+  if (!el) return;
+  el.innerHTML = `<span>${esc(msg)}</span>` + (actLabel ? `<button type="button">${esc(actLabel)}</button>` : "");
+  el.classList.toggle("plain", !actLabel);
+  el._act = act || null;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), actLabel ? 4500 : 2200);
+}
+document.getElementById("toast").addEventListener("click", (e) => {
+  const el = e.currentTarget;
+  if (e.target.closest("button") && el._act) {
+    const f = el._act;
+    el._act = null;
+    f();
+  }
+  el.classList.remove("show");
+});
+
 function closeDialog() {
   const host = document.getElementById("modal");
   host.hidden = true;
@@ -2494,7 +2666,7 @@ function badCode() {
 function lessonFields(e) {
   const names = activeSem().courses.map((c) => c.name);
   const extra = e.subject && names.indexOf(e.subject) < 0;
-  return `<div class="fld txt"><label>Saat — necə istəyirsən elə yaz</label>
+  return `<div class="fld txt"><label>Saat</label>
       <input data-fld="time" value="${esc(e.time)}" placeholder="09:00 – 10:20"></div>
     <div class="fld" style="margin-top:10px"><label>Fənn</label><select data-fld="subject">
       <option value="">— seç —</option>
@@ -2511,8 +2683,9 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs]");
-  if (!t) return;
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more]");
+  // <html> özü də data-theme/data-font daşıyır — boş yerə toxunuş onu "düymə" saymasın
+  if (!t || t === document.documentElement) return;
   const host = document.getElementById("modal");
 
   if (t.dataset.dlg) {
@@ -2527,14 +2700,34 @@ document.addEventListener("click", (e) => {
 
   if (t.dataset.save != null) return commit();
   if (t.dataset.discard != null) return discard();
-  if (t.dataset.go) return go(t.dataset.go);
+  if (t.dataset.more) return openMenu();
+  if (t.dataset.go) {
+    if (!host.hidden) closeDialog();
+    return go(t.dataset.go);
+  }
 
   if (t.dataset.absent != null) {
     const i = +t.dataset.absent, d = +t.dataset.delta;
-    return mutate((s) => {
-      const r = s.semesters[s.active].courses[i];
-      r.absent = Math.max(0, numOr(r.absent) + d);
+    const r0 = activeSem().courses[i];
+    if (!r0) return;
+    const before = numOr(r0.absent);
+    const after = Math.max(0, before + d);
+    if (after === before) return;
+    // ardıcıl toxunuşlarda "Geri al" ilk dəyərə qaytarır
+    if (!(undoAbs && undoAbs.i === i && undoAbs.sem === state.active && toastOpen())) {
+      undoAbs = { i, sem: state.active, prev: before };
+    }
+    if (navigator.vibrate) { try { navigator.vibrate(8); } catch (x) { /* dəstəklənmir */ } }
+    mutate((s) => { s.semesters[s.active].courses[i].absent = after; });
+    const m = compute(r0);
+    const u = undoAbs;
+    const nm = r0.name.length > 26 ? r0.name.slice(0, 25) + "…" : r0.name;
+    toast(`${nm} · ${after}${m.G != null ? " / " + m.G : ""} saat`, "Geri al", () => {
+      const sm = state.semesters[u.sem];
+      if (sm && sm.courses[u.i]) mutate((s) => { s.semesters[u.sem].courses[u.i].absent = u.prev; });
+      undoAbs = null;
     });
+    return;
   }
 
   if (t.dataset.vweek) { viewWeek = t.dataset.vweek; return render(); }
@@ -2654,7 +2847,7 @@ document.addEventListener("click", (e) => {
   }
 
   /* ---- hesabat ---- */
-  if (t.dataset.report) { reportSem = t.dataset.report; current = "report"; render(); window.scrollTo({ top: 0 }); return; }
+  if (t.dataset.report) { reportSem = t.dataset.report; current = "report"; render(); return; }
   if (t.dataset.print) { window.print(); return; }
   if (t.dataset.reportfile) {
     const key = t.dataset.reportfile;
@@ -2910,7 +3103,7 @@ document.addEventListener("click", (e) => {
   }
 
   if (t.dataset.reset) {
-    return openDialog("Excel vəziyyətinə qaytarılsın?", "sonra Saxla lazımdır",
+    return openDialog("İlkin vəziyyətə qaytarılsın?", "sonra Saxla lazımdır",
       `<p class="dlg-msg">Bütün qaib, qiymət və cədvəl dəyişiklikləri silinəcək və fayl ilk oxunduğu vəziyyətə qayıdacaq.</p>`
       + (guardOn() ? `<div class="fld" style="margin-top:12px"><label>Qoruma kodu</label>
            <input type="password" inputmode="numeric" data-fld="code" autocomplete="off"></div>` : ""),
@@ -3213,17 +3406,34 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
   });
 }
 
-/* açılış ekranı — məzmun hazır olan kimi yumşaq itir */
+/* açılış ekranı — loqo yığılır, sonra proqram yumşaq açılır */
 (function () {
   const sp = document.getElementById("splash");
   if (!sp) return;
+  const az = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const bitir = () => {
     sp.classList.add("gone");
-    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 400);
+    if (!az) {
+      const w = document.querySelector(".win");
+      if (w) {
+        w.classList.add("reveal");
+        setTimeout(() => w.classList.remove("reveal"), 700);
+      }
+      playEnter();
+    }
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 600);
   };
-  const az = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  setTimeout(bitir, az ? 0 : 620);
+  setTimeout(bitir, az ? 0 : 1350);
 })();
+
+/* icmal açıqdırsa, "növbəti dərs" kartı hər dəqiqə yenilənir */
+setInterval(() => {
+  if (current !== "overview" || document.hidden) return;
+  if (!document.getElementById("modal").hidden) return;
+  const a = document.activeElement;
+  if (a && /^(INPUT|SELECT|TEXTAREA)$/.test(a.tagName)) return;
+  render();
+}, 60000);
 
 /* açılışdan sonra arxa planda yenilik yoxla */
 setTimeout(() => checkUpdate(true), 1500);
