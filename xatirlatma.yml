@@ -1,0 +1,330 @@
+# Qaib Jurnalı — dərs xatırlatmaları.
+# İş günləri səhər işə düşür və gün boyu oyaq qalır:
+#   · səhər günün dərs siyahısını göndərir
+#   · hər dərsdən 5 dəqiqə əvvəl "Qaib Jurnalı" adı ilə bildiriş göndərir
+# Hər dəqiqə buluddakı cədvəli təzədən oxuyur — proqramda cədvəli dəyişib
+# "Saxla" basmaq kifayətdir, təqvimə heç nə əlavə etmək lazım deyil.
+#
+# GitHub-ın planlı işləri bəzən gec başlayır, ona görə səhər iki dəfə, günorta
+# iki dəfə qurulub. Eyni anda yalnız biri işləyir, qalanları növbədə gözləyir;
+# göndərilən hər bildiriş buludda qeyd olunur və təkrar getmir.
+# Bir iş 6 saatdan çox işləyə bilmir — ona görə gün iki hissəyə bölünür.
+name: Qaib dərs xatırlatmaları
+
+on:
+  schedule:
+    - cron: "10 3,4 * * 1-5"     # 07:10 və 08:10 (Bakı)
+    - cron: "40 8,9 * * 1-5"     # 12:40 və 13:40 (Bakı)
+  workflow_dispatch:
+    inputs:
+      sinaq:
+        description: "İndi telefona nümunə xatırlatma göndər"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qaib-xatirlatma
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Kitabxana
+        run: pip install --quiet pywebpush
+
+      - name: Gün boyu xatırlat
+        env:
+          FIREBASE_URL: ${{ secrets.FIREBASE_URL }}
+          VAULT_KEY: ${{ secrets.VAULT_KEY }}
+          VAPID_PRIVATE: ${{ secrets.VAPID_PRIVATE }}
+          SINAQ: ${{ inputs.sinaq }}
+          TZ: Asia/Baku
+        run: |
+          python - << 'QAIB_PY'
+          # -*- coding: utf-8 -*-
+          import os, re, sys, json, time, hashlib, datetime, urllib.parse, urllib.request
+
+          try:
+              sys.stdout.reconfigure(encoding="utf-8")
+          except Exception:
+              pass
+
+          BASE = os.environ.get("FIREBASE_URL", "").strip().rstrip("/")
+          KEY = os.environ.get("VAULT_KEY", "").strip()
+          PRIV = os.environ.get("VAPID_PRIVATE", "").strip()
+          DRY = os.environ.get("DRY") == "1"          # yerli sınaq: heç nə göndərmir, heç nə yazmır
+          ONCE = os.environ.get("ONCE") == "1"
+          SINAQ = os.environ.get("SINAQ", "").strip().lower() == "true"
+
+          LEAD = 5                     # dərsdən neçə dəqiqə əvvəl
+          LATE_OK = 8                  # bu qədər gecikmə ilə hələ göndərilir
+          MAX_RUN = 5 * 3600 + 45 * 60 # GitHub-ın 6 saatlıq həddindən əvvəl bitir
+          DAYS = ["mon", "tue", "wed", "thu", "fri"]
+          WEEK_AZ = {"ust": "Üst həftə", "alt": "Alt həftə"}
+
+          if not BASE or not KEY:
+              sys.exit("XETA: FIREBASE_URL ve ya VAULT_KEY bosdur.")
+          if not PRIV and not DRY:
+              sys.exit("XETA: VAPID_PRIVATE bosdur.")
+
+
+          def now_local():
+              if os.environ.get("NOW"):                 # yalnız yerli sınaq üçün
+                  return datetime.datetime.strptime(os.environ["NOW"], "%Y-%m-%dT%H:%M")
+              return datetime.datetime.now()
+
+
+          def api(path, method="GET", data=None):
+              u = BASE + "/vaults/" + urllib.parse.quote(KEY, safe="") + path + ".json"
+              body = None if data is None else json.dumps(data).encode("utf-8")
+              req = urllib.request.Request(u, data=body, method=method,
+                                           headers={"Content-Type": "application/json"})
+              with urllib.request.urlopen(req, timeout=30) as r:
+                  raw = r.read().decode("utf-8")
+              return json.loads(raw) if raw and raw != "null" else None
+
+
+          def mark(gun, mk):
+              if DRY:
+                  print("   (DRY) qeyd olunmadi:", mk)
+                  return
+              api("/sent/" + gun, "PATCH", {mk: True})
+
+
+          def parse_range(t):
+              m = re.search(r"(\d{1,2})[:.](\d{2})(?:\s*[–\-—]\s*(\d{1,2})[:.](\d{2}))?", str(t or ""))
+              if not m:
+                  return None
+              s = int(m.group(1)) * 60 + int(m.group(2))
+              e = int(m.group(3)) * 60 + int(m.group(4)) if m.group(3) else s + 80
+              return (s, e if e > s else s + 80)
+
+
+          def monday_of(d):
+              d = d.replace(hour=0, minute=0, second=0, microsecond=0)
+              return d - datetime.timedelta(days=d.weekday())
+
+
+          def week_type(state, now):
+              a = state.get("weekAnchor") or {"monday": "2026-09-28", "type": "ust"}
+              base = monday_of(datetime.datetime.strptime(a["monday"], "%Y-%m-%d"))
+              weeks = round((monday_of(now) - base).days / 7.0)
+              other = "alt" if a["type"] == "ust" else "ust"
+              return a["type"] if weeks % 2 == 0 else other
+
+
+          def hhmm(m):
+              return "%02d:%02d" % (m // 60, m % 60)
+
+
+          def slug(s):
+              return hashlib.sha1(s.encode("utf-8")).hexdigest()[:8]
+
+
+          def lessons_today(state, now):
+              di = now.weekday()
+              if di > 4:
+                  return [], None
+              wk = week_type(state, now)
+              sch = (state.get("schedules") or {}).get(state.get("active")) or {}
+              out = []
+              for e in (sch.get(wk) or {}).get(DAYS[di], []) or []:
+                  subj = (e.get("subject") or "").strip()
+                  tr = parse_range(e.get("time"))
+                  if subj and tr:
+                      out.append({"s": tr[0], "e": tr[1], "subj": subj,
+                                  "room": (e.get("room") or "").strip(),
+                                  "teacher": (e.get("teacher") or "").strip()})
+              out.sort(key=lambda x: x["s"])
+              return out, wk
+
+
+          def send_all(subs, payload):
+              """Bütün cihazlara göndərir. Qaytarır: (uğurlu, ölü abunələr)."""
+              if DRY:
+                  print("   (DRY) ->", json.dumps(payload, ensure_ascii=False))
+                  return len(subs), []
+              from pywebpush import webpush, WebPushException
+              ok, dead = 0, []
+              for sid, sub in subs.items():
+                  if not isinstance(sub, dict) or not sub.get("endpoint"):
+                      continue
+                  try:
+                      webpush(subscription_info={"endpoint": sub["endpoint"],
+                                                 "keys": {"p256dh": sub["p256dh"], "auth": sub["auth"]}},
+                              data=json.dumps(payload, ensure_ascii=False),
+                              vapid_private_key=PRIV,
+                              vapid_claims={"sub": "mailto:qaib@users.noreply.github.com"},
+                              ttl=900, headers={"Urgency": "high"})
+                      ok += 1
+                  except WebPushException as e:
+                      code = getattr(getattr(e, "response", None), "status_code", 0)
+                      print("   push xetasi:", code, str(e)[:120])
+                      if code in (404, 410):
+                          dead.append(sid)
+              return ok, dead
+
+
+          def qaib_map(node):
+              """Proqram Saxla basanda yazdığı xülasə: fənn -> (işlənmiş saat, limit)."""
+              lst = (node.get("qaibInfo") or {}).get("list") or []
+              if isinstance(lst, dict):
+                  lst = list(lst.values())
+              out = {}
+              for c in lst:
+                  try:
+                      out[(c.get("n") or "").strip()] = (float(c["F"]), float(c["G"]))
+                  except Exception:
+                      pass
+              return out
+
+
+          def saat(x):
+              return str(int(x)) if float(x).is_integer() else ("%.1f" % x)
+
+
+          def qaib_line(subj, qm, short=False):
+              """Limitə yaxındırsa xəbərdarlıq sətri, yoxsa boş."""
+              v = qm.get(subj)
+              if not v:
+                  return ""
+              F, G = v
+              H = G - F
+              if H < 0:
+                  return "⛔ limit aşılıb" if short else "⛔ Qaib limiti aşılıb"
+              if H == 0:
+                  return "⛔ limitdəsən" if short else "⛔ Limitdəsən — bu dərsi buraxma!"
+              if H <= 2 or (G > 0 and F / G >= 0.75):
+                  return ("⚠️ %s saat qalıb" if short else "⚠️ Qaib haqqın: cəmi %s saat qalıb") % saat(H)
+              return ""
+
+
+          def reminder_payload(L, now, wk, qm=None):
+              start = now.replace(hour=L["s"] // 60, minute=L["s"] % 60, second=0, microsecond=0)
+              mins = max(0, round((start - now).total_seconds() / 60))
+              when = "%d dəqiqəyə başlayır" % mins if mins > 0 else "indi başlayır"
+              line2 = " · ".join(x for x in [hhmm(L["s"]) + "–" + hhmm(L["e"]),
+                                              ("Otaq " + L["room"]) if L["room"] else ""] if x)
+              body = when + "\n" + line2 + (("\n" + L["teacher"]) if L["teacher"] else "")
+              warn = qaib_line(L["subj"], qm or {})
+              if warn:
+                  body += "\n" + warn
+              return {"title": L["subj"], "body": body,
+                      "tag": "qaib-ders-%s-%s" % (now.date().isoformat(), hhmm(L["s"]).replace(":", ""))}
+
+
+          def digest_payload(ders, now, wk, qm=None):
+              n = len(ders)
+              title = "Bu gün %d dərs · %s" % (n, WEEK_AZ.get(wk, ""))
+              lines = []
+              for L in ders:
+                  warn = qaib_line(L["subj"], qm or {}, short=True)
+                  lines.append(hhmm(L["s"]) + "  " + L["subj"] + ((" · " + L["room"]) if L["room"] else "")
+                               + (("  " + warn) if warn else ""))
+              return {"title": title, "body": "\n".join(lines), "tag": "qaib-gun-" + now.date().isoformat()}
+
+
+          def load():
+              node = api("") or {}
+              st = node.get("stateJson")
+              state = json.loads(st) if isinstance(st, str) else node.get("state")
+              return node, state
+
+
+          t0 = time.time()
+          dead_all = set()
+          deleted = set()
+
+          while True:
+              now = now_local()
+              gun = now.date().isoformat()
+              try:
+                  node, state = load()
+              except Exception as e:
+                  print("bulud oxunmadi:", str(e)[:120], "- 30 san sonra yeniden")
+                  time.sleep(30)
+                  continue
+              if not state:
+                  sys.exit("XETA: buludda melumat yoxdur.")
+              subs = {k: v for k, v in (node.get("push") or {}).items() if k not in dead_all}
+              if not subs:
+                  sys.exit("Abune cihaz yoxdur - telefonda 'Bildirisleri ac' basilmayib.")
+              sent = ((node.get("sent") or {}).get(gun)) or {}
+              ders, wk = lessons_today(state, now)
+              qm = qaib_map(node)
+
+              if SINAQ:
+                  # görünüşü yoxlamaq üçün: bu günün ilk dərsi (yoxdursa nümunə) "5 dəqiqə qalıb" kimi
+                  if ders:
+                      L = ders[0]
+                  else:
+                      st = (now + datetime.timedelta(minutes=LEAD)).replace(second=0, microsecond=0)
+                      L = {"s": st.hour * 60 + st.minute, "e": (st.hour * 60 + st.minute + 80) % 1440,
+                           "subj": "Nümunə dərs", "room": "101", "teacher": ""}
+                  fake = now.replace(hour=L["s"] // 60, minute=L["s"] % 60, second=0, microsecond=0)                       - datetime.timedelta(minutes=LEAD)
+                  p = reminder_payload(L, fake, wk, qm)
+                  p["tag"] = "qaib-sinaq-" + now.strftime("%H%M%S")
+                  ok, dead = send_all(subs, p)
+                  print("sinaq: %d cihaza gonderildi" % ok)
+                  break
+
+              # 1) səhər siyahısı — ilk dərsdən əvvəl, günorta 12-dən gec deyil
+              if ders and not sent.get("digest"):
+                  first = now.replace(hour=ders[0]["s"] // 60, minute=ders[0]["s"] % 60, second=0, microsecond=0)
+                  if (now.hour >= 8 or now >= first - datetime.timedelta(minutes=70)) and now.hour < 12:
+                      ok, dead = send_all(subs, digest_payload(ders, now, wk, qm))
+                      dead_all.update(dead)
+                      print("gun siyahisi -> %d cihaz" % ok)
+                      mark(gun, "digest")
+
+              # 2) dərs xatırlatmaları
+              pending = []
+              for L in ders:
+                  mk = "ders-%s-%s" % (hhmm(L["s"]).replace(":", ""), slug(L["subj"]))
+                  if sent.get(mk):
+                      continue
+                  start = now.replace(hour=L["s"] // 60, minute=L["s"] % 60, second=0, microsecond=0)
+                  target = start - datetime.timedelta(minutes=LEAD)
+                  late = (now - target).total_seconds()
+                  if late < 0:
+                      pending.append(target)
+                      continue
+                  if late <= LATE_OK * 60:
+                      ok, dead = send_all(subs, reminder_payload(L, now, wk, qm))
+                      dead_all.update(dead)
+                      print("%s %s -> %d cihaz" % (hhmm(L["s"]), L["subj"], ok))
+                  else:
+                      print("%s %s - gec qaldi, atlandi" % (hhmm(L["s"]), L["subj"]))
+                  mark(gun, mk)
+
+              for sid in dead_all - deleted:
+                  deleted.add(sid)
+                  if not DRY:
+                      try:
+                          api("/push/" + sid, "DELETE")
+                          print("kohnelmis cihaz silindi:", sid)
+                      except Exception:
+                          pass
+
+              if ONCE:
+                  print("novbeti:", [t.strftime("%H:%M") for t in sorted(pending)])
+                  break
+              if not pending:
+                  print("bu gun ucun xatirlatma qalmadi")
+                  break
+              if time.time() - t0 > MAX_RUN:
+                  print("vaxt bitdi - novbeti is davam etdirecek")
+                  break
+              nxt = min(pending) if pending else now + datetime.timedelta(minutes=10)
+              wait = (nxt - now_local()).total_seconds()
+              time.sleep(max(5, min(60, wait)))
+          QAIB_PY

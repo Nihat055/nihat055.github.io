@@ -561,6 +561,10 @@ ol.steps li::before{
 .toast.plain{padding-right:16px}
 .toast.show{opacity:1; transform:none; pointer-events:auto}
 .toast span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.toast span.two{display:flex; flex-direction:column; line-height:1.3; padding:3px 0}
+.toast span.two > *{overflow:hidden; text-overflow:ellipsis}
+.toast span.two i{font-style:normal; font-size:13px; font-weight:600; color:#ffb340}
+.toast span.two i.crit{color:#ff6961}
 .toast button{flex:none; border:0; background:rgba(255,255,255,.1); color:#6cb6ff; font-weight:600; font-size:14px; height:32px; padding:0 12px; border-radius:9px}
 .toast button:hover{background:rgba(255,255,255,.18)}
 :root[data-theme="dark"] .toast{background:#3a3a3c}
@@ -894,7 +898,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261029-1400";
+var APP_BUILD = "20261029-1500";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1585,6 +1589,26 @@ function mutate(fn) {
   render();
 }
 
+/* bildiriş skripti limiti özü hesablamır — fənlərin qaib/limit xülasəsi buluda yazılır */
+function qaibSummary() {
+  const list = [];
+  for (const r of activeSem().courses || []) {
+    const m = compute(r);
+    if (m.G != null) list.push({ n: r.name, F: m.F, G: m.G });
+  }
+  return { sem: state.active, list };
+}
+
+/* qaib yazılanda limitə nə qədər qaldığını deyir; yaxın deyilsə boş */
+function qaibWarn(F, G) {
+  if (G == null) return "";
+  const H = G - F;
+  if (H < 0) return "!⛔ Qaib limiti aşıldı";
+  if (H === 0) return "!⛔ Limitdəsən — növbəti qaib kəsilmədir";
+  if (H <= 2 || (G > 0 && F / G >= 0.75)) return "⚠️ Cəmi " + H + " saat qaib haqqın qaldı";
+  return "";
+}
+
 async function commit() {
   savedJson = JSON.stringify(state);
   dirty = false;
@@ -1598,7 +1622,7 @@ async function commit() {
   }
   setSync("busy", "Saxlanılır");
   try {
-    await backend.push({ updatedAt: Date.now(), stateJson: savedJson });
+    await backend.push({ updatedAt: Date.now(), stateJson: savedJson, qaibInfo: qaibSummary() });
     setSync("ok", "Saxlanıldı");
     toast("Yadda saxlanıldı");
   } catch (err) {
@@ -2737,7 +2761,11 @@ function toastOpen() {
 function toast(msg, actLabel, act) {
   const el = document.getElementById("toast");
   if (!el) return;
-  el.innerHTML = `<span>${esc(msg)}</span>` + (actLabel ? `<button type="button">${esc(actLabel)}</button>` : "");
+  // ikinci sətir (\n-dən sonra) rəngli xəbərdarlıq kimi göstərilir; "!" ilə başlayırsa qırmızı
+  const [l1, l2] = String(msg).split("\n");
+  const body = l2 == null ? esc(l1)
+    : `<b style="font-weight:500">${esc(l1)}</b><i class="${l2[0] === "!" ? "crit" : ""}">${esc(l2.replace(/^!/, ""))}</i>`;
+  el.innerHTML = `<span class="${l2 == null ? "" : "two"}">${body}</span>` + (actLabel ? `<button type="button">${esc(actLabel)}</button>` : "");
   el.classList.toggle("plain", !actLabel);
   el._act = act || null;
   el.classList.add("show");
@@ -2828,8 +2856,10 @@ document.addEventListener("click", (e) => {
     mutate((s) => { s.semesters[s.active].courses[i].absent = after; });
     const m = compute(r0);
     const u = undoAbs;
+    const warn = d > 0 ? qaibWarn(after, m.G) : "";
     const nm = r0.name.length > 26 ? r0.name.slice(0, 25) + "…" : r0.name;
-    toast(`${nm} · ${after}${m.G != null ? " / " + m.G : ""} saat`, "Geri al", () => {
+    if (warn && navigator.vibrate) { try { navigator.vibrate([30, 60, 30]); } catch (x) {} }
+    toast(`${nm} · ${after}${m.G != null ? " / " + m.G : ""} saat${warn ? "\n" + warn : ""}`, "Geri al", () => {
       const sm = state.semesters[u.sem];
       if (sm && sm.courses[u.i]) mutate((s) => { s.semesters[u.sem].courses[u.i].absent = u.prev; });
       undoAbs = null;
