@@ -894,7 +894,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261029-1300";
+var APP_BUILD = "20261029-1400";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1554,6 +1554,10 @@ async function applyUpdate() {
       await Promise.all(rs.map((r) => r.unregister()));
     }
   } catch (e) { /* davam */ }
+  // brauzerin öz yaddaşındakı köhnə səhifəni də təzələ — yoxsa çıxıb-girəndə
+  // ana ekran "./" ünvanını oradan açır və "Yenilə" yenidən çıxır
+  await Promise.all(["./", "index.html"].map((u) =>
+    fetch(u, { cache: "reload" }).catch(() => null)));
   location.replace(location.pathname + "?v=" + Date.now());
 }
 
