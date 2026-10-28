@@ -785,6 +785,18 @@ dl.rep-id dd{margin:0; font-size:14px; font-weight:600}
   .lock-t{margin-top:12px}
 }
 :root.qj-locked .win, :root.qj-locked .modal, :root.qj-locked .toast{visibility:hidden}
+/* açılma: nöqtələr yaşıllaşır, kilid ekranı yumşaq çəkilir, proqram qaranlıqdan işıqlanır */
+.lock-dots.ok i{background:#30d158; border-color:#30d158; transform:scale(1.15); transition:background .12s, border-color .12s, transform .2s}
+.lock.out{pointer-events:none; animation:lk-out .55s cubic-bezier(.4,0,.2,1) forwards}
+.lock.out .lock-pad, .lock.out .lock-links{animation:lk-sink .45s cubic-bezier(.4,0,.2,1) forwards}
+@keyframes lk-out{0%{opacity:1} 100%{opacity:0; transform:scale(1.06); filter:blur(8px)}}
+@keyframes lk-sink{to{opacity:0; transform:translateY(24px)}}
+.win.unlock{animation:win-unlock .8s cubic-bezier(.2,.75,.2,1) both}
+@keyframes win-unlock{
+  0%{filter:brightness(.15); transform:scale(.94); opacity:.4}
+  55%{filter:brightness(.85); opacity:1}
+  100%{filter:none; transform:none; opacity:1}
+}
 
 /* ====================  çap  ==================== */
 @media print{
@@ -882,7 +894,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261029-1200";
+var APP_BUILD = "20261029-1300";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -3578,7 +3590,7 @@ async function bioEnroll() {
   const cred = await navigator.credentials.create({ publicKey: {
     challenge: rnd(32),
     rp: { name: "Qaib Jurnalı", id: location.hostname },
-    user: { id: rnd(16), name: "qaib", displayName: "Qaib Jurnalı" },
+    user: { id: rnd(16), name: "Qaib Jurnalı", displayName: "Qaib Jurnalı" },
     pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
     authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "discouraged" },
     attestation: "none",
@@ -3629,7 +3641,9 @@ function lockEl() {
 function padOpen(opts) {
   pad = Object.assign({ len: 4, val: "", busy: false, err: "" }, opts);
   padDraw();
-  lockEl().hidden = false;
+  const el = lockEl();
+  el.classList.remove("out");
+  el.hidden = false;
 }
 function padClose() {
   pad = null;
@@ -3738,9 +3752,33 @@ function lockFail() {
 function lockPass() {
   const c = lockCfg();
   if (c && (c.fails || c.until)) { const n = Object.assign({}, c); delete n.fails; delete n.until; lockSave(n); }
+  const was = lockLocked;
   lockLocked = false;
-  document.documentElement.classList.remove("qj-locked");
-  padClose();
+  const el = document.getElementById("lock");
+  const calm = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!was || calm || !el || el.hidden) {
+    document.documentElement.classList.remove("qj-locked");
+    padClose();
+    return;
+  }
+  pad = null;                                  // daha toxunuş qəbul etmə
+  const dots = el.querySelector(".lock-dots");
+  if (dots) {
+    dots.querySelectorAll("i").forEach((i) => i.classList.add("on"));
+    dots.classList.add("ok");
+  }
+  setTimeout(() => {
+    document.documentElement.classList.remove("qj-locked");
+    const w = document.querySelector(".win");
+    if (w) { w.classList.remove("unlock"); void w.offsetWidth; w.classList.add("unlock"); }
+    el.classList.add("out");
+    if (typeof playEnter === "function") playEnter();
+    setTimeout(() => {
+      if (w) w.classList.remove("unlock");
+      el.classList.remove("out");
+      if (!pad) padClose();                    // bu arada yenidən kilidlənməyibsə
+    }, 820);
+  }, 200);
 }
 function lockNow(auto) {
   if (!lockOn()) return;
