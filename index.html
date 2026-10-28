@@ -743,8 +743,52 @@ dl.rep-id dd{margin:0; font-size:14px; font-weight:600}
 .report .kpi{border-top:.5px solid var(--line); border-bottom:.5px solid var(--line); padding-top:10px}
 .report .rep-foot{color:var(--muted); font-size:13px; line-height:1.6; padding:14px var(--pad) 18px; border-top:.5px solid var(--line); margin:0}
 
+/* ====================  giriş kilidi  ==================== */
+.lock{
+  position:fixed; inset:0; z-index:190; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:calc(24px + env(safe-area-inset-top)) 16px calc(20px + env(safe-area-inset-bottom));
+  background:var(--bg); color:var(--ink); overflow:auto;
+  -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+}
+.lock[hidden]{display:none}
+.lock-logo{width:56px; height:56px; flex:none; filter:drop-shadow(0 10px 22px rgba(8,16,32,.28))}
+.lock-t{margin-top:18px; font-size:19px; font-weight:600; letter-spacing:-.02em; text-align:center}
+.lock-s{margin-top:4px; min-height:20px; font-size:14px; color:var(--muted); text-align:center; max-width:300px; line-height:1.4}
+.lock-s.err{color:var(--crit)}
+.lock-dots{display:flex; gap:16px; height:14px; margin:22px 0 30px}
+.lock-dots i{width:13px; height:13px; border-radius:50%; border:1.5px solid var(--ink-2); transition:background .12s}
+.lock-dots i.on{background:var(--ink-2)}
+.lock-dots.shake{animation:lk-shake .42s cubic-bezier(.36,.07,.19,.97)}
+@keyframes lk-shake{20%,60%{transform:translateX(-9px)} 40%,80%{transform:translateX(9px)}}
+.lock-pad{display:grid; grid-template-columns:repeat(3,76px); gap:16px 26px}
+.lock-pad button{
+  width:76px; height:76px; border:0; border-radius:50%; background:var(--fill); color:var(--ink);
+  font-size:30px; font-weight:400; font-variant-numeric:tabular-nums; display:flex; align-items:center; justify-content:center;
+  transition:background .15s; -webkit-tap-highlight-color:transparent;
+}
+.lock-pad button:active{background:var(--fill-3); transition:none}
+.lock-pad button.ghost{background:none}
+.lock-pad button.ghost:active{background:var(--fill-2)}
+.lock-pad button[disabled]{opacity:.35}
+.lock-pad button.ghost svg{width:30px; height:30px}
+.lock-pad .nil{visibility:hidden}
+.lock-links{display:flex; gap:24px; margin-top:26px; min-height:24px}
+.lock-links button{border:0; background:none; color:var(--accent); font-size:15px; font-weight:500; padding:2px 4px}
+.lock-forgot{max-width:340px; text-align:center}
+.lock-forgot p{margin:12px 0 0; font-size:14.5px; line-height:1.5; color:var(--ink-2)}
+.lock-forgot .row{justify-content:center; margin-top:20px}
+.lock-forgot .btn{height:44px; padding:0 18px; border-radius:12px; font-size:15px}
+@media (max-height:620px){
+  .lock-pad{grid-template-columns:repeat(3,64px); gap:12px 22px}
+  .lock-pad button{width:64px; height:64px; font-size:26px}
+  .lock-dots{margin:16px 0 20px}
+  .lock-t{margin-top:12px}
+}
+:root.qj-locked .win, :root.qj-locked .modal, :root.qj-locked .toast{visibility:hidden}
+
 /* ====================  çap  ==================== */
 @media print{
+  :root.qj-locked body{display:none}
   .titlebar, .side, .tabbar, .toolbar, .notice, .splash{display:none !important}
   .win, .content, .scroll{display:block; height:auto; overflow:visible}
   #view{padding:0}
@@ -838,7 +882,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261021-1700";
+var APP_BUILD = "20261029-1200";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -2391,6 +2435,29 @@ function viewAyarlar() {
           </section>
 
           <section class="panel">
+            <div class="ph">Giriş kilidi<span class="ph-r">${lockOn() ? (lockCfg().bio ? "kod + " + esc(bioName()) : "kod") : "yoxdur"}</span></div>
+            <div class="pb">
+              <p class="dlg-msg" style="margin-bottom:11px">${lockOn()
+                ? "Proqram açılanda və arxa fondan qayıdanda kod soruşulur." + (lockCfg().bio ? ` <b>${esc(bioName())}</b> ilə də açmaq olar.` : "")
+                : `Kod təyin etsən, proqram açılanda kod soruşacaq${bioAvail ? ` — istəsən <b>${esc(bioName())}</b> ilə də` : ""}. Kilid yalnız bu cihazda qurulur, digər cihazlarda ayrıca qurmaq lazımdır.`}</p>
+              <div class="row">
+                ${lockOn()
+                  ? `<button class="btn" type="button" data-lockset="1">Kodu dəyiş</button>
+                     ${bioAvail || lockCfg().bio ? (lockCfg().bio
+                       ? `<button class="btn" type="button" data-lockbio="off">${esc(bioName())}-ni ayır</button>`
+                       : `<button class="btn primary" type="button" data-lockbio="on">${esc(bioName())}-ni qoş</button>`) : ""}
+                     <button class="btn" type="button" data-locknow="1">İndi kilidlə</button>
+                     <button class="btn danger" type="button" data-lockoff="1">Kilidi söndür</button>`
+                  : `<button class="btn primary" type="button" data-lockset="1">Kod təyin et</button>`}
+              </div>
+              ${lockOn() ? `<p class="dlg-msg" style="margin:14px 0 9px">Arxa fondan qayıdanda kilidlə</p>
+              <span class="seg">${LOCK_AFTER.map(([s, l]) =>
+                `<button type="button" data-lockafter="${s}" aria-pressed="${lockAfter() === s}">${l}</button>`).join("")}</span>` : ""}
+              ${bioAvail === false && !lockOn() ? `<p class="dlg-msg" style="margin-top:10px;opacity:.72">Bu cihazda ${esc(bioName())} əlçatan deyil — yalnız kod işləyəcək.</p>` : ""}
+            </div>
+          </section>
+
+          <section class="panel">
             <div class="ph">Qoruma kodu<span class="ph-r">${guardOn() ? "aktiv" : "yoxdur"}</span></div>
             <div class="pb">
               <p class="dlg-msg" style="margin-bottom:11px">${guardOn()
@@ -2707,7 +2774,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more],[data-calunhook]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more],[data-calunhook],[data-lockset],[data-lockbio],[data-locknow],[data-lockoff],[data-lockafter]");
   // <html> özü də data-theme/data-font daşıyır — boş yerə toxunuş onu "düymə" saymasın
   if (!t || t === document.documentElement) return;
   const host = document.getElementById("modal");
@@ -3102,6 +3169,32 @@ document.addEventListener("click", (e) => {
     return;
   }
 
+  /* ---- giriş kilidi ---- */
+  if (t.dataset.lockset) {
+    if (!lockOn()) return lockSetFlow(null);
+    return lockAsk("Hazırkı kodu daxil et", () => lockSetFlow(lockCfg()));
+  }
+  if (t.dataset.lockbio === "on") return lockBioOn();
+  if (t.dataset.lockbio === "off") {
+    return lockAsk("Hazırkı kodu daxil et", () => {
+      lockSave(Object.assign({}, lockCfg(), { bio: null }));
+      toast(bioName() + " ayrıldı");
+      render();
+    });
+  }
+  if (t.dataset.locknow) return lockNow(false);
+  if (t.dataset.lockoff) {
+    return lockAsk("Kilidi söndürmək üçün kod", () => {
+      lockSave(null);
+      toast("Kilid söndürüldü");
+      render();
+    });
+  }
+  if (t.dataset.lockafter != null) {
+    lockSave(Object.assign({}, lockCfg(), { after: +t.dataset.lockafter }));
+    return render();
+  }
+
   /* ---- kodu təyin et / dəyiş ---- */
   if (t.dataset.setguard) {
     return openDialog(guardOn() ? "Kodu dəyiş" : "Kod təyin et", "rəqəm və ya mətn",
@@ -3421,8 +3514,355 @@ function saveFile(name, text, mime) {
 
 
 /* ============================================================
+   17b. Giriş kilidi — kod və Face ID
+   Ayar yalnız bu cihazda saxlanılır (buluda getmir): Face ID açarı
+   cihaza bağlıdır, kodu da hər cihazda ayrıca qurmaq daha təhlükəsizdir.
+   ============================================================ */
+const LOCK_KEY = "qaib.lock";
+const LOCK_AFTER = [[0, "Dərhal"], [60, "1 dəq"], [300, "5 dəq"], [900, "15 dəq"]];
+let lockCfgMem = null;
+let lockLocked = false;
+let lockHiddenAt = 0;
+let bioAvail = null;        // null — hələ yoxlanmayıb
+let pad = null;             // hazırkı klaviatura vəziyyəti
+
+function lockCfg() {
+  if (lockCfgMem) return lockCfgMem;
+  try {
+    const c = JSON.parse(localStorage.getItem(LOCK_KEY) || "null");
+    if (c && typeof c.hash === "string" && c.hash && typeof c.salt === "string") lockCfgMem = c;
+  } catch (e) { /* zədəli — kilid yoxdur */ }
+  return lockCfgMem;
+}
+function lockSave(c) {
+  lockCfgMem = c || null;
+  try {
+    if (c) localStorage.setItem(LOCK_KEY, JSON.stringify(c));
+    else localStorage.removeItem(LOCK_KEY);
+  } catch (e) {}
+}
+const lockOn = () => !!lockCfg();
+const lockAfter = () => { const c = lockCfg(); return c && typeof c.after === "number" ? c.after : 60; };
+
+const b64e = (buf) => btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
+const b64d = (s) => Uint8Array.from(atob(s), (ch) => ch.charCodeAt(0));
+const rnd = (n) => crypto.getRandomValues(new Uint8Array(n));
+
+async function pinHash(pin, saltB64) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(String(pin)), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt: b64d(saltB64), iterations: 150000, hash: "SHA-256" }, key, 256);
+  return b64e(bits);
+}
+async function pinOk(pin) {
+  const c = lockCfg();
+  return !!c && (await pinHash(pin, c.salt)) === c.hash;
+}
+
+function bioName() {
+  const ua = navigator.userAgent || "";
+  if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1)) return "Face ID";
+  if (/Macintosh/.test(ua)) return "Touch ID";
+  if (/Windows/.test(ua)) return "Windows Hello";
+  if (/Android/.test(ua)) return "Barmaq izi";
+  return "Biometrik giriş";
+}
+async function bioCheck() {
+  try {
+    bioAvail = !!(window.PublicKeyCredential && window.isSecureContext &&
+      await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());
+  } catch (e) { bioAvail = false; }
+  return bioAvail;
+}
+async function bioEnroll() {
+  const cred = await navigator.credentials.create({ publicKey: {
+    challenge: rnd(32),
+    rp: { name: "Qaib Jurnalı", id: location.hostname },
+    user: { id: rnd(16), name: "qaib", displayName: "Qaib Jurnalı" },
+    pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+    authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required", residentKey: "discouraged" },
+    attestation: "none",
+    timeout: 60000,
+  } });
+  return b64e(cred.rawId);
+}
+async function bioVerify() {
+  const c = lockCfg();
+  if (!c || !c.bio) return false;
+  const a = await navigator.credentials.get({ publicKey: {
+    challenge: rnd(32),
+    rpId: location.hostname,
+    allowCredentials: [{ type: "public-key", id: b64d(c.bio), transports: ["internal"] }],
+    userVerification: "required",
+    timeout: 60000,
+  } });
+  // eyni açar olmalı və istifadəçi doğrulanmalıdır (UV bayrağı)
+  const flags = new Uint8Array(a.response.authenticatorData)[32];
+  return b64e(a.rawId) === c.bio && !!(flags & 0x04);
+}
+
+/* ---- klaviatura ekranı ---- */
+const FACE_SVG = `<svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M3 9V6.5A3.5 3.5 0 0 1 6.5 3H9M21 3h2.5A3.5 3.5 0 0 1 27 6.5V9M27 21v2.5a3.5 3.5 0 0 1-3.5 3.5H21M9 27H6.5A3.5 3.5 0 0 1 3 23.5V21"/>
+  <path d="M10 11v2.2M20 11v2.2M15 11v5.5h-1.3M11 20.2c2.3 2 5.7 2 8 0"/></svg>`;
+const BACK_SVG = `<svg viewBox="0 0 30 30" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  <path d="M11 7h13a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H11l-7-8z"/><path d="M14.5 12l6 6M20.5 12l-6 6"/></svg>`;
+
+function lockEl() {
+  let el = document.getElementById("lock");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "lock";
+    el.className = "lock";
+    el.hidden = true;
+    el.setAttribute("role", "dialog");
+    el.setAttribute("aria-modal", "true");
+    el.setAttribute("aria-label", "Giriş kilidi");
+    const sp = document.getElementById("splash");
+    document.body.insertBefore(el, sp || null);
+    el.addEventListener("click", padClick);
+  }
+  return el;
+}
+
+/* opts: { title, sub, len, lenToggle, bio, cancel, forgot, onPin(pin) → Promise<true|string> } */
+function padOpen(opts) {
+  pad = Object.assign({ len: 4, val: "", busy: false, err: "" }, opts);
+  padDraw();
+  lockEl().hidden = false;
+}
+function padClose() {
+  pad = null;
+  const el = document.getElementById("lock");
+  if (el) { el.hidden = true; el.innerHTML = ""; }
+}
+function padWait() {
+  const c = lockCfg();
+  return c && c.until ? Math.max(0, Math.ceil((c.until - Date.now()) / 1000)) : 0;
+}
+function padDraw() {
+  const el = lockEl();
+  if (!pad) return;
+  if (pad.forgotView) {
+    const sync = typeof cloudCfg === "function" && cloudCfg();
+    el.innerHTML = `<div class="lock-forgot">
+      <svg class="lock-logo" aria-hidden="true"><use href="#qj-logo"/></svg>
+      <div class="lock-t">Kodu unutmusan?</div>
+      <p>Kod heç yerdə açıq saxlanılmır, ona görə bərpa etmək olmur.
+        Kilidi götürmək üçün bu cihazdakı məlumat silinməlidir.</p>
+      <p>${sync
+        ? "<b>Buludda olan məlumat qalır.</b> Sonra Ayarlarda sinxronu yenidən qurub (baza ünvanı və açar) hər şeyi geri yükləyə bilərsən."
+        : "<b>Sinxron qurulmayıb</b> — bu cihazdakı bütün qaib, qiymət və cədvəl məlumatı itəcək."}</p>
+      <div class="row">
+        <button class="btn" type="button" data-lk="back">Geri</button>
+        <button class="btn danger" type="button" data-lk="wipe">Cihazı təmizlə</button>
+      </div></div>`;
+    return;
+  }
+  const wait = padWait();
+  const sub = wait ? `Çox səhv cəhd. ${wait} saniyə gözlə.` : (pad.err || pad.sub || "");
+  const dots = Array.from({ length: pad.len }, (_, i) => `<i class="${i < pad.val.length ? "on" : ""}"></i>`).join("");
+  const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+    .map((d) => `<button type="button" data-lk="d" data-d="${d}" ${wait ? "disabled" : ""}>${d}</button>`).join("");
+  const left = pad.bio && lockCfg() && lockCfg().bio
+    ? `<button type="button" class="ghost" data-lk="bio" aria-label="${esc(bioName())} ilə aç">${FACE_SVG}</button>`
+    : `<button type="button" class="nil" tabindex="-1" aria-hidden="true"></button>`;
+  el.innerHTML = `
+    <svg class="lock-logo" aria-hidden="true"><use href="#qj-logo"/></svg>
+    <div class="lock-t">${esc(pad.title)}</div>
+    <div class="lock-s ${pad.err || wait ? "err" : ""}" aria-live="polite">${esc(sub)}</div>
+    <div class="lock-dots" aria-hidden="true">${dots}</div>
+    <div class="lock-pad">${keys}${left}
+      <button type="button" data-lk="d" data-d="0" ${wait ? "disabled" : ""}>0</button>
+      <button type="button" class="ghost" data-lk="del" aria-label="Sil">${BACK_SVG}</button>
+    </div>
+    <div class="lock-links">
+      ${pad.lenToggle ? `<button type="button" data-lk="len">${pad.len === 4 ? "6 rəqəmli kod" : "4 rəqəmli kod"}</button>` : ""}
+      ${pad.forgot ? `<button type="button" data-lk="forgot">Kodu unutdum</button>` : ""}
+      ${pad.cancel ? `<button type="button" data-lk="cancel">Ləğv et</button>` : ""}
+    </div>`;
+  if (wait) setTimeout(() => { if (pad && !pad.forgotView) padDraw(); }, 1000);
+}
+function padShake(msg) {
+  if (!pad) return;
+  pad.val = "";
+  pad.err = msg;
+  padDraw();
+  const d = document.querySelector("#lock .lock-dots");
+  if (d) { d.classList.add("shake"); if (navigator.vibrate) navigator.vibrate(120); }
+}
+async function padDigit(d) {
+  if (!pad || pad.busy || padWait() || pad.val.length >= pad.len) return;
+  pad.val += d;
+  pad.err = "";
+  padDraw();
+  if (pad.val.length < pad.len) return;
+  pad.busy = true;
+  const p = pad;
+  let res;
+  try { res = await p.onPin(p.val); } catch (e) { res = "Xəta baş verdi, yenidən yoxla"; }
+  if (pad !== p) return;        // ekran artıq dəyişib
+  p.busy = false;
+  if (res !== true) padShake(typeof res === "string" ? res : "Kod səhvdir");
+}
+function padClick(e) {
+  const b = e.target.closest("[data-lk]");
+  if (!b || !pad) return;
+  const k = b.dataset.lk;
+  if (k === "d") return padDigit(b.dataset.d);
+  if (k === "del") { if (!pad.busy) { pad.val = pad.val.slice(0, -1); pad.err = ""; padDraw(); } return; }
+  if (k === "len") { pad.len = pad.len === 4 ? 6 : 4; pad.val = ""; pad.err = ""; return padDraw(); }
+  if (k === "cancel") { const f = pad.onCancel; padClose(); if (f) f(); return; }
+  if (k === "bio") return lockBio(true);
+  if (k === "forgot") { pad.forgotView = true; return padDraw(); }
+  if (k === "back") { pad.forgotView = false; return padDraw(); }
+  if (k === "wipe") return lockWipe();
+}
+/* kilid ekranı açıqdırsa, klaviatura yalnız ona işləyir */
+window.addEventListener("keydown", (e) => {
+  if (!pad) return;
+  e.stopImmediatePropagation();
+  if (pad.forgotView) return;
+  if (/^[0-9]$/.test(e.key)) { e.preventDefault(); padDigit(e.key); }
+  else if (e.key === "Backspace") { e.preventDefault(); if (!pad.busy) { pad.val = pad.val.slice(0, -1); padDraw(); } }
+  else if (e.key === "Escape" && pad.cancel) { e.preventDefault(); const f = pad.onCancel; padClose(); if (f) f(); }
+}, true);
+
+/* ---- kilidləmə / açma ---- */
+function lockFail() {
+  const c = Object.assign({}, lockCfg());
+  c.fails = (c.fails || 0) + 1;
+  if (c.fails >= 5) c.until = Date.now() + Math.min(900, 30 * Math.pow(2, c.fails - 5)) * 1000;
+  lockSave(c);
+}
+function lockPass() {
+  const c = lockCfg();
+  if (c && (c.fails || c.until)) { const n = Object.assign({}, c); delete n.fails; delete n.until; lockSave(n); }
+  lockLocked = false;
+  document.documentElement.classList.remove("qj-locked");
+  padClose();
+}
+function lockNow(auto) {
+  if (!lockOn()) return;
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  lockLocked = true;
+  document.documentElement.classList.add("qj-locked");
+  padOpen({
+    title: "Kodu daxil et",
+    sub: lockCfg().bio ? bioName() + " və ya kod ilə aç" : "",
+    len: lockCfg().len || 4,
+    bio: true,
+    forgot: true,
+    onPin: async (pin) => {
+      if (await pinOk(pin)) { lockPass(); return true; }
+      lockFail();
+      return "Kod səhvdir";
+    },
+  });
+  if (auto && lockCfg().bio) setTimeout(() => lockBio(false), 250);
+}
+let bioBusy = false;
+async function lockBio(byTap) {
+  if (bioBusy || !lockLocked || padWait()) return;
+  bioBusy = true;
+  try {
+    if (await bioVerify()) lockPass();
+    else if (byTap) padShake(bioName() + " tanımadı");
+  } catch (e) {
+    // avtomatik cəhdi brauzer rədd edə bilər (toxunuş tələb olunur) — düymə qalır
+    if (byTap && pad && e && e.name !== "NotAllowedError" && e.name !== "AbortError") padShake(bioName() + " alınmadı");
+  } finally { bioBusy = false; }
+}
+function lockWipe() {
+  try { [LS_KEY, LS_OLD, CFG_KEY, LOCK_KEY].forEach((k) => localStorage.removeItem(k)); } catch (e) {}
+  location.replace(location.pathname);
+}
+
+document.addEventListener("visibilitychange", () => {
+  if (!lockOn()) return;
+  if (document.hidden) {
+    lockHiddenAt = Date.now();
+    // "Dərhal" — tətbiq dəyişdiricisinin şəklində məlumat görünməsin
+    if (lockAfter() === 0 && !lockLocked && !pad) lockNow(false);
+  } else if (lockLocked) {
+    if (lockCfg().bio) setTimeout(() => lockBio(false), 300);
+  } else if (!pad && lockHiddenAt && Date.now() - lockHiddenAt >= lockAfter() * 1000) {
+    lockNow(true);
+  }
+});
+
+function lockBoot() {
+  if (lockOn()) lockNow(false);
+  bioCheck().then(() => { if (current === "ayarlar" && !lockLocked) render(); });
+  // açılış ekranı çəkiləndən sonra Face ID özü soruşulur
+  if (lockOn() && lockCfg().bio) setTimeout(() => lockBio(false), 1800);
+}
+
+/* ---- sazlamalardan çağırılan əməliyyatlar ---- */
+function lockAsk(title, onOk) {
+  padOpen({
+    title, sub: "", len: lockCfg().len || 4, cancel: true,
+    onPin: async (pin) => {
+      if (padWait()) return "Gözlə";
+      if (!(await pinOk(pin))) { lockFail(); return "Kod səhvdir"; }
+      lockPass();
+      onOk();
+      return true;
+    },
+  });
+}
+function lockSetFlow(old) {
+  if (!window.crypto || !crypto.subtle) {
+    return openDialog("Kilid qurmaq olmur", "", `<p class="dlg-msg">Bu səhifə təhlükəsiz bağlantı (https) ilə açılmayıb.</p>`, null, "Oldu");
+  }
+  padOpen({
+    title: old ? "Yeni kodu daxil et" : "Kod təyin et",
+    sub: "Proqramı açmaq üçün istifadə olunacaq",
+    len: (old && old.len) || 4, lenToggle: true, cancel: true,
+    onPin: async (first) => {
+      const len = first.length;
+      padOpen({
+        title: "Kodu təkrar daxil et", sub: "", len, cancel: true,
+        onPin: async (second) => {
+          if (second !== first) {
+            setTimeout(() => { lockSetFlow(old); if (pad) { pad.err = "Kodlar uyğun gəlmədi"; padDraw(); } }, 0);
+            return true;
+          }
+          const salt = b64e(rnd(16));
+          const hash = await pinHash(first, salt);
+          lockSave({ v: 1, salt, hash, len, bio: old ? old.bio || null : null, after: old ? lockAfter() : 60 });
+          padClose();
+          render();
+          if (!old && bioAvail) {
+            setTimeout(() => openDialog(bioName() + " də qoşulsun?", "kod ehtiyat kimi qalır",
+              `<p class="dlg-msg">Proqramı kod yığmadan, ${esc(bioName())} ilə açmaq olar.</p>`,
+              () => lockBioOn(), "Qoş"), 0);
+          } else toast(old ? "Kod dəyişdi" : "Kilid quruldu");
+          return true;
+        },
+      });
+      return true;
+    },
+  });
+}
+async function lockBioOn() {
+  try {
+    const id = await bioEnroll();
+    lockSave(Object.assign({}, lockCfg(), { bio: id }));
+    toast(bioName() + " qoşuldu");
+  } catch (e) {
+    if (!e || e.name !== "NotAllowedError") {
+      openDialog(bioName() + " qoşulmadı", "", `<p class="dlg-msg">${esc(e && e.message ? e.message : "Naməlum xəta")}</p>`, null, "Oldu");
+    }
+  }
+  render();
+}
+
+
+/* ============================================================
    18. Başlat
    ============================================================ */
+lockBoot();
 render();
 initStore();
 
