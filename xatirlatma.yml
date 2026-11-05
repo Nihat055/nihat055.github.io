@@ -131,6 +131,8 @@ jobs:
 
 
           def lessons_today(state, now):
+              if now.date().isoformat() in (state.get("holidays") or {}):
+                  return [], None
               di = now.weekday()
               if di > 4:
                   return [], None

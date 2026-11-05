@@ -406,6 +406,8 @@ table.t tr.lv-crit td.stripe::before{background:var(--crit)}
 .ls.lv-crit .tm::after{background:var(--crit)}
 .ls b{display:block; font-size:14.5px; font-weight:550; margin-top:3px; line-height:1.3}
 .ls .mt{display:block; font-size:12.5px; color:var(--muted); margin-top:4px}
+.col-hol{margin:0; padding:9px 11px; border-radius:11px; font-size:12.5px; line-height:1.4; color:var(--ink); background:color-mix(in srgb, var(--warn) 14%, transparent)}
+.col-b.off .ls{opacity:.5}
 .col-empty{margin:0; padding:12px; border-radius:11px; color:var(--faint); font-size:13px; text-align:center; background:var(--fill-2)}
 .col-f{display:block}
 .addbtn{
@@ -898,7 +900,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261029-1500";
+var APP_BUILD = "20261106-0030";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1089,8 +1091,31 @@ const PROFILE_FIELDS = [
 
 const PERSONAL = null;   // acig hostda sexsi melumat saxlanilmir
 
+/* Qeyri-iş günləri: "iiii-aa-gg" -> ad. Yalnız sabit tarixlər və elan olunmuş köçürmələr;
+   Ramazan, Qurban və köçürülən günlər hər il ayrıca elan olunur, onları proqramdan əlavə etmək olar. */
+const DEFAULT_HOLIDAYS = {
+  "2026-11-08": "Zəfər Günü",
+  "2026-11-09": "Dövlət Bayrağı Günü",
+  "2026-11-10": "Zəfər Günü (istirahət günü)",
+  "2026-12-31": "Dünya Azərbaycanlılarının Həmrəyliyi Günü",
+  "2027-01-01": "Yeni il",
+  "2027-01-02": "Yeni il",
+  "2027-01-20": "Ümumxalq Hüzn Günü",
+  "2027-03-08": "Qadınlar Günü",
+  "2027-03-20": "Novruz bayramı",
+  "2027-03-21": "Novruz bayramı",
+  "2027-03-22": "Novruz bayramı",
+  "2027-03-23": "Novruz bayramı",
+  "2027-03-24": "Novruz bayramı",
+  "2027-05-09": "Faşizm üzərində Qələbə Günü",
+  "2027-05-28": "Müstəqillik Günü",
+  "2027-06-15": "Milli Qurtuluş Günü",
+  "2027-06-26": "Silahlı Qüvvələr Günü",
+};
+
 const BASELINE = {
   version: 2,
+  holidays: DEFAULT_HOLIDAYS,
   active: "Kurs 2 • Semestr 1",
   // Həftə növbəsi: bu bazar ertəsindən başlayan həftə "ust" sayılır,
   // sonrakı həftələr avtomatik olaraq bir-birini növbələyir.
@@ -1259,6 +1284,36 @@ function weekTypeAt(date) {
   return same ? a.type : other;
 }
 function currentWeekType() { return weekTypeAt(new Date()); }
+
+/* ---- Bayram və tətil günləri ---- */
+const isoDay = (d) => d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+const holidayAt = (d) => (state.holidays || {})[isoDay(d)] || null;
+function holidayDays(from, to) {
+  const out = [];
+  const d = new Date(from + "T00:00:00");
+  while (isoDay(d) <= to && out.length < 366) {
+    out.push(isoDay(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return out;
+}
+/* ardıcıl, eyni adlı günlər bir sətir olur */
+function holidayGroups() {
+  const hs = state.holidays || {};
+  const out = [];
+  for (const day of Object.keys(hs).sort()) {
+    const last = out[out.length - 1];
+    if (last && last.name === hs[day] && holidayDays(last.to, day).length === 2) last.to = day;
+    else out.push({ from: day, to: day, name: hs[day] });
+  }
+  return out;
+}
+function holidayRange(h) {
+  const a = new Date(h.from + "T00:00:00"), b = new Date(h.to + "T00:00:00");
+  const end = b.getDate() + " " + MONTHS[b.getMonth()] + " " + b.getFullYear();
+  if (h.from === h.to) return end;
+  return (a.getMonth() === b.getMonth() ? a.getDate() + "–" : a.getDate() + " " + MONTHS[a.getMonth()] + " – ") + end;
+}
 const weekName = (t) => (t === "ust" ? "Üst həftə" : "Alt həftə");
 
 /* ---- Köhnə nüsxələri yeni formata gətir ---- */
@@ -1600,13 +1655,20 @@ function qaibSummary() {
 }
 
 /* qaib yazılanda limitə nə qədər qaldığını deyir; yaxın deyilsə boş */
-function qaibWarn(F, G) {
+function qaibWarn(F, G, m) {
   if (G == null) return "";
   const H = G - F;
-  if (H < 0) return "!⛔ Qaib limiti aşıldı";
-  if (H === 0) return "!⛔ Limitdəsən — növbəti qaib kəsilmədir";
+  const pay = m && m.pay25 != null ? " (25% ödəniş " + money(m.pay25) + ")" : "";
+  if (H < 0) return "!⛔ Qaib limiti aşıldı" + pay;
+  if (H === 0) return "!⛔ Limitdəsən — növbəti qaib kəsilmədir" + pay;
   if (H <= 2 || (G > 0 && F / G >= 0.75)) return "⚠️ Cəmi " + H + " saat qaib haqqın qaldı";
   return "";
+}
+
+/* kəsilən və ya kəsilməyə yaxın fənnin ödənişi — məbləğlər Fənn kataloqundakı kimidir */
+function failCost(m) {
+  if (m.pay25 == null) return "";
+  return (m.result === "Fail" ? "Kəsilmisən" : "Kəsilsən") + ": 25% ödəniş " + money(m.pay25) + " · alt qrup " + money(m.paySub);
 }
 
 async function commit() {
@@ -1656,7 +1718,11 @@ function onRemote(payload) {
   if (!raw) { setSync("ok", "Hazırdır"); return; }
   const incoming = migrate(raw);
   const incomingJson = JSON.stringify(incoming);
-  if (incomingJson === savedJson) { setSync("ok", "Sinxron"); return; }
+  if (incomingJson === savedJson) {
+    setSync("ok", "Sinxron");
+    if (raw.holidays == null && !dirty) seedHolidays();
+    return;
+  }
   if (dirty) {
     remotePending = raw;
     setSync("busy", "Başqa cihazda dəyişiklik var");
@@ -1667,6 +1733,15 @@ function onRemote(payload) {
   try { localStorage.setItem(LS_KEY, savedJson); } catch (e) {}
   setSync("ok", "Sinxron");
   render();
+  if (raw.holidays == null) seedHolidays();
+}
+
+/* buluddakı skriptlər bayramları state-dən oxuyur */
+async function seedHolidays() {
+  if (!backend) return;
+  try {
+    await backend.push({ updatedAt: Date.now(), stateJson: savedJson, qaibInfo: qaibSummary() });
+  } catch (e) { /* növbəti açılışda yenə cəhd olunur */ }
 }
 
 /* ---- arxa uc 1: Claude qabığının bazası ---- */
@@ -1944,7 +2019,7 @@ function nextLesson() {
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() + off);
     const dk = (DAYS[d.getDay() - 1] || [])[0];
-    if (!dk) continue;
+    if (!dk || holidayAt(d)) continue;
     for (const { e } of dayLessons(weekTypeAt(d), dk)) {
       const tr = parseRange(e.time);
       if (!tr) continue;
@@ -1998,12 +2073,14 @@ function viewOverview() {
   const cw = currentWeekType();
   const tk = todayKey();
   const shownDay = tk || "mon";
-  const rows = dayLessons(cw, shownDay);
+  const shownDate = tk ? now : new Date(mondayOf(now).getTime() + 7 * 86400000);
+  const hol = holidayAt(shownDate);
+  const rows = hol ? [] : dayLessons(cw, shownDay);
   const dayName = DAYS.find(([k]) => k === shownDay)[1];
   const first = String((state.profile || {})["Ad, Soyad, Ata adı"] || "").trim().split(/\s+/)[0] || "";
 
   const lessons = rows.length === 0
-    ? `<p class="blank">${tk ? "Bu gün dərs yoxdur." : "Bu gün dərs günü deyil."}</p>`
+    ? `<p class="blank">${hol ? "Dərs yoxdur — " + esc(hol) + "." : tk ? "Bu gün dərs yoxdur." : "Bu gün dərs günü deyil."}</p>`
     : `<div class="tw"><table class="t"><thead><tr>
          <th>Saat</th><th>Fənn</th><th class="hide-sm">Otaq</th><th class="r">Qaib</th><th></th>
        </tr></thead><tbody>${rows.map(({ e }) => {
@@ -2106,7 +2183,7 @@ function viewQaib() {
               const m = compute(r);
               return `<tr class="lv-${m.level}">
                 <td class="ix stripe">${i + 1}</td>
-                <td class="nm"><button class="linkbtn" type="button" data-course="${i}">${esc(r.name)}</button>${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}</td>
+                <td class="nm"><button class="linkbtn" type="button" data-course="${i}">${esc(r.name)}</button>${m.teacher ? `<small>${esc(m.teacher)}</small>` : ""}${(m.level !== "ok" || m.result === "Fail") && failCost(m) ? `<small>${esc(failCost(m))}</small>` : ""}</td>
                 <td class="hide-sm code">${esc(m.code)}</td>
                 <td class="hide-sm r">${dash(m.credits)}</td>
                 <td class="hide-sm r">${m.F}</td>
@@ -2136,15 +2213,19 @@ function viewCedvel() {
   const total = DAYS.reduce((a, [dk]) => a + weekBlock(wk)[dk].length, 0);
   const sem = activeSem();
 
-  const columns = DAYS.map(([dk, label]) => {
+  const shownMon = new Date(mondayOf(new Date()).getTime() + (wk === cw ? 0 : 7) * 86400000);
+  const columns = DAYS.map(([dk, label], di) => {
     const list = dayLessons(wk, dk);
     const isToday = dk === tk && wk === cw;
+    const colDate = new Date(shownMon.getTime() + di * 86400000);
+    const hol = holidayAt(colDate);
     return `<section class="col">
       <div class="col-h ${isToday ? "today" : ""}">
         <span>${esc(label)}</span>${isToday ? `<span class="tag acc">Bu gün</span>` : ""}
         <span class="n">${list.length}</span>
       </div>
-      <div class="col-b">
+      <div class="col-b${hol ? " off" : ""}">
+        ${hol ? `<p class="col-hol">${colDate.getDate()} ${MONTHS[colDate.getMonth()]} — ${esc(hol)}, dərs yoxdur</p>` : ""}
         ${list.length === 0 ? `<p class="col-empty">dərs yoxdur</p>` : list.map(({ e, i }) => {
           const ci = sem.courses.findIndex((c) => c.name === e.subject);
           const lv = ci >= 0 ? compute(sem.courses[ci]).level : "ok";
@@ -2176,8 +2257,25 @@ function viewCedvel() {
       </div>
       <div class="board">${columns}</div>
       <p class="hintbox">Həftə hər bazar ertəsi özü dəyişir. Nöqtə (·) cari həftəni göstərir.</p>
-    </section>`,
+    </section>
+    ${holidayPanel()}`,
   };
+}
+
+function holidayPanel() {
+  const today = isoDay(new Date());
+  const list = holidayGroups().filter((h) => h.to >= today);
+  return `<section class="panel">
+      <div class="ph">Bayram və tətil günləri<span class="ph-r"><button class="btn" type="button" data-addhol="1">Əlavə et</button></span></div>
+      ${list.length === 0 ? `<p class="blank">Qarşıda qeyd olunmuş gün yoxdur.</p>` : `<div class="tw"><table class="t">
+        <thead><tr><th>Ad</th><th class="r">Tarix</th></tr></thead>
+        <tbody>${list.map((h) => `<tr>
+          <td class="nm"><button class="linkbtn" type="button" data-hol="${h.from}">${esc(h.name)}</button></td>
+          <td class="r" style="white-space:nowrap">${holidayRange(h)}</td>
+        </tr>`).join("")}</tbody>
+      </table></div>`}
+      <p class="hintbox">Bu günlərdə dərs göstərilmir, xatırlatma gəlmir və təqvimdən çıxır. Ramazan, Qurban və köçürülən istirahət günləri hər il elan olunur — onları özün əlavə et.</p>
+    </section>`;
 }
 
 /* ============================================================
@@ -2818,7 +2916,7 @@ function lessonFields(e) {
    15. Hadisələr
    ============================================================ */
 document.addEventListener("click", (e) => {
-  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more],[data-calunhook],[data-lockset],[data-lockbio],[data-locknow],[data-lockoff],[data-lockafter]");
+  const t = e.target.closest("[data-go],[data-absent],[data-vweek],[data-flipweek],[data-copyweek],[data-add],[data-edit],[data-pick],[data-prof],[data-setsem],[data-export],[data-import],[data-reset],[data-dlg],[data-save],[data-discard],[data-synccfg],[data-syncnow],[data-syncpush],[data-ics],[data-addcourse],[data-course],[data-addsem],[data-report],[data-reportfile],[data-print],[data-setguard],[data-delguard],[data-update],[data-checkupd],[data-theme],[data-testics],[data-calhook],[data-caldiag],[data-pushon],[data-pushoff],[data-pushtest],[data-font],[data-fs],[data-more],[data-calunhook],[data-lockset],[data-lockbio],[data-locknow],[data-lockoff],[data-lockafter],[data-addhol],[data-hol]");
   // <html> özü də data-theme/data-font daşıyır — boş yerə toxunuş onu "düymə" saymasın
   if (!t || t === document.documentElement) return;
   const host = document.getElementById("modal");
@@ -2856,7 +2954,7 @@ document.addEventListener("click", (e) => {
     mutate((s) => { s.semesters[s.active].courses[i].absent = after; });
     const m = compute(r0);
     const u = undoAbs;
-    const warn = d > 0 ? qaibWarn(after, m.G) : "";
+    const warn = d > 0 ? qaibWarn(after, m.G, m) : "";
     const nm = r0.name.length > 26 ? r0.name.slice(0, 25) + "…" : r0.name;
     if (warn && navigator.vibrate) { try { navigator.vibrate([30, 60, 30]); } catch (x) {} }
     toast(`${nm} · ${after}${m.G != null ? " / " + m.G : ""} saat${warn ? "\n" + warn : ""}`, "Geri al", () => {
@@ -2946,6 +3044,7 @@ document.addEventListener("click", (e) => {
     return openDialog(r.name, m.G == null ? "limit təyin olunmayıb" : "limit " + m.G + " saat",
       `<div class="fld"><label>İşlənmiş qaib (saat)</label>
          <input class="mono" inputmode="numeric" data-fld="v" value="${m.F}"></div>
+       ${failCost(m) ? `<p class="dlg-msg" style="margin-top:11px">${esc(failCost(m))}</p>` : ""}
        <p class="dlg-msg" style="margin-top:11px">Fənni silsən, onun qaibi və qiymətləri də silinir.</p>`,
       (val) => mutate((s) => { s.semesters[s.active].courses[i].absent = Math.max(0, numOr(val.v)); }),
       "Yadda saxla",
@@ -2953,6 +3052,30 @@ document.addEventListener("click", (e) => {
         s.semesters[s.active].courses.splice(i, 1);
         selected = 0;
       }));
+  }
+
+  /* ---- bayram və tətil günləri ---- */
+  if (t.dataset.addhol || t.dataset.hol) {
+    const h = t.dataset.hol ? holidayGroups().find((g) => g.from === t.dataset.hol) : null;
+    const drop = (s) => { if (h) for (const day of holidayDays(h.from, h.to)) delete s.holidays[day]; };
+    return openDialog(h ? "Bayram və ya tətil" : "Yeni bayram və ya tətil", "dərs olmayan günlər",
+      `<div class="fld txt"><label>Ad</label>
+         <input data-fld="name" placeholder="Qış tətili" value="${h ? esc(h.name) : ""}"></div>
+       <div class="form" style="margin-top:10px">
+         <div class="fld txt"><label>Başlanğıc</label><input type="date" data-fld="from" value="${h ? h.from : ""}"></div>
+         <div class="fld txt"><label>Son (bir gündürsə boş qoy)</label><input type="date" data-fld="to" value="${h && h.to !== h.from ? h.to : ""}"></div>
+       </div>`,
+      (val) => {
+        const from = String(val.from || "");
+        if (!from) { toast("Başlanğıc tarixi yazılmayıb"); return; }
+        const to = val.to && val.to > from ? val.to : from;
+        const name = String(val.name || "").trim() || "Tətil";
+        mutate((s) => {
+          s.holidays = s.holidays || {};
+          drop(s);
+          for (const day of holidayDays(from, to)) s.holidays[day] = name;
+        });
+      }, "Yadda saxla", h ? () => mutate(drop) : undefined);
   }
 
   /* ---- semestr əlavə et ---- */
@@ -3433,6 +3556,11 @@ function buildIcs(weeks, minutesBefore) {
         L.push("DTSTART:" + icsStamp(start));
         L.push("DTEND:" + icsStamp(end));
         L.push("RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + icsStamp(until));
+        const off = [];
+        for (const d = new Date(start); d <= until; d.setDate(d.getDate() + 14)) {
+          if (holidayAt(d)) off.push(icsStamp(d));
+        }
+        if (off.length) L.push(icsFold("EXDATE:" + off.join(",")));
         L.push(icsFold("SUMMARY:" + icsEsc(e.subject)));
         if (e.room) L.push(icsFold("LOCATION:" + icsEsc(e.room)));
         const desc = [e.teacher, weekName(wk)].filter(Boolean).join(" · ");
