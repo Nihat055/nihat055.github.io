@@ -142,6 +142,15 @@ jobs:
                                 "DTEND:" + stamp(end),
                                 "RRULE:FREQ=WEEKLY;INTERVAL=2;UNTIL=" + stamp(until),
                                 fold("SUMMARY:" + esc(subj))]
+                          hol = state.get("holidays") or {}
+                          off = []
+                          d = start
+                          while d <= until:
+                              if d.date().isoformat() in hol:
+                                  off.append(stamp(d))
+                              d += datetime.timedelta(days=14)
+                          if off:
+                              L.append(fold("EXDATE:" + ",".join(off)))
                           if e.get("room"):
                               L.append(fold("LOCATION:" + esc(e["room"])))
                           desc = " · ".join([x for x in [e.get("teacher"), WEEK_AZ[wk]] if x])
@@ -230,6 +239,8 @@ jobs:
 
           def today_lessons(state, now):
               """Bugunku derslerin siyahisi: [(dakika, ad, otaq)]"""
+              if now.date().isoformat() in (state.get("holidays") or {}):
+                  return []
               di = now.weekday()
               if di > 4:
                   return []

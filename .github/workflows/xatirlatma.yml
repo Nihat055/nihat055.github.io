@@ -131,6 +131,8 @@ jobs:
 
 
           def lessons_today(state, now):
+              if now.date().isoformat() in (state.get("holidays") or {}):
+                  return [], None
               di = now.weekday()
               if di > 4:
                   return [], None
@@ -174,23 +176,62 @@ jobs:
               return ok, dead
 
 
-          def reminder_payload(L, now, wk):
+          def qaib_map(node):
+              """Proqram Saxla basanda yazdığı xülasə: fənn -> (işlənmiş saat, limit)."""
+              lst = (node.get("qaibInfo") or {}).get("list") or []
+              if isinstance(lst, dict):
+                  lst = list(lst.values())
+              out = {}
+              for c in lst:
+                  try:
+                      out[(c.get("n") or "").strip()] = (float(c["F"]), float(c["G"]))
+                  except Exception:
+                      pass
+              return out
+
+
+          def saat(x):
+              return str(int(x)) if float(x).is_integer() else ("%.1f" % x)
+
+
+          def qaib_line(subj, qm, short=False):
+              """Limitə yaxındırsa xəbərdarlıq sətri, yoxsa boş."""
+              v = qm.get(subj)
+              if not v:
+                  return ""
+              F, G = v
+              H = G - F
+              if H < 0:
+                  return "⛔ limit aşılıb" if short else "⛔ Qaib limiti aşılıb"
+              if H == 0:
+                  return "⛔ limitdəsən" if short else "⛔ Limitdəsən — bu dərsi buraxma!"
+              if H <= 2 or (G > 0 and F / G >= 0.75):
+                  return ("⚠️ %s saat qalıb" if short else "⚠️ Qaib haqqın: cəmi %s saat qalıb") % saat(H)
+              return ""
+
+
+          def reminder_payload(L, now, wk, qm=None):
               start = now.replace(hour=L["s"] // 60, minute=L["s"] % 60, second=0, microsecond=0)
               mins = max(0, round((start - now).total_seconds() / 60))
               when = "%d dəqiqəyə başlayır" % mins if mins > 0 else "indi başlayır"
               line2 = " · ".join(x for x in [hhmm(L["s"]) + "–" + hhmm(L["e"]),
                                               ("Otaq " + L["room"]) if L["room"] else ""] if x)
               body = when + "\n" + line2 + (("\n" + L["teacher"]) if L["teacher"] else "")
+              warn = qaib_line(L["subj"], qm or {})
+              if warn:
+                  body += "\n" + warn
               return {"title": L["subj"], "body": body,
                       "tag": "qaib-ders-%s-%s" % (now.date().isoformat(), hhmm(L["s"]).replace(":", ""))}
 
 
-          def digest_payload(ders, now, wk):
+          def digest_payload(ders, now, wk, qm=None):
               n = len(ders)
               title = "Bu gün %d dərs · %s" % (n, WEEK_AZ.get(wk, ""))
               lines = []
               for L in ders:
-                  lines.append(hhmm(L["s"]) + "  " + L["subj"] + ((" · " + L["room"]) if L["room"] else ""))
+                  warn = qaib_line(L["subj"], qm or {}, short=True)
+                  lines.append(hhmm(L["s"]) + "  " + L["subj"] + ((" · " + L["room"]) if L["room"] else "")
+                               + (("  " + warn) if warn else ""))
               return {"title": title, "body": "\n".join(lines), "tag": "qaib-gun-" + now.date().isoformat()}
 
 
@@ -221,6 +262,7 @@ jobs:
                   sys.exit("Abune cihaz yoxdur - telefonda 'Bildirisleri ac' basilmayib.")
               sent = ((node.get("sent") or {}).get(gun)) or {}
               ders, wk = lessons_today(state, now)
+              qm = qaib_map(node)
 
               if SINAQ:
                   # görünüşü yoxlamaq üçün: bu günün ilk dərsi (yoxdursa nümunə) "5 dəqiqə qalıb" kimi
@@ -231,7 +273,7 @@ jobs:
                       L = {"s": st.hour * 60 + st.minute, "e": (st.hour * 60 + st.minute + 80) % 1440,
                            "subj": "Nümunə dərs", "room": "101", "teacher": ""}
                   fake = now.replace(hour=L["s"] // 60, minute=L["s"] % 60, second=0, microsecond=0)                       - datetime.timedelta(minutes=LEAD)
-                  p = reminder_payload(L, fake, wk)
+                  p = reminder_payload(L, fake, wk, qm)
                   p["tag"] = "qaib-sinaq-" + now.strftime("%H%M%S")
                   ok, dead = send_all(subs, p)
                   print("sinaq: %d cihaza gonderildi" % ok)
@@ -241,7 +283,7 @@ jobs:
               if ders and not sent.get("digest"):
                   first = now.replace(hour=ders[0]["s"] // 60, minute=ders[0]["s"] % 60, second=0, microsecond=0)
                   if (now.hour >= 8 or now >= first - datetime.timedelta(minutes=70)) and now.hour < 12:
-                      ok, dead = send_all(subs, digest_payload(ders, now, wk))
+                      ok, dead = send_all(subs, digest_payload(ders, now, wk, qm))
                       dead_all.update(dead)
                       print("gun siyahisi -> %d cihaz" % ok)
                       mark(gun, "digest")
@@ -259,7 +301,7 @@ jobs:
                       pending.append(target)
                       continue
                   if late <= LATE_OK * 60:
-                      ok, dead = send_all(subs, reminder_payload(L, now, wk))
+                      ok, dead = send_all(subs, reminder_payload(L, now, wk, qm))
                       dead_all.update(dead)
                       print("%s %s -> %d cihaz" % (hhmm(L["s"]), L["subj"], ok))
                   else:
