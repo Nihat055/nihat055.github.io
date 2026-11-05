@@ -604,6 +604,7 @@ ol.steps li::before{
 .qn{font-size:14.5px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .qv{font-size:13.5px; color:var(--muted); font-variant-numeric:tabular-nums}
 .qrow .meter{grid-column:1/-1}
+.qm{grid-column:1/-1; font-size:13px; color:var(--muted)}
 
 /* yan panelin altı: istifadəçi */
 .side-foot{margin-top:auto; padding-top:12px}
@@ -900,7 +901,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261106-0030";
+var APP_BUILD = "20261106-0111";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -1313,6 +1314,37 @@ function holidayRange(h) {
   const end = b.getDate() + " " + MONTHS[b.getMonth()] + " " + b.getFullYear();
   if (h.from === h.to) return end;
   return (a.getMonth() === b.getMonth() ? a.getDate() + "–" : a.getDate() + " " + MONTHS[a.getMonth()] + " – ") + end;
+}
+/* İcmal: dərs gününə düşən növbəti bayram; dalbadal gələnlər birlikdə göstərilir */
+function holidayCard() {
+  const today = isoDay(new Date());
+  const lessonDay = (day) => {
+    const d = new Date(day + "T00:00:00");
+    return (DAYS[d.getDay() - 1] || [])[0] ? d : null;
+  };
+  const list = holidayGroups().filter((h) => h.to >= today && holidayDays(h.from, h.to).some(lessonDay));
+  if (list.length === 0) return "";
+  const chain = [list[0]];
+  for (const h of list.slice(1)) {
+    if (holidayDays(chain[chain.length - 1].to, h.from).length !== 2) break;
+    chain.push(h);
+  }
+  const start = new Date(today + "T00:00:00").getTime();
+  return `<section class="panel">
+            <div class="ph">Yaxın bayram</div>
+            <div class="qlist">${chain.map((h) => {
+              const left = Math.round((new Date(h.from + "T00:00:00").getTime() - start) / 86400000);
+              const n = holidayDays(h.from, h.to).filter((day) => day >= today).reduce((a, day) => {
+                const d = lessonDay(day);
+                return a + (d ? dayLessons(weekTypeAt(d), DAYS[d.getDay() - 1][0]).length : 0);
+              }, 0);
+              const when = left <= 0 ? "Bu gün" : left === 1 ? "Sabah" : left + " gün qalıb";
+              return `<button class="qrow" type="button" data-go="cedvel">
+                <span class="qn">${esc(h.name)}</span><span class="qv">${holidayRange(h)}</span>
+                <span class="qm">${when} · ${n ? n + " dərs olmayacaq" : "həmin gün dərsin yoxdur"}</span>
+              </button>`;
+            }).join("")}</div>
+          </section>`;
 }
 const weekName = (t) => (t === "ust" ? "Üst həftə" : "Alt həftə");
 
@@ -2126,6 +2158,8 @@ function viewOverview() {
 
       <div class="two">
         <div>
+          ${holidayCard()}
+
           <section class="panel">
             <div class="ph">${tk ? "Bu günün dərsləri" : esc(dayName) + " dərsləri"}<span class="ph-r">${rows.length ? rows.length + " dərs" : ""}</span></div>
             ${lessons}
