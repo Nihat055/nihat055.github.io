@@ -550,23 +550,43 @@ ol.steps li::before{
 .splash.gone{opacity:0; visibility:hidden; pointer-events:none}
 .splash-in{
   display:flex; flex-direction:column; align-items:center;
-  transition:transform .55s cubic-bezier(.4,0,.2,1), opacity .35s ease;
+  transition:transform .55s cubic-bezier(.4,0,.2,1), opacity .35s ease, filter .45s ease;
 }
-.splash.gone .splash-in{transform:scale(1.12); opacity:0}
+.splash.gone .splash-in{transform:scale(1.14); opacity:0; filter:blur(8px)}
+
+/* Ardıcıllıq: nişan dumandan çıxır → halqa çəkilir → quyruq çıxıb Q-nu tamamlayır →
+   dalğa və parıltı keçir → ad aydınlaşır. Hər sinfin əsas halı son haldır. */
+.sp-mark{position:relative; width:96px; height:96px}
+.sp-halo{
+  position:absolute; left:50%; top:50%; width:300px; height:300px; margin:-150px 0 0 -150px; border-radius:50%;
+  background:radial-gradient(closest-side, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
+  opacity:.5; pointer-events:none; animation:sp-halo 1.5s .05s cubic-bezier(.2,.7,.2,1) both;
+}
 .splash-logo{
-  width:96px; height:96px; overflow:visible;
-  filter:drop-shadow(0 16px 30px rgba(8,16,32,.32));
-  animation:sp-bump .55s 1.2s cubic-bezier(.3,.7,.3,1) both;
+  position:relative; display:block; width:96px; height:96px; overflow:visible;
+  filter:blur(0) drop-shadow(0 16px 30px rgba(8,16,32,.32));
+  animation:sp-in .75s cubic-bezier(.2,.9,.25,1.06) both, sp-bump .55s 1.12s cubic-bezier(.3,.7,.3,1);
 }
-.sp-bg{transform-box:fill-box; transform-origin:center; animation:sp-bg .6s cubic-bezier(.2,.9,.25,1.1) both}
-.sp-track{opacity:0; animation:qj-fade .35s .3s ease both}
-.sp-arc{stroke-dashoffset:300; animation:sp-arc .9s .38s cubic-bezier(.5,.05,.2,1) both}
-.sp-q{transform-box:fill-box; transform-origin:center; animation:sp-q .5s .7s cubic-bezier(.2,.9,.3,1.35) both}
-.splash-name{margin-top:24px; font-size:22px; font-weight:700; letter-spacing:-.025em; color:var(--ink); animation:sp-up .55s .85s cubic-bezier(.2,.8,.2,1) both}
-.splash-sub{margin-top:4px; font-size:14px; color:var(--muted); animation:sp-up .55s .97s cubic-bezier(.2,.8,.2,1) both}
-@keyframes sp-bg{from{transform:scale(.35) rotate(-14deg); opacity:0} to{transform:none; opacity:1}}
-@keyframes sp-arc{0%{stroke-dashoffset:300; opacity:0} 5%{opacity:1} 100%{stroke-dashoffset:0; opacity:1}}
-@keyframes sp-q{from{opacity:0; transform:scale(.35) rotate(-20deg)} to{opacity:1; transform:none}}
+.sp-track{animation:qj-fade .4s .25s ease both}
+.sp-arc{animation:sp-arc .85s .35s cubic-bezier(.65,0,.25,1) both}
+.sp-tail{animation:sp-tail .34s .78s cubic-bezier(.3,.8,.3,1) both}
+.sp-ripple{opacity:0; transform-box:fill-box; transform-origin:center; animation:sp-ripple .8s 1.1s cubic-bezier(.2,.6,.3,1) both}
+.sp-shine{opacity:0; animation:sp-shine .85s 1.1s cubic-bezier(.4,0,.2,1) both}
+.splash-name{margin-top:24px; font-size:22px; font-weight:700; letter-spacing:-.025em; color:var(--ink); animation:sp-name .7s .8s cubic-bezier(.2,.8,.2,1) both}
+.splash-sub{margin-top:4px; font-size:14px; color:var(--muted); animation:sp-up .6s .98s cubic-bezier(.2,.8,.2,1) both}
+@keyframes sp-in{
+  from{opacity:0; transform:scale(.62); filter:blur(12px) drop-shadow(0 16px 30px rgba(8,16,32,0))}
+  to{opacity:1; transform:none; filter:blur(0) drop-shadow(0 16px 30px rgba(8,16,32,.32))}
+}
+@keyframes sp-halo{0%{opacity:0; transform:scale(.45)} 55%{opacity:.85} 100%{opacity:.5; transform:none}}
+@keyframes sp-arc{0%{stroke-dashoffset:292; opacity:0} 6%{opacity:1} 100%{stroke-dashoffset:0; opacity:1}}
+@keyframes sp-tail{0%{stroke-dashoffset:1; opacity:0} 12%{opacity:1} 100%{stroke-dashoffset:0; opacity:1}}
+@keyframes sp-ripple{0%{opacity:.75; transform:none} 100%{opacity:0; transform:scale(2.3)}}
+@keyframes sp-shine{0%{opacity:1; transform:translateX(0) skewX(-18deg)} 100%{opacity:1; transform:translateX(64px) skewX(-18deg)}}
+@keyframes sp-name{
+  from{opacity:0; transform:translateY(12px); filter:blur(8px); letter-spacing:.03em}
+  to{opacity:1; transform:none; filter:blur(0); letter-spacing:-.025em}
+}
 @keyframes sp-up{from{opacity:0; transform:translateY(10px)} to{opacity:1; transform:none}}
 @keyframes sp-bump{0%,100%{transform:none} 45%{transform:scale(1.06)}}
 .win.reveal{animation:win-in .6s cubic-bezier(.2,.8,.2,1) both}
@@ -883,16 +903,22 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <linearGradient id="qj-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2333"/><stop offset="1" stop-color="#0b0f18"/></linearGradient>
-    <linearGradient id="qj-ring" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#30d158"/><stop offset="1" stop-color="#7af08e"/></linearGradient>
+    <linearGradient id="qj-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#222d4d"/><stop offset="1" stop-color="#0a0e18"/></linearGradient>
+    <radialGradient id="qj-glow" cx=".92" cy=".04" r=".95"><stop offset="0" stop-color="#5c78fc" stop-opacity=".5"/><stop offset=".62" stop-color="#5c78fc" stop-opacity="0"/></radialGradient>
+    <linearGradient id="qj-ring" gradientUnits="userSpaceOnUse" x1="7.5" y1="25" x2="25" y2="6.9"><stop offset="0" stop-color="#8af59c"/><stop offset="1" stop-color="#27c850"/></linearGradient>
+    <mask id="qj-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32"><rect width="32" height="32" fill="#fff"/><line x1="18.5" y1="18" x2="23.125" y2="22.625" stroke="#000" stroke-width="5.375" stroke-linecap="round"/></mask>
   </defs>
+  <!-- loqo: halqanın özü Q hərfidir — qaib halqası, quyruq onu kəsib keçir -->
   <symbol id="qj-logo" viewBox="0 0 32 32">
     <rect width="32" height="32" rx="8" fill="url(#qj-bg)"/>
+    <rect width="32" height="32" rx="8" fill="url(#qj-glow)"/>
     <rect x=".25" y=".25" width="31.5" height="31.5" rx="7.75" fill="none" stroke="#fff" stroke-opacity=".09" stroke-width=".5"/>
-    <circle cx="16" cy="16" r="7.7" fill="none" stroke="#30d158" stroke-opacity=".24" stroke-width="3.4"/>
-    <circle cx="16" cy="16" r="7.7" fill="none" stroke="url(#qj-ring)" stroke-width="3.4" stroke-linecap="round"
-            pathLength="360" stroke-dasharray="300 360" transform="rotate(-90 16 16)"/>
-    <path d="M15.65 18.76Q14.24 18.76 13.35 17.84Q12.46 16.92 12.46 15.45Q12.46 13.9 13.37 12.93Q14.26 11.97 15.76 11.97Q17.16 11.97 18.03 12.89Q18.9 13.81 18.9 15.32Q18.9 16.86 17.99 17.81Q17.96 17.84 17.93 17.87Q17.91 17.9 17.87 17.93L19.54 19.53H17.47L16.6 18.65Q16.17 18.76 15.65 18.76ZM15.71 13.24Q14.94 13.24 14.48 13.83Q14.02 14.41 14.02 15.37Q14.02 16.35 14.48 16.92Q14.94 17.48 15.68 17.48Q16.44 17.48 16.89 16.93Q17.34 16.37 17.34 15.4Q17.34 14.38 16.9 13.81Q16.47 13.24 15.71 13.24Z" fill="#fff"/>
+    <g mask="url(#qj-cut)">
+      <circle cx="16" cy="15.5" r="7.5" fill="none" stroke="#30d158" stroke-opacity=".22" stroke-width="3.5"/>
+      <circle cx="16" cy="15.5" r="7.5" fill="none" stroke="url(#qj-ring)" stroke-width="3.5" stroke-linecap="round"
+              pathLength="360" stroke-dasharray="292 360" transform="rotate(-84 16 15.5)"/>
+    </g>
+    <line x1="18.5" y1="18" x2="23.125" y2="22.625" stroke="url(#qj-ring)" stroke-width="3.5" stroke-linecap="round"/>
   </symbol>
 </svg>
 
@@ -931,17 +957,34 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <div class="splash" id="splash" aria-hidden="true">
   <div class="splash-in">
-    <svg class="splash-logo" viewBox="0 0 32 32">
-      <defs>
-        <linearGradient id="sp-bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1c2333"/><stop offset="1" stop-color="#0b0f18"/></linearGradient>
-    <linearGradient id="sp-ring" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#30d158"/><stop offset="1" stop-color="#7af08e"/></linearGradient>
-      </defs>
-      <rect class="sp-bg" width="32" height="32" rx="8" fill="url(#sp-bg)"/>
-      <circle class="sp-track" cx="16" cy="16" r="7.7" fill="none" stroke="#30d158" stroke-opacity=".24" stroke-width="3.4"/>
-      <circle class="sp-arc" cx="16" cy="16" r="7.7" fill="none" stroke="url(#sp-ring)" stroke-width="3.4" stroke-linecap="round"
-              pathLength="360" stroke-dasharray="300 360" transform="rotate(-90 16 16)"/>
-      <path class="sp-q" d="M15.65 18.76Q14.24 18.76 13.35 17.84Q12.46 16.92 12.46 15.45Q12.46 13.9 13.37 12.93Q14.26 11.97 15.76 11.97Q17.16 11.97 18.03 12.89Q18.9 13.81 18.9 15.32Q18.9 16.86 17.99 17.81Q17.96 17.84 17.93 17.87Q17.91 17.9 17.87 17.93L19.54 19.53H17.47L16.6 18.65Q16.17 18.76 15.65 18.76ZM15.71 13.24Q14.94 13.24 14.48 13.83Q14.02 14.41 14.02 15.37Q14.02 16.35 14.48 16.92Q14.94 17.48 15.68 17.48Q16.44 17.48 16.89 16.93Q17.34 16.37 17.34 15.4Q17.34 14.38 16.9 13.81Q16.47 13.24 15.71 13.24Z" fill="#fff"/>
-    </svg>
+    <div class="sp-mark">
+      <span class="sp-halo"></span>
+      <svg class="splash-logo" viewBox="0 0 32 32">
+        <defs>
+          <linearGradient id="sp-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#222d4d"/><stop offset="1" stop-color="#0a0e18"/></linearGradient>
+          <radialGradient id="sp-glow" cx=".92" cy=".04" r=".95"><stop offset="0" stop-color="#5c78fc" stop-opacity=".5"/><stop offset=".62" stop-color="#5c78fc" stop-opacity="0"/></radialGradient>
+          <linearGradient id="sp-ring" gradientUnits="userSpaceOnUse" x1="7.5" y1="25" x2="25" y2="6.9"><stop offset="0" stop-color="#8af59c"/><stop offset="1" stop-color="#27c850"/></linearGradient>
+          <mask id="sp-cut" maskUnits="userSpaceOnUse" x="0" y="0" width="32" height="32"><rect width="32" height="32" fill="#fff"/><line x1="18.5" y1="18" x2="23.125" y2="22.625" stroke="#000" stroke-width="5.375" stroke-linecap="round"/></mask>
+          <clipPath id="sp-clip"><rect width="32" height="32" rx="8"/></clipPath>
+          <linearGradient id="sp-shine" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".34"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+        </defs>
+        <rect width="32" height="32" rx="8" fill="url(#sp-bg)"/>
+        <rect width="32" height="32" rx="8" fill="url(#sp-glow)"/>
+        <rect x=".25" y=".25" width="31.5" height="31.5" rx="7.75" fill="none" stroke="#fff" stroke-opacity=".09" stroke-width=".5"/>
+        <g clip-path="url(#sp-clip)">
+          <circle class="sp-ripple" cx="16" cy="15.5" r="7.5" fill="none" stroke="#5fe880" stroke-width="1.2"/>
+        </g>
+        <g mask="url(#sp-cut)">
+          <circle class="sp-track" cx="16" cy="15.5" r="7.5" fill="none" stroke="#30d158" stroke-opacity=".22" stroke-width="3.5"/>
+          <circle class="sp-arc" cx="16" cy="15.5" r="7.5" fill="none" stroke="url(#sp-ring)" stroke-width="3.5" stroke-linecap="round"
+                  pathLength="360" stroke-dasharray="292 360" transform="rotate(-84 16 15.5)"/>
+        </g>
+        <line class="sp-tail" x1="18.5" y1="18" x2="23.125" y2="22.625" stroke="url(#sp-ring)" stroke-width="3.5" stroke-linecap="round" pathLength="1" stroke-dasharray="1 1"/>
+        <g clip-path="url(#sp-clip)">
+          <rect class="sp-shine" x="-16" y="-8" width="10" height="48" fill="url(#sp-shine)"/>
+        </g>
+      </svg>
+    </div>
     <span class="splash-name">Qaib Jurnalı</span>
     <span class="splash-sub">Davamiyyət · cədvəl · qiymətlər</span>
   </div>
@@ -949,7 +992,7 @@ input, textarea, .report, .report *, .hintbox, .dlg-msg, dl.kv dd{
 
 <script>
 "use strict";
-var APP_BUILD = "20261116-1700";
+var APP_BUILD = "20261116-1730";
 var CLOUD_SYNC = true;   // GitHub Pages: Firebase RTDB ile sinxron
 var ICON_HREF = "icon-180.png";
 
@@ -4191,9 +4234,9 @@ if ("serviceWorker" in navigator && location.protocol === "https:") {
       }
       playEnter();
     }
-    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 600);
+    setTimeout(() => { if (sp.parentNode) sp.parentNode.removeChild(sp); }, 650);
   };
-  setTimeout(bitir, az ? 0 : 1700);
+  setTimeout(bitir, az ? 0 : 1850);
 })();
 
 /* icmal açıqdırsa, "növbəti dərs" kartı hər dəqiqə yenilənir */
